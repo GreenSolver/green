@@ -1,2 +1,4 @@
 language: java
-script: ant build
+script: 
+   - ant build
+   - ant test
