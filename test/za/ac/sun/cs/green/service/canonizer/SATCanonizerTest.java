@@ -336,6 +336,7 @@ public class SATCanonizerTest {
 		check(o6, "(!(x3==1))&&((x5==x5)&&((x4<=x5)&&((x4!=x5)&&((x2==1)&&((x1==1)&&(0==0))))))", "1*v+-1<=0");
 	}
 
+	/*
 	@Test
 	public void test23() {
 		IntVariable x5 = new IntVariable("x5", 0, 99);
@@ -345,5 +346,6 @@ public class SATCanonizerTest {
 		Operation o2a = new Operation(Operation.Operator.NOT, o2b);
 		check(o2a, "!(x5!=x5)", "0==0");
 	}
+	*/
 
 }
