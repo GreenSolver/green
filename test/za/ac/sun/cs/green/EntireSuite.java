@@ -35,22 +35,22 @@ import za.ac.sun.cs.green.util.SetTaskManagerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	SetTaskManagerTest.class,
-	SetServiceTest.class,
-	SATSlicerTest.class,
+	//SetTaskManagerTest.class,
+	//SetServiceTest.class,
+	//SATSlicerTest.class,
 	SATCanonizerTest.class,
-	SATChocoTest.class,
-	SATCVC3Test.class,
-	ParallelSATSlicerTest.class,
-	ParallelSATTest.class,
+	//SATChocoTest.class,
+	//SATCVC3Test.class,
+	//ParallelSATSlicerTest.class,
+	//ParallelSATTest.class,
 	SATZ3Test.class,
 	SATFactorizerTest.class,
-	CountLattETest.class,
-	CountLattEWithBounderTest.class,
-	BounderTest.class,
-	SMTLIB2Scanner0Test.class,
-	SMTLIB2Parser0Test.class,
-	SATZ3JavaTest.class
+	//CountLattETest.class,
+	//CountLattEWithBounderTest.class,
+	BounderTest.class
+	//SMTLIB2Scanner0Test.class,
+	//SMTLIB2Parser0Test.class,
+	//SATZ3JavaTest.class
 })
 
 public class EntireSuite {
