@@ -38,16 +38,16 @@ import za.ac.sun.cs.green.util.SetTaskManagerTest;
 	//SetTaskManagerTest.class,
 	//SetServiceTest.class,
 	//SATSlicerTest.class,
-	SATCanonizerTest.class,
+	SATCanonizerTest.class
 	//SATChocoTest.class,
 	//SATCVC3Test.class,
 	//ParallelSATSlicerTest.class,
 	//ParallelSATTest.class,
-	SATZ3Test.class,
-	SATFactorizerTest.class,
+	//SATZ3Test.class,
+	//SATFactorizerTest.class,
 	//CountLattETest.class,
 	//CountLattEWithBounderTest.class,
-	BounderTest.class
+	//BounderTest.class
 	//SMTLIB2Scanner0Test.class,
 	//SMTLIB2Parser0Test.class,
 	//SATZ3JavaTest.class
