@@ -2,44 +2,15 @@ plugins {
 	id 'application'
 	id 'java'
 	id 'eclipse'
-	id 'de.fuerstenau.buildconfig' version '1.1.8'
+	id 'com.palantir.git-version' version '0.12.0-rc2'
 	id 'maven-publish'
 }
 
 mainClassName = 'za.ac.sun.cs.green.Green'
-group = 'za.ac.sun.cs'
-
-def getLongVersionName = { ->
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'describe', '--tags'
-		standardOutput = stdout
-	}
-	return stdout.toString().trim()
-}
-
-def getShortVersionName = { ->
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'describe', '--tags', '--abbrev=0'
-		standardOutput = stdout
-	}
-	return stdout.toString().trim()
-}
-
-version = getLongVersionName()
 
 repositories {
-	mavenCentral()
 	jcenter()
-}
-
-buildConfig {
-	sourceSets {
-		main {
-			packageName = 'za.ac.sun.cs.green'
-		}
-  	}
+	mavenCentral()
 }
 
 dependencies {
@@ -58,7 +29,7 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-			version getShortVersionName() + '-SNAPSHOT'
+			version gitVersion() + '-SNAPSHOT'
 		}
 	}
 	repositories {

@@ -6,4 +6,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-First version after switching to gradle.
+### Added
+- ...
+
+### Changed
+- ...
+
+### Deprecated
+- ...
+
+### Removed
+- ...
+
+### Fixed
+- ...
+
+## [0.1.0] - 2018.07.17
+
+First version after switching to gradle and publishing on github.
+
+### Added
+- New tests for CNF factoriser
+- Added Travis support (probably broken after merge of pull request)
+- More support for OR operator
+
+### Changed
+- Merge pull request from JHTaljaard to switch to gradle
