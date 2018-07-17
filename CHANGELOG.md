@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - ...
 
+## [0.1.1] - 2018.07.17
+
+### Fixed
+- Maven publication needed a group name in the build.gradle.
+
 ## [0.1.0] - 2018.07.17
 
 First version after switching to gradle and publishing on github.
