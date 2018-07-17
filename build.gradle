@@ -7,6 +7,7 @@ plugins {
 }
 
 mainClassName = 'za.ac.sun.cs.green.Green'
+group = 'za.ac.sun.cs'
 
 repositories {
 	jcenter()
