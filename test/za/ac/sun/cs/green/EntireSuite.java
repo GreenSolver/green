@@ -73,10 +73,7 @@ public class EntireSuite {
 		LATTE_PATH = latte;
 		BARVINOK_PATH = barvinok;
 		Z3_PATH = z3;
-		HAS_CVC3 = false; //checkCVC3Presence();
-		HAS_LATTE = false; //checkLattEPresence();
 		HAS_Z3 = checkZ3Presence();
-		HAS_Z3JAVA = false; //checkZ3JavaPresence();
 	}
 
 	private static boolean checkCVC3Presence() {
