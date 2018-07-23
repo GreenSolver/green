@@ -35,22 +35,8 @@ import za.ac.sun.cs.green.util.SetTaskManagerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	//SetTaskManagerTest.class,
-	//SetServiceTest.class,
-	//SATSlicerTest.class,
-	SATCanonizerTest.class,
-	//SATChocoTest.class,
-	//SATCVC3Test.class,
-	//ParallelSATSlicerTest.class,
-	//ParallelSATTest.class,
-	SATZ3Test.class
-	//SATFactorizerTest.class,
-	//CountLattETest.class,
-	//CountLattEWithBounderTest.class,
-	//BounderTest.class
-	//SMTLIB2Scanner0Test.class,
-	//SMTLIB2Parser0Test.class,
-	//SATZ3JavaTest.class
+	SATCanonizerTest.class
+	#,SATZ3Test.class
 })
 
 public class EntireSuite {
@@ -67,7 +53,7 @@ public class EntireSuite {
 
 	public static final boolean HAS_Z3;
 
-	public static final boolean HAS_Z3JAVA;
+	public static final boolean HAS_Z3JAVA = false;
 
 	static {
 		String latte = null, z3 = null, barvinok = null;
@@ -87,10 +73,10 @@ public class EntireSuite {
 		LATTE_PATH = latte;
 		BARVINOK_PATH = barvinok;
 		Z3_PATH = z3;
-		//HAS_CVC3 = checkCVC3Presence();
-		//HAS_LATTE = checkLattEPresence();
+		HAS_CVC3 = false; //checkCVC3Presence();
+		HAS_LATTE = false; //checkLattEPresence();
 		HAS_Z3 = checkZ3Presence();
-		HAS_Z3JAVA = checkZ3JavaPresence();
+		HAS_Z3JAVA = false; //checkZ3JavaPresence();
 	}
 
 	private static boolean checkCVC3Presence() {
