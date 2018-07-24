@@ -13,6 +13,6 @@ services:
   
 before_install:
 - docker build -t FloraJuliane/green .
-- docker run -d -p 127.0.0.1:80:4567 FloraJuliane/green /bin/sh -c "cd /root/green; bundle exec foreman start;"
+- docker run -d -p 127.0.0.1:80:4567 FloraJuliane/green /bin/sh -c "cd /root/green; ant;"
 - docker ps -a
-- docker run FloraJuliane/green/bin/sh -c "cd /root/green; bundle exec rake test"
+- docker run FloraJuliane/green/bin/sh -c "cd /root/green; ant test"
