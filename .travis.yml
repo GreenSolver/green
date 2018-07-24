@@ -1,7 +1,7 @@
 language: java
 
 script:
--docker run green/bin/sh -c "ant;ant test -v"
+-docker run green /bin/sh -c "ant;ant test -v"
  
 
 
