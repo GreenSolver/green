@@ -6,12 +6,9 @@ services:
  - docker;
 
 before_install:
-  - docker build -t green .
-  - docker run -d -p 127.0.0.1:80:4567 green /bin/sh -c "cd /root/green; ant;"
-  - docker ps -a
-  - docker run green /bin/sh -c "cd /root/green; ant test"
+  - docker build -t green . 
 
 script:
- - ant;
- - ant test;
+ - docker run -d -p 127.0.0.1:80:4567 green /bin/sh -c "ant;"
+ - docker run green /bin/sh -c "ant test"
   
