@@ -9,6 +9,5 @@ before_install:
   - docker build -t green . 
 
 script:
- - docker run -d -p 127.0.0.1:80:4567 green /bin/sh -c "ant;"
- - docker run green /bin/sh -c "ant test;"
+ - docker run green /bin/sh -c "ant; ant test;"
   
