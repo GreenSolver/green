@@ -1,11 +1,10 @@
-language: java
-
-
  
 sudo: required
 
+language: java
+
 services:
-  - docker
+- docker
   
   
 before_install:
