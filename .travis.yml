@@ -12,7 +12,7 @@ services:
   
   
 before_install:
-- docker build -t floraJuliane/green .
-- docker run -d -p 127.0.0.1:80:4567 floraJuliane/green /bin/sh -c "cd /root/green; ant;"
+- docker build -t green .
+- docker run -d -p 127.0.0.1:80:4567 green /bin/sh -c " ant;"
 - docker ps -a
-- docker run floraJuliane/green/bin/sh -c "cd /root/green; ant test"
+- docker run floraJuliane/green/bin/sh -c "ant test"
