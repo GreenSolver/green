@@ -291,10 +291,10 @@ public class SATCanonizerTest {
 	public void test19() {
 		IntConstant c1 = new IntConstant(2);
 		Operation o1 = new Operation(Operation.Operator.LE, c1, c1);
-		check(o1, "2<=2", "0==0");
+		check(o1, "2<=2", "0!=0");
 	}
 
-	*/@Test
+	@Test
 	public void test20() {
 		IntConstant c1 = new IntConstant(2);
 		IntVariable v1 = new IntVariable("aa", 0, 99);
@@ -302,6 +302,6 @@ public class SATCanonizerTest {
 		Operation o2 = new Operation(Operation.Operator.LT, v1, c1);
 		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
 		check(o3, "(2<=2)&&(aa<2)", "1*v+-1<=0");
-	}*/
+	}
 
 }
