@@ -95,7 +95,7 @@
     <target name="test">
     	<echo message="java.library.path = ${z3lib};${cvc3lib}"/>
         <mkdir dir="${junit.dir}"/>
-        <junit fork="yes" printsummary="no" failureproperty="test.failed" haltonfailure="no" filtertrace="false">
+        <junit fork="yes" printsummary="no" failureproperty="test.failed" haltonfailure="no" filtertrace="true">
             <formatter type="brief" usefile="false" />
             <test name="za.ac.sun.cs.green.EntireSuite" todir="${junit.dir}"/>
             <env key="DYLD_LIBRARY_PATH" value="lib"/>
@@ -110,7 +110,7 @@
             <report format="frames" todir="${junit.dir}"/>
         </junitreport>
 
-        <fail if="test.failed">tests.failed=${test.failed}</fail>
+        <fail if="test.failed">Some test cases failed.</fail>
     </target>
 
 <!--
