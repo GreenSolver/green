@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ashleighschepers/green.svg?branch=master)](https://travis-ci.org/ashleighschepers/green.svg?branch=master)
+[![Build Status](https://travis-ci.org/ashleighschepers/green)](https://travis-ci.org/ashleighschepers/green)
 
 Notes:
 
