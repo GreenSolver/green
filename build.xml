@@ -95,9 +95,9 @@
     <target name="test">
     	<echo message="java.library.path = ${z3lib};${cvc3lib}"/>
         <mkdir dir="${junit.dir}"/>
-        <junit fork="yes" printsummary="no" failureproperty="test.failed" haltonfailure="no" filtertrace="true">
-            <formatter type="brief" usefile="false" />
-            <test name="za.ac.sun.cs.green.EntireSuite" todir="${junit.dir}"/>
+        <junit fork="yes" printsummary="yes" failureproperty="test.failed" haltonfailure="off" filtertrace="true">
+            <formatter type="plain" usefile="false" />
+            <test name="za.ac.sun.cs.green.EntireSuite" todir="${junit.dir}" haltonfailure="off"/>
             <env key="DYLD_LIBRARY_PATH" value="lib"/>
             <env key="LD_LIBRARY_PATH" value="lib"/>
             <sysproperty key="java.library.path" value="${z3lib}:${cvc3lib}"/>
