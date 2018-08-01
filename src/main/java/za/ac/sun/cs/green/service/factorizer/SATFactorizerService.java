@@ -31,6 +31,8 @@ public class SATFactorizerService extends BasicService {
 	 * Number of factored constraints returned.
 	 */
 	private int factorCount = 0;
+	
+	private long timeTaken = 0;
 
 	public SATFactorizerService(Green solver) {
 		super(solver);
@@ -38,6 +40,7 @@ public class SATFactorizerService extends BasicService {
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
+		long start = System.currentTimeMillis();
 		invocationCount++;
 		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(FACTORS);
@@ -59,7 +62,7 @@ public class SATFactorizerService extends BasicService {
 
 			result = new HashSet<Instance>();
 			for (Expression e : fc.getFactors()) {
-				log.info("Factorizer computes instance for :" + e);
+				//log.info("Factorizer computes instance for :" + e);
 				final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
 				result.add(i);
 			}
@@ -67,11 +70,12 @@ public class SATFactorizerService extends BasicService {
 			instance.setData(FACTORS, result);
 			instance.setData(FACTORS_UNSOLVED, new HashSet<Instance>(result));
 
-			log.info("Factorize exiting with " + result.size() + " results");
+			//log.info("Factorize exiting with " + result.size() + " results");
 
 			constraintCount += 1;
 			factorCount += fc.getNumFactors();
 		}
+		timeTaken += (System.currentTimeMillis() - start);
 		return result;
 	}
 
@@ -112,6 +116,7 @@ public class SATFactorizerService extends BasicService {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
 		reporter.report(getClass().getSimpleName(), "totalConstraints = " + constraintCount);
 		reporter.report(getClass().getSimpleName(), "factoredConstraints = " + factorCount);
+		reporter.report(getClass().getSimpleName(), "factoredTime = " + timeTaken);
 	}
 
 }

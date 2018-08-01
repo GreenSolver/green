@@ -29,6 +29,8 @@ public class SATCanonizerService extends BasicService {
 	 * Number of times the slicer has been invoked.
 	 */
 	private int invocations = 0;
+	
+	private long timeTaken = 0;
 
 	public SATCanonizerService(Green solver) {
 		super(solver);
@@ -36,6 +38,7 @@ public class SATCanonizerService extends BasicService {
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
+		long start = System.currentTimeMillis();
 		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
@@ -45,18 +48,20 @@ public class SATCanonizerService extends BasicService {
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
+		timeTaken += (System.currentTimeMillis() - start);
 		return result;
 	}
 
 	@Override
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
+		reporter.report(getClass().getSimpleName(), "time = " + timeTaken);
 	}
 
 	public Expression canonize(Expression expression,
 			Map<Variable, Variable> map) {
 		try {
-			log.debug("Before Canonization: {}", expression);
+			//log.debug("Before Canonization: {}", expression);
 			invocations++;
 			OrderingVisitor orderingVisitor = new OrderingVisitor();
 			expression.accept(orderingVisitor);
@@ -68,7 +73,7 @@ public class SATCanonizerService extends BasicService {
 				canonized = new Renamer(map,
 						canonizationVisitor.getVariableSet()).rename(canonized);
 			}
-			log.debug("After Canonization: {}", canonized);
+			//log.debug("After Canonization: {}", canonized);
 			return canonized;
 		} catch (VisitorException x) {
 			log.fatal("encountered an exception -- this should not be happening!", x);
