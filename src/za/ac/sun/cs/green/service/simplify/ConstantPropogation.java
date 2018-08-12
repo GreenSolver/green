@@ -385,8 +385,8 @@ public class ConstantPropogation extends BasicService {
                     break;
 
                 case AND:
-                    Expression l = operands[0];
-                    Expression r = operands[1];
+                    l = operands[0];
+                    r = operands[1];
 
                     if (l.equals(Operation.TRUE)) {
                         stack.push(r);
@@ -403,8 +403,8 @@ public class ConstantPropogation extends BasicService {
                     return;
 
                 case OR:
-                    Expression l = operands[0];
-                    Expression r = operands[1];
+                    l = operands[0];
+                    r = operands[1];
 
                     if (l.equals(Operation.TRUE)) {
                         stack.push(l);
