@@ -313,7 +313,7 @@ public class ConstantPropogation extends BasicService {
                                 break;
                         }
 
-                        if (nop) {
+                        if (nop != null) {
                             Expression left, right;
 
                             if (lefty) {
