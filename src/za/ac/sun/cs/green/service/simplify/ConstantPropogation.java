@@ -11,7 +11,6 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
-import java.util.stream.Stream;
 
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
@@ -219,19 +218,23 @@ public class ConstantPropogation extends BasicService {
                             Operation.TRUE : Operation.FALSE);
                     break;
                 case LT:
-                    stack.push(operands[0].compareTo(operands[1]) < 0 ?
+                    stack.push(((IntConstant) operands[0]).getValue() <
+                            ((IntConstant) operands[1]).getValue() ?
                             Operation.TRUE : Operation.FALSE);
                     break;
                 case GT:
-                    stack.push(operands[0].compareTo(operands[1]) > 0 ?
+                    stack.push(((IntConstant) operands[0]).getValue() >
+                            ((IntConstant) operands[1]).getValue() ?
                             Operation.TRUE : Operation.FALSE);
                     break;
                 case LE:
-                    stack.push(operands[0].compareTo(operands[1]) <= 0 ?
+                    stack.push(((IntConstant) operands[0]).getValue() <=
+                            ((IntConstant) operands[1]).getValue() ?
                             Operation.TRUE : Operation.FALSE);
                     break;
                 case GE:
-                    stack.push(operands[0].compareTo(operands[1]) >= 0 ?
+                    stack.push(((IntConstant) operands[0]).getValue() >=
+                            ((IntConstant) operands[1]).getValue() ?
                             Operation.TRUE : Operation.FALSE);
                     break;
 
