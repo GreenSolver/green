@@ -176,7 +176,11 @@ public class ConstantPropogation extends BasicService {
 		}
 
 		public Expression getExpression() {
-			return stack.pop();
+            if (unsatisfiable) {
+                return Operation.FALSE;
+            } else {
+                return stack.pop();
+            }
 		}
 
 		@Override
@@ -199,14 +203,8 @@ public class ConstantPropogation extends BasicService {
                     if (!constants.containsKey(v)) {
                         constants.put(v, c);
                         changed = true;
-                    } else {
-                        if (constants.get(v).equals(c)) {
-                            while (!stack.empty()) {
-                                stack.pop();
-                            }
-                            stack.push(Operation.FALSE);
-                            unsatisfiable = true;
-                        }
+                    } else if (!constants.get(v).equals(c)) {
+                        unsatisfiable = true;
                     }
 
                     replace = false;
@@ -218,14 +216,8 @@ public class ConstantPropogation extends BasicService {
                     if (!constants.containsKey(v)) {
                         constants.put(v, c);
                         changed = true;
-                    } else {
-                        if (constants.get(v).equals(c)) {
-                            while (!stack.empty()) {
-                                stack.pop();
-                            }
-                            stack.push(Operation.FALSE);
-                            unsatisfiable = true;
-                        }
+                    } else if (!constants.get(v).equals(c)) {
+                        unsatisfiable = true;
                     }
 
                     replace = false;
