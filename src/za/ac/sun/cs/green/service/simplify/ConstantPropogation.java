@@ -318,6 +318,7 @@ public class ConstantPropogation extends BasicService {
 
         private void simplifyRelations(Operation operation, Expression[] operands) {
             Operation.Operator op = operation.getOperator();
+            System.out.print("\nSimplifying [" + operation + "] to ");
 
             switch (op) {
                 case EQ:
@@ -418,7 +419,9 @@ public class ConstantPropogation extends BasicService {
                     return;
             }
 
-            stack.push(new Operation(operation.getOperator(), operands));
+            Expression ex = new Operation(operation.getOperator(), operands);
+            System.out.println("[" + ex + "]");
+            stack.push(ex);
         }
 
         private void simplifyConstants(Operation operation, Expression[] operands) {
