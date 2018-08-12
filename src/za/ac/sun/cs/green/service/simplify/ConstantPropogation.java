@@ -147,11 +147,12 @@ public class ConstantPropogation extends BasicService {
 
                     break;
                 default:
-                    for (int i = op.getArity(); i > 0; i--) {
-                        stack.pop();
+                    int arity = operation.getOperator().getArity();
+                    Expression operands[] = new Expression[arity];
+                    for (int i = arity; i > 0; i--) {
+                        operands[i - 1] = stack.pop();
                     }
-
-                    stack.push(operation);
+                    stack.push(new Operation(operation.getOperator(), operands));
             }
 		}
 
