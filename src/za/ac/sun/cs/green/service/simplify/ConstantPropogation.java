@@ -192,14 +192,14 @@ public class ConstantPropogation extends BasicService {
             Operation.Operator op = operation.getOperator();
 
             switch (op) {
-                case EQ:
-                case NE:
-                case LT:
-                case GT:
-                case LE:
-                case GE:
+                // case EQ:
+                // case NE:
+                // case LT:
+                // case GT:
+                // case LE:
+                // case GE:
                     // TODO
-                    break;
+                //    break;
                 default:
                     stack.push(new Operation(operation.getOperator(), operands));
             }
