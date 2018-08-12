@@ -72,10 +72,13 @@ public class ConstantPropogation extends BasicService {
 
                 expression.accept(orderingVisitor);
                 expression = orderingVisitor.getExpression();
+                System.out.println("Reordered Expression: " + expression);
                 expression.accept(constantVisitor);
                 expression = constantVisitor.getExpression();
+                System.out.println("Sub Constants: " + expression);
                 expression.accept(simplifyVisitor);
                 expression = simplifyVisitor.getExpression();
+                System.out.println("Symplified: " + expression);
                 changed = orderingVisitor.hasChanged() || 
                     constantVisitor.hasChanged() ||
                     simplifyVisitor.hasChanged();
@@ -137,11 +140,9 @@ public class ConstantPropogation extends BasicService {
 
                     if (l instanceof IntConstant && r instanceof IntVariable) {
                         stack.push(new Operation(op, r, l));
-                        System.out.println("Reordered: " + operation + " to " + stack.peek());
                         changed = true;
                     } else {
                         stack.push(operation);
-                        System.out.println("Did not reorder: " + operation);
                     }
 
                     break;
@@ -206,7 +207,6 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
-                        System.out.println(v + " == " + constants.get(v) + " != " + c);
                         unsatisfiable = true;
                     }
 
@@ -220,7 +220,6 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
-                        System.out.println(v + " == " + constants.get(v) + " != " + c);
                         unsatisfiable = true;
                     }
 
