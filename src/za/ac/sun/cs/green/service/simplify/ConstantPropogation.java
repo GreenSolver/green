@@ -57,7 +57,7 @@ public class ConstantPropogation extends BasicService {
 	public Expression propagate(Expression expression,
 			Map<Variable, Variable> map) {
 		try {
-			log.log(Level.FINEST, "Before Canonization: " + expression);
+			log.log(Level.FINEST, "Before Propagation: " + expression);
 			invocations++;
             //boolean result = true;
             Map<IntVariable, IntConstant> constants = new HashMap<IntVariable, IntConstant>();
@@ -73,7 +73,7 @@ public class ConstantPropogation extends BasicService {
 
             //Expression canonized = simplifyVisitor.getExpression();
 
-			log.log(Level.FINEST, "After Canonization: " + expression);
+			log.log(Level.FINEST, "After Propagation: " + expression);
 			return expression;
 		} catch (VisitorException x) {
 			log.log(Level.SEVERE,
@@ -134,6 +134,7 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
+            replace = true;
 			int arity = operation.getOperator().getArity();
 			Expression operands[] = new Expression[arity];
 			for (int i = arity; i > 0; i--) {
