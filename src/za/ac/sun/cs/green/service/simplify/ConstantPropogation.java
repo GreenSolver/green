@@ -394,7 +394,7 @@ public class ConstantPropogation extends BasicService {
                         break;
                     }
 
-                    System.out.println("Simplified AND to " + stack.peak());
+                    System.out.println("Simplified AND to " + stack.peek());
 
                     return;
 
