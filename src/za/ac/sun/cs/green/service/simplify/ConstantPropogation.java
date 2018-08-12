@@ -1,5 +1,6 @@
 package za.ac.sun.cs.green.service.simplify;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,14 +65,12 @@ public class ConstantPropogation extends BasicService {
 
             //while (result) {
             ConstantVisitor constantVisitor = new ConstantVisitor(constants);
-            //SimplifyVisitor simplifyVisitor = new SimplifyVisitor();
             expression.accept(constantVisitor);
             expression = constantVisitor.getExpression();
-            //expression.accept(simplifyVisitor);
-            //Expression canonized = simplifyVisitor.getExpression();
+            SimplifyVisitor simplifyVisitor = new SimplifyVisitor();
+            expression.accept(simplifyVisitor);
+            expression = simplifyVisitor.getExpression();
             //}
-
-            //Expression canonized = simplifyVisitor.getExpression();
 
 			log.log(Level.FINEST, "After Propagation: " + expression);
 			return expression;
@@ -145,34 +144,15 @@ public class ConstantPropogation extends BasicService {
 	}
 
 	private static class SimplifyVisitor extends Visitor {
-	}
-
-	private static class Renamer extends Visitor {
-
-		private Map<Variable, Variable> map;
 
 		private Stack<Expression> stack;
 
-		public Renamer(Map<Variable, Variable> map,
-				SortedSet<IntVariable> variableSet) {
-			this.map = map;
+		public SimplifyVisitor() {
 			stack = new Stack<Expression>();
 		}
 
-		public Expression rename(Expression expression) throws VisitorException {
-			expression.accept(this);
+		public Expression getExpression() {
 			return stack.pop();
-		}
-
-		@Override
-		public void postVisit(IntVariable variable) {
-			Variable v = map.get(variable);
-			if (v == null) {
-				v = new IntVariable("v" + map.size(), variable.getLowerBound(),
-						variable.getUpperBound());
-				map.put(variable, v);
-			}
-			stack.push(v);
 		}
 
 		@Override
@@ -181,14 +161,117 @@ public class ConstantPropogation extends BasicService {
 		}
 
 		@Override
-		public void postVisit(Operation operation) {
+		public void postVisit(IntVariable variable) {
+            stack.push(variable);
+		}
+
+		@Override
+		public void postVisit(Operation operation) throws VisitorException {
 			int arity = operation.getOperator().getArity();
 			Expression operands[] = new Expression[arity];
 			for (int i = arity; i > 0; i--) {
 				operands[i - 1] = stack.pop();
 			}
-			stack.push(new Operation(operation.getOperator(), operands));
+
+            Stream<Expression> str = Arrays.stream(operands);
+            
+            if (str.allMatch(e -> 
+                        e instanceof IntConstant 
+                        || e.equals(Operation.TRUE) 
+                        || e.equals(Operation.FALSE)
+                    )) {
+                simplifyConstants(operation, operands);
+            } else {
+                simplifyRelations(operation, operands);
+            }
+
 		}
+
+        private void simplifyRelations(Operation operation, Expression[] operands) {
+            Operation.Operator op = operation.getOperator();
+
+            switch (op) {
+                case EQ:
+                case NE:
+                case LT:
+                case GT:
+                case LE:
+                case GE:
+                    // TODO
+                    break;
+                default:
+                    stack.push(new Operation(operation.getOperator(), operands));
+            }
+        }
+
+        private void simplifyConstants(Operation operation, Expression[] operands) {
+            Stream<Expression> str = Arrays.stream(operands);
+            Operation.Operator op = operation.getOperator();
+
+            switch (op) {
+                case EQ:
+                    stack.push(operands[0].equals(operands[1]) ?
+                            Operation.TRUE : Operation.FALSE);
+                    break;
+                case NE:
+                    stack.push(!operands[0].equals(operands[1]) ?
+                            Operation.TRUE : Operation.FALSE);
+                    break;
+                case LT:
+                    stack.push(operands[0].compareTo(operands[1]) < 0 ?
+                            Operation.TRUE : Operation.FALSE);
+                    break;
+                case GT:
+                    stack.push(operands[0].compareTo(operands[1]) > 0 ?
+                            Operation.TRUE : Operation.FALSE);
+                    break;
+                case LE:
+                    stack.push(operands[0].compareTo(operands[1]) <= 0 ?
+                            Operation.TRUE : Operation.FALSE);
+                    break;
+                case GE:
+                    stack.push(operands[0].compareTo(operands[1]) >= 0 ?
+                            Operation.TRUE : Operation.FALSE);
+                    break;
+
+                case AND:
+                    stack.push(str.allMatch(e -> e.equals(Operation.TRUE)) ?
+                                Operation.TRUE : Operation.FALSE);
+                    break;
+                case OR:
+                    stack.push(str.anyMatch(e -> e.equals(Operation.TRUE)) ?
+                                Operation.TRUE : Operation.FALSE);
+                    break;
+
+                case ADD:
+                    stack.push(new IntConstant(str
+                                .mapToInt(e -> ((IntConstant) e).getValue())
+                                .sum()));
+                    break;
+                case SUB:
+                    stack.push(new IntConstant(((IntConstant) operands[0]).getValue() -
+                            ((IntConstant) operands[1]).getValue()));
+                    break;
+                case MUL:
+                    stack.push(new IntConstant(((IntConstant) operands[0]).getValue() *
+                            ((IntConstant) operands[1]).getValue()));
+                    break;
+                case DIV:
+                    stack.push(new IntConstant(((IntConstant) operands[0]).getValue() /
+                            ((IntConstant) operands[1]).getValue()));
+                    break;
+                case MOD:
+                    stack.push(new IntConstant(((IntConstant) operands[0]).getValue() %
+                            ((IntConstant) operands[1]).getValue()));
+                    break;
+                case NEG:
+                    stack.push(new IntConstant(-((IntConstant) operands[0]).getValue()));
+                    break;
+
+                default:
+                    stack.push(operation);
+            }
+        }
 
 	}
 
