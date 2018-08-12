@@ -176,21 +176,18 @@ public class ConstantPropogation extends BasicService {
 		}
 
 		public Expression getExpression() {
-            // if (unsatisfiable) {
-            //     return Operation.FALSE;
-            // } else {
-            //     return stack.pop();
-            // }
-            log.log(Level.FINEST, "unsatisfiable = " + unsatisfiable );           
-            System.out.println("unsatisfiable = " + unsatisfiable );           
-            return stack.pop();
+            if (unsatisfiable) {
+                return Operation.FALSE;
+            } else {
+                return stack.pop();
+            }
 		}
 
 		@Override
 		public void preVisit(Operation operation) throws VisitorException {
-            // if (unsatisfiable) {
-            //     return;
-            // }
+            if (unsatisfiable) {
+                return;
+            }
 
             Operation.Operator op = operation.getOperator();
 
@@ -207,7 +204,6 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
-                        log.log(Level.FINEST, v + " == " + constants.get(v) + " != " + c); 
                         unsatisfiable = true;
                     }
 
@@ -221,7 +217,6 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
-                        log.log(Level.FINEST, v + " == " + constants.get(v) + " != " + c); 
                         unsatisfiable = true;
                     }
 
@@ -232,18 +227,18 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(IntConstant constant) {
-            //if (unsatisfiable) {
-            //    return;
-            //}
+            if (unsatisfiable) {
+                return;
+            }
 
 			stack.push(constant);
 		}
 
 		@Override
 		public void postVisit(IntVariable variable) {
-            // if (unsatisfiable) {
-            //     return;
-            // }
+            if (unsatisfiable) {
+                return;
+            }
 
             if (replace && constants.containsKey(variable)) {
                 stack.push(constants.get(variable));
@@ -255,9 +250,9 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
-            // if (unsatisfiable) {
-            //     return;
-            // }
+            if (unsatisfiable) {
+                return;
+            }
 
             replace = true;
 			int arity = operation.getOperator().getArity();
@@ -381,41 +376,41 @@ public class ConstantPropogation extends BasicService {
 
                     break;
 
-                case AND:
-                    l = operands[0];
-                    r = operands[1];
+                // case AND:
+                //     l = operands[0];
+                //     r = operands[1];
 
-                    if (l.equals(Operation.TRUE)) {
-                        stack.push(r);
-                    } else if (r.equals(Operation.TRUE)) {
-                        stack.push(l);
-                    } else if (l.equals(Operation.FALSE)) {
-                        stack.push(l);
-                    } else if (r.equals(Operation.FALSE)) {
-                        stack.push(r);
-                    } else {
-                        break;
-                    }
+                //     if (l.equals(Operation.TRUE)) {
+                //         stack.push(r);
+                //     } else if (r.equals(Operation.TRUE)) {
+                //         stack.push(l);
+                //     } else if (l.equals(Operation.FALSE)) {
+                //         stack.push(l);
+                //     } else if (r.equals(Operation.FALSE)) {
+                //         stack.push(r);
+                //     } else {
+                //         break;
+                //     }
 
-                    return;
+                //     return;
 
-                case OR:
-                    l = operands[0];
-                    r = operands[1];
+                // case OR:
+                //     l = operands[0];
+                //     r = operands[1];
 
-                    if (l.equals(Operation.TRUE)) {
-                        stack.push(l);
-                    } else if (r.equals(Operation.TRUE)) {
-                        stack.push(r);
-                    } else if (l.equals(Operation.FALSE)) {
-                        stack.push(r);
-                    } else if (r.equals(Operation.FALSE)) {
-                        stack.push(l);
-                    } else {
-                        break;
-                    }
+                //     if (l.equals(Operation.TRUE)) {
+                //         stack.push(l);
+                //     } else if (r.equals(Operation.TRUE)) {
+                //         stack.push(r);
+                //     } else if (l.equals(Operation.FALSE)) {
+                //         stack.push(r);
+                //     } else if (r.equals(Operation.FALSE)) {
+                //         stack.push(l);
+                //     } else {
+                //         break;
+                //     }
 
-                    return;
+                //     return;
             }
 
             stack.push(new Operation(operation.getOperator(), operands));
