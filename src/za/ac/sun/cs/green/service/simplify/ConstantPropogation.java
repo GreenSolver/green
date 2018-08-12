@@ -209,14 +209,22 @@ public class ConstantPropogation extends BasicService {
 
                 if (r instanceof IntVariable &&
                         l instanceof IntConstant) {
-                    constants.put((IntVariable) r, (IntConstant) l);
+                    IntVariable v = (IntVariable) r;
+                    IntConstant c = (IntConstant) l;
+                    if (!constants.containsKey(v)) {
+                        constants.put(v, c);
+                        changed = true;
+                    }
                     replace = false;
-                    changed = true;
                 } else if (r instanceof IntConstant &&
                         l instanceof IntVariable) {
-                    constants.put((IntVariable) l, (IntConstant) r);
+                    IntVariable v = (IntVariable) l;
+                    IntConstant c = (IntConstant) r;
+                    if (!constants.containsKey(v)) {
+                        constants.put(v, c);
+                        changed = true;
+                    }
                     replace = false;
-                    changed = true;
                 }
             }
         }
