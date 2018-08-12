@@ -142,7 +142,7 @@ public class ConstantPropogation extends BasicService {
                         stack.push(new Operation(op, r, l));
                         changed = true;
                     } else {
-                        stack.push(operation);
+                        stack.push(new Operation(op, l, r));
                     }
 
                     break;
