@@ -64,6 +64,7 @@ public class ConstantPropogation extends BasicService {
             boolean changed = true;
             Map<IntVariable, IntConstant> constants = new HashMap<IntVariable, IntConstant>();
 
+            int n = 0;
             while (changed) {
                 OrderingVisitor orderingVisitor = new OrderingVisitor();
                 ConstantVisitor constantVisitor = new ConstantVisitor(constants);
@@ -78,6 +79,12 @@ public class ConstantPropogation extends BasicService {
                 changed = orderingVisitor.hasChanged() || 
                     constantVisitor.hasChanged() ||
                     simplifyVisitor.hasChanged();
+
+                if (n++ > 10) {
+                    log.log(Level.FINEST, "still changed after 10 iterations: " + expression);
+                    break;
+                }
+
             }
 
 			log.log(Level.FINEST, "After Propagation: " + expression);
