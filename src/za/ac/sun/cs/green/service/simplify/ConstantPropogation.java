@@ -137,9 +137,11 @@ public class ConstantPropogation extends BasicService {
 
                     if (l instanceof IntConstant && r instanceof IntVariable) {
                         stack.push(new Operation(op, r, l));
+                        System.out.println("Reordered: " + stack.peek());
                         changed = true;
                     } else {
                         stack.push(operation);
+                        System.out.println("Did not reorder: " + operation);
                     }
 
                     break;
@@ -318,7 +320,6 @@ public class ConstantPropogation extends BasicService {
 
         private void simplifyRelations(Operation operation, Expression[] operands) {
             Operation.Operator op = operation.getOperator();
-            System.out.print("\nSimplifying [" + operation + "] to ");
 
             switch (op) {
                 case EQ:
@@ -395,8 +396,6 @@ public class ConstantPropogation extends BasicService {
                         break;
                     }
 
-                    System.out.println("Simplified AND to " + stack.peek());
-
                     return;
 
                 case OR:
@@ -415,12 +414,10 @@ public class ConstantPropogation extends BasicService {
                         break;
                     }
 
-                    System.out.println("Simplified OR");
                     return;
             }
 
             Expression ex = new Operation(operation.getOperator(), operands);
-            System.out.println("[" + ex + "]");
             stack.push(ex);
         }
 
