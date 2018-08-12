@@ -64,14 +64,19 @@ public class ConstantPropogation extends BasicService {
             //boolean result = true;
             Map<IntVariable, IntConstant> constants = new HashMap<IntVariable, IntConstant>();
 
-            //while (result) {
-            ConstantVisitor constantVisitor = new ConstantVisitor(constants);
-            expression.accept(constantVisitor);
-            expression = constantVisitor.getExpression();
-            SimplifyVisitor simplifyVisitor = new SimplifyVisitor();
-            expression.accept(simplifyVisitor);
-            expression = simplifyVisitor.getExpression();
-            //}
+            int n = 3;
+            while (n-- > 0) {
+                OrderingVisitor orderingVisitor = new OrderingVisitor();
+                ConstantVisitor constantVisitor = new ConstantVisitor(constants);
+                SimplifyVisitor simplifyVisitor = new SimplifyVisitor();
+
+                expression.accept(orderingVisitor);
+                expression = orderingVisitor.getExpression();
+                expression.accept(constantVisitor);
+                expression = constantVisitor.getExpression();
+                expression.accept(simplifyVisitor);
+                expression = simplifyVisitor.getExpression();
+            }
 
 			log.log(Level.FINEST, "After Propagation: " + expression);
 			return expression;
@@ -82,6 +87,83 @@ public class ConstantPropogation extends BasicService {
 		}
 		return null;
 	}
+
+	private static class OrderingVisitor extends Visitor {
+
+		private Stack<Expression> stack;
+
+		public OrderingVisitor() {
+			stack = new Stack<Expression>();
+		}
+
+		public Expression getExpression() {
+			return stack.pop();
+		}
+
+		@Override
+		public void postVisit(IntConstant constant) {
+			stack.push(constant);
+		}
+
+		@Override
+		public void postVisit(IntVariable variable) {
+			stack.push(variable);
+		}
+
+		@Override
+		public void postVisit(Operation operation) throws VisitorException {
+			Operation.Operator op = operation.getOperator();
+			Operation.Operator nop = null;
+			switch (op) {
+			case EQ:
+				nop = Operation.Operator.EQ;
+				break;
+			case NE:
+				nop = Operation.Operator.NE;
+				break;
+			case LT:
+				nop = Operation.Operator.GT;
+				break;
+			case LE:
+				nop = Operation.Operator.GE;
+				break;
+			case GT:
+				nop = Operation.Operator.LT;
+				break;
+			case GE:
+				nop = Operation.Operator.LE;
+				break;
+			default:
+				break;
+			}
+			if (nop != null) {
+				Expression r = stack.pop();
+				Expression l = stack.pop();
+				if ((r instanceof IntVariable)
+						&& (l instanceof IntVariable)
+						&& (((IntVariable) r).getName().compareTo(
+								((IntVariable) l).getName()) < 0)) {
+					stack.push(new Operation(nop, r, l));
+				} else if ((r instanceof IntVariable)
+						&& (l instanceof IntConstant)) {
+					stack.push(new Operation(nop, r, l));
+				} else {
+					stack.push(operation);
+				}
+			} else if (op.getArity() == 2) {
+				Expression r = stack.pop();
+				Expression l = stack.pop();
+				stack.push(new Operation(op, l, r));
+			} else {
+				for (int i = op.getArity(); i > 0; i--) {
+					stack.pop();
+				}
+				stack.push(operation);
+			}
+		}
+
+	}
+
 
 	private static class ConstantVisitor extends Visitor {
 
@@ -192,17 +274,64 @@ public class ConstantPropogation extends BasicService {
             Operation.Operator op = operation.getOperator();
 
             switch (op) {
-                // case EQ:
-                // case NE:
-                // case LT:
-                // case GT:
-                // case LE:
-                // case GE:
-                    // TODO
-                //    break;
-                default:
-                    stack.push(new Operation(operation.getOperator(), operands));
+                case EQ:
+                case NE:
+                case LT:
+                case GT:
+                case LE:
+                case GE:
+                    Expression l = operands[0];
+                    Expression r = operands[1];
+                    Operation.Operator op2 = null;
+                    Operation operator = null;
+                    IntConstant constant = null;
+                    boolean eq = false;
+                    boolean lefty = false;
+
+                    if (l instanceof Operation && r instanceof IntConstant) {
+                        op2 = ((Operation) l).getOperator();
+                        operator = (Operation) l;
+                        constant = (IntConstant) r;
+                        eq = true;
+                        lefty = true;
+                    } else if (r instanceof Operation && l instanceof IntConstant) {
+                        op2 = ((Operation) l).getOperator();
+                        operator = (Operation) r;
+                        constant = (IntConstant) l;
+                        eq = true;
+                    }
+
+                    if (eq) {
+                        Operation.Operator nop = null;
+
+                        switch (op2) {
+                            case ADD:
+                                nop = Operation.Operator.SUB;
+                                break;
+                            case SUB:
+                                nop = Operation.Operator.ADD;
+                                break;
+                        }
+
+                        if (nop) {
+                            Expression left, right;
+
+                            if (lefty) {
+                                left = operator.getOperand(0);
+                                right = new Operation(nop, constant, operator.getOperand(1));
+                            } else {
+                                left = new Operation(nop, constant, operator.getOperand(1));
+                                right = operator.getOperand(0);
+                            }
+
+                            operand[0] = left;
+                            operand[1] = right;
+                        }
+                    }
+
             }
+
+            stack.push(new Operation(operation.getOperator(), operands));
         }
 
         private void simplifyConstants(Operation operation, Expression[] operands) {
