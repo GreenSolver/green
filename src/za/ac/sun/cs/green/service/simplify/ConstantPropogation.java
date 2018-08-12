@@ -61,11 +61,10 @@ public class ConstantPropogation extends BasicService {
 		try {
 			log.log(Level.FINEST, "Before Propagation: " + expression);
 			invocations++;
-            //boolean result = true;
+            boolean changed = true;
             Map<IntVariable, IntConstant> constants = new HashMap<IntVariable, IntConstant>();
 
-            int n = 3;
-            while (n-- > 0) {
+            while (changed) {
                 OrderingVisitor orderingVisitor = new OrderingVisitor();
                 ConstantVisitor constantVisitor = new ConstantVisitor(constants);
                 SimplifyVisitor simplifyVisitor = new SimplifyVisitor();
@@ -76,6 +75,9 @@ public class ConstantPropogation extends BasicService {
                 expression = constantVisitor.getExpression();
                 expression.accept(simplifyVisitor);
                 expression = simplifyVisitor.getExpression();
+                changed = orderingVisitor.hasChanged() || 
+                    constantVisitor.hasChanged() ||
+                    simplifyVisitor.hasChanged();
             }
 
 			log.log(Level.FINEST, "After Propagation: " + expression);
@@ -91,9 +93,15 @@ public class ConstantPropogation extends BasicService {
 	private static class OrderingVisitor extends Visitor {
 
 		private Stack<Expression> stack;
+        private boolean changed;
 
 		public OrderingVisitor() {
 			stack = new Stack<Expression>();
+            changed = false;
+		}
+
+		public boolean hasChanged() {
+			return changed;
 		}
 
 		public Expression getExpression() {
@@ -115,38 +123,42 @@ public class ConstantPropogation extends BasicService {
 			Operation.Operator op = operation.getOperator();
 			Operation.Operator nop = null;
 			switch (op) {
-			case EQ:
-				nop = Operation.Operator.EQ;
-				break;
-			case NE:
-				nop = Operation.Operator.NE;
-				break;
-			case LT:
-				nop = Operation.Operator.GT;
-				break;
-			case LE:
-				nop = Operation.Operator.GE;
-				break;
-			case GT:
-				nop = Operation.Operator.LT;
-				break;
-			case GE:
-				nop = Operation.Operator.LE;
-				break;
-			default:
-				break;
+                case EQ:
+                    nop = Operation.Operator.EQ;
+                    break;
+                case NE:
+                    nop = Operation.Operator.NE;
+                    break;
+                case LT:
+                    nop = Operation.Operator.GT;
+                    break;
+                case LE:
+                    nop = Operation.Operator.GE;
+                    break;
+                case GT:
+                    nop = Operation.Operator.LT;
+                    break;
+                case GE:
+                    nop = Operation.Operator.LE;
+                    break;
+                default:
+                    break;
 			}
+
 			if (nop != null) {
 				Expression r = stack.pop();
 				Expression l = stack.pop();
+
 				if ((r instanceof IntVariable)
 						&& (l instanceof IntVariable)
 						&& (((IntVariable) r).getName().compareTo(
 								((IntVariable) l).getName()) < 0)) {
 					stack.push(new Operation(nop, r, l));
+                    changed = true;
 				} else if ((r instanceof IntVariable)
 						&& (l instanceof IntConstant)) {
 					stack.push(new Operation(nop, r, l));
+                    changed = true;
 				} else {
 					stack.push(operation);
 				}
@@ -169,11 +181,18 @@ public class ConstantPropogation extends BasicService {
 
 		private Stack<Expression> stack;
         private Map<IntVariable, IntConstant> constants;
-        private boolean replace = true;
+        private boolean replace;
+        private boolean changed;
 
 		public ConstantVisitor(Map<IntVariable, IntConstant> constants) {
 			stack = new Stack<Expression>();
             this.constants = constants;
+            replace = true;
+            changed = false;
+		}
+
+		public boolean hasChanged() {
+			return changed;
 		}
 
 		public Expression getExpression() {
@@ -192,10 +211,12 @@ public class ConstantPropogation extends BasicService {
                         l instanceof IntConstant) {
                     constants.put((IntVariable) r, (IntConstant) l);
                     replace = false;
+                    changed = true;
                 } else if (r instanceof IntConstant &&
                         l instanceof IntVariable) {
                     constants.put((IntVariable) l, (IntConstant) r);
                     replace = false;
+                    changed = true;
                 }
             }
         }
@@ -209,6 +230,7 @@ public class ConstantPropogation extends BasicService {
 		public void postVisit(IntVariable variable) {
             if (replace && constants.containsKey(variable)) {
                 stack.push(constants.get(variable));
+                changed = true;
             } else {
                 stack.push(variable);
             }
@@ -229,13 +251,19 @@ public class ConstantPropogation extends BasicService {
 	private static class SimplifyVisitor extends Visitor {
 
 		private Stack<Expression> stack;
+        private boolean changed;
 
 		public SimplifyVisitor() {
 			stack = new Stack<Expression>();
+            changed = false;
 		}
 
 		public Expression getExpression() {
 			return stack.pop();
+		}
+
+		public boolean hasChanged() {
+			return changed;
 		}
 
 		@Override
@@ -295,7 +323,7 @@ public class ConstantPropogation extends BasicService {
                         eq = true;
                         lefty = true;
                     } else if (r instanceof Operation && l instanceof IntConstant) {
-                        op2 = ((Operation) l).getOperator();
+                        op2 = ((Operation) r).getOperator();
                         operator = (Operation) r;
                         constant = (IntConstant) l;
                         eq = true;
@@ -314,6 +342,7 @@ public class ConstantPropogation extends BasicService {
                         }
 
                         if (nop != null) {
+                            changed = true;
                             Expression left, right;
 
                             if (lefty) {
@@ -340,6 +369,10 @@ public class ConstantPropogation extends BasicService {
 
             switch (op) {
                 case EQ:
+                    if (operation.equals(Operator.TRUE) || operation.equals(Operator.FALSE)) {
+                        stack.push(operation);
+                        return;
+                    }
                     stack.push(operands[0].equals(operands[1]) ?
                             Operation.TRUE : Operation.FALSE);
                     break;
@@ -404,7 +437,10 @@ public class ConstantPropogation extends BasicService {
 
                 default:
                     stack.push(operation);
+                    return;
             }
+
+            changed = true;
         }
 
 	}
