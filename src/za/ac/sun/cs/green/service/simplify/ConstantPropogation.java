@@ -11,6 +11,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
