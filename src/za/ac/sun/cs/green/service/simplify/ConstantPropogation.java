@@ -161,12 +161,14 @@ public class ConstantPropogation extends BasicService {
         private Map<IntVariable, IntConstant> constants;
         private boolean replace;
         private boolean changed;
+        private boolean unsatisfiable;
 
 		public ConstantVisitor(Map<IntVariable, IntConstant> constants) {
 			stack = new Stack<Expression>();
             this.constants = constants;
             replace = true;
             changed = false;
+            unsatisfiable = false;
 		}
 
 		public boolean hasChanged() {
@@ -179,6 +181,10 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void preVisit(Operation operation) throws VisitorException {
+            if (unsatisfiable) {
+                return;
+            }
+
             Operation.Operator op = operation.getOperator();
 
             if (op == Operation.Operator.EQ) {
@@ -189,19 +195,39 @@ public class ConstantPropogation extends BasicService {
                         l instanceof IntConstant) {
                     IntVariable v = (IntVariable) r;
                     IntConstant c = (IntConstant) l;
+
                     if (!constants.containsKey(v)) {
                         constants.put(v, c);
                         changed = true;
+                    } else {
+                        if (constants.get(v).equals(c)) {
+                            while (!stack.empty()) {
+                                stack.pop();
+                            }
+                            stack.push(Operation.FALSE);
+                            unsatisfiable = true;
+                        }
                     }
+
                     replace = false;
                 } else if (r instanceof IntConstant &&
                         l instanceof IntVariable) {
                     IntVariable v = (IntVariable) l;
                     IntConstant c = (IntConstant) r;
+
                     if (!constants.containsKey(v)) {
                         constants.put(v, c);
                         changed = true;
+                    } else {
+                        if (constants.get(v).equals(c)) {
+                            while (!stack.empty()) {
+                                stack.pop();
+                            }
+                            stack.push(Operation.FALSE);
+                            unsatisfiable = true;
+                        }
                     }
+
                     replace = false;
                 }
             }
@@ -209,11 +235,19 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(IntConstant constant) {
+            if (unsatisfiable) {
+                return;
+            }
+
 			stack.push(constant);
 		}
 
 		@Override
 		public void postVisit(IntVariable variable) {
+            if (unsatisfiable) {
+                return;
+            }
+
             if (replace && constants.containsKey(variable)) {
                 stack.push(constants.get(variable));
                 changed = true;
@@ -224,6 +258,10 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
+            if (unsatisfiable) {
+                return;
+            }
+
             replace = true;
 			int arity = operation.getOperator().getArity();
 			Expression operands[] = new Expression[arity];
@@ -344,6 +382,43 @@ public class ConstantPropogation extends BasicService {
                         }
                     }
 
+                    break;
+
+                case AND:
+                    Expression l = operands[0];
+                    Expression r = operands[1];
+
+                    if (l.equals(Operation.TRUE)) {
+                        stack.push(r);
+                    } else if (r.equals(Operation.TRUE)) {
+                        stack.push(l);
+                    } else if (l.equals(Operation.FALSE)) {
+                        stack.push(l);
+                    } else if (r.equals(Operation.FALSE)) {
+                        stack.push(r);
+                    } else {
+                        break;
+                    }
+
+                    return;
+
+                case OR:
+                    Expression l = operands[0];
+                    Expression r = operands[1];
+
+                    if (l.equals(Operation.TRUE)) {
+                        stack.push(l);
+                    } else if (r.equals(Operation.TRUE)) {
+                        stack.push(r);
+                    } else if (l.equals(Operation.FALSE)) {
+                        stack.push(r);
+                    } else if (r.equals(Operation.FALSE)) {
+                        stack.push(l);
+                    } else {
+                        break;
+                    }
+
+                    return;
             }
 
             stack.push(new Operation(operation.getOperator(), operands));
