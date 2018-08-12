@@ -324,8 +324,8 @@ public class ConstantPropogation extends BasicService {
                                 right = operator.getOperand(0);
                             }
 
-                            operand[0] = left;
-                            operand[1] = right;
+                            operands[0] = left;
+                            operands[1] = right;
                         }
                     }
 
