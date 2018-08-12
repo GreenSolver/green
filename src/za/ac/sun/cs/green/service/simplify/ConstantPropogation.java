@@ -204,6 +204,7 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
+                        log.log(Level.FINEST, v + " == " + constants.get(v) + " != " + c);
                         unsatisfiable = true;
                     }
 
@@ -217,6 +218,7 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
+                        log.log(Level.FINEST, v + " == " + constants.get(v) + " != " + c);
                         unsatisfiable = true;
                     }
 
@@ -376,41 +378,44 @@ public class ConstantPropogation extends BasicService {
 
                     break;
 
-                // case AND:
-                //     l = operands[0];
-                //     r = operands[1];
+                case AND:
+                    l = operands[0];
+                    r = operands[1];
 
-                //     if (l.equals(Operation.TRUE)) {
-                //         stack.push(r);
-                //     } else if (r.equals(Operation.TRUE)) {
-                //         stack.push(l);
-                //     } else if (l.equals(Operation.FALSE)) {
-                //         stack.push(l);
-                //     } else if (r.equals(Operation.FALSE)) {
-                //         stack.push(r);
-                //     } else {
-                //         break;
-                //     }
+                    if (l.equals(Operation.TRUE)) {
+                        stack.push(r);
+                    } else if (r.equals(Operation.TRUE)) {
+                        stack.push(l);
+                    } else if (l.equals(Operation.FALSE)) {
+                        stack.push(l);
+                    } else if (r.equals(Operation.FALSE)) {
+                        stack.push(r);
+                    } else {
+                        break;
+                    }
 
-                //     return;
+                    log.log(Level.FINEST, "Simplified AND to " + stack.peak());
 
-                // case OR:
-                //     l = operands[0];
-                //     r = operands[1];
+                    return;
 
-                //     if (l.equals(Operation.TRUE)) {
-                //         stack.push(l);
-                //     } else if (r.equals(Operation.TRUE)) {
-                //         stack.push(r);
-                //     } else if (l.equals(Operation.FALSE)) {
-                //         stack.push(r);
-                //     } else if (r.equals(Operation.FALSE)) {
-                //         stack.push(l);
-                //     } else {
-                //         break;
-                //     }
+                case OR:
+                    l = operands[0];
+                    r = operands[1];
 
-                //     return;
+                    if (l.equals(Operation.TRUE)) {
+                        stack.push(l);
+                    } else if (r.equals(Operation.TRUE)) {
+                        stack.push(r);
+                    } else if (l.equals(Operation.FALSE)) {
+                        stack.push(r);
+                    } else if (r.equals(Operation.FALSE)) {
+                        stack.push(l);
+                    } else {
+                        break;
+                    }
+
+                    log.log(Level.FINEST, "Simplified OR");
+                    return;
             }
 
             stack.push(new Operation(operation.getOperator(), operands));
