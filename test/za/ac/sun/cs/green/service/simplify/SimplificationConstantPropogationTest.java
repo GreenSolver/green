@@ -146,7 +146,7 @@ public class SimplificationConstantPropogationTest {
 			Operation o3 = new Operation(Operation.Operator.EQ, z, c);
 			Operation o = new Operation(Operation.Operator.AND, o1, o2);
 			o = new Operation(Operation.Operator.AND, o, o3);
-			check(o, "(x==1)&&((y==1)&&(z==1))");
+			check(o, "((x==1)&&(y==1))&&(z==1)");
 		}
 
 	@Test
@@ -164,7 +164,7 @@ public class SimplificationConstantPropogationTest {
 
 			Operation o = new Operation(Operation.Operator.AND, o2, o3); // z = x * y && x = 2
 			o = new Operation(Operation.Operator.AND, o, o5); // z = x * y && x = 2 && x+y = 4
-			check(o, "(z==4)&&((x==2)&&(y==2))");
+			check(o, "((z==4)&&(x==2))&&(y==2)");
 		}
 
 	@Test
