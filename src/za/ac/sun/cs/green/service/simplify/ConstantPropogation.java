@@ -369,7 +369,7 @@ public class ConstantPropogation extends BasicService {
 
             switch (op) {
                 case EQ:
-                    if (operation.equals(Operator.TRUE) || operation.equals(Operator.FALSE)) {
+                    if (operation.equals(Operation.TRUE) || operation.equals(Operation.FALSE)) {
                         stack.push(operation);
                         return;
                     }
