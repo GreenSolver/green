@@ -204,7 +204,7 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
-                        log.log(Level.FINEST, v + " == " + constants.get(v) + " != " + c);
+                        System.out.println(v + " == " + constants.get(v) + " != " + c);
                         unsatisfiable = true;
                     }
 
@@ -218,7 +218,7 @@ public class ConstantPropogation extends BasicService {
                         constants.put(v, c);
                         changed = true;
                     } else if (!constants.get(v).equals(c)) {
-                        log.log(Level.FINEST, v + " == " + constants.get(v) + " != " + c);
+                        System.out.println(v + " == " + constants.get(v) + " != " + c);
                         unsatisfiable = true;
                     }
 
@@ -394,7 +394,7 @@ public class ConstantPropogation extends BasicService {
                         break;
                     }
 
-                    log.log(Level.FINEST, "Simplified AND to " + stack.peak());
+                    System.out.println("Simplified AND to " + stack.peak());
 
                     return;
 
@@ -414,7 +414,7 @@ public class ConstantPropogation extends BasicService {
                         break;
                     }
 
-                    log.log(Level.FINEST, "Simplified OR");
+                    System.out.println("Simplified OR");
                     return;
             }
 
