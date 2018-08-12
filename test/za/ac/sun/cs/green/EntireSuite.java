@@ -20,12 +20,13 @@ import za.ac.sun.cs.green.parser.smtlib2.SMTLIB2Parser0Test;
 import za.ac.sun.cs.green.parser.smtlib2.SMTLIB2Scanner0Test;
 import za.ac.sun.cs.green.service.bounder.BounderTest;
 import za.ac.sun.cs.green.service.canonizer.SATCanonizerTest;
-import za.ac.sun.cs.green.service.simplify.ConstantPropogation;
 import za.ac.sun.cs.green.service.choco.SATChocoTest;
 import za.ac.sun.cs.green.service.cvc3.SATCVC3Test;
 import za.ac.sun.cs.green.service.factorizer.SATFactorizerTest;
 import za.ac.sun.cs.green.service.latte.CountLattETest;
 import za.ac.sun.cs.green.service.latte.CountLattEWithBounderTest;
+import za.ac.sun.cs.green.service.simplify.OnlyConstantPropogationTest;
+import za.ac.sun.cs.green.service.simplify.SimplificationConstantPropogationTest;
 import za.ac.sun.cs.green.service.slicer.ParallelSATSlicerTest;
 import za.ac.sun.cs.green.service.slicer.SATSlicerTest;
 import za.ac.sun.cs.green.service.z3.SATZ3JavaTest;
@@ -36,9 +37,7 @@ import za.ac.sun.cs.green.util.SetTaskManagerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	SATCanonizerTest.class,
-	SATZ3Test.class,
-    ConstantPropogation.class
+    OnlyConstantPropogationTest.class
 })
 
 public class EntireSuite {
