@@ -176,18 +176,21 @@ public class ConstantPropogation extends BasicService {
 		}
 
 		public Expression getExpression() {
-            if (unsatisfiable) {
-                return Operation.FALSE;
-            } else {
-                return stack.pop();
-            }
+            // if (unsatisfiable) {
+            //     return Operation.FALSE;
+            // } else {
+            //     return stack.pop();
+            // }
+            log.log(Level.FINEST, "unsatisfiable = " + unsatisfiable );           
+            System.out.println("unsatisfiable = " + unsatisfiable );           
+            return stack.pop();
 		}
 
 		@Override
 		public void preVisit(Operation operation) throws VisitorException {
-            if (unsatisfiable) {
-                return;
-            }
+            // if (unsatisfiable) {
+            //     return;
+            // }
 
             Operation.Operator op = operation.getOperator();
 
@@ -229,18 +232,18 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(IntConstant constant) {
-            if (unsatisfiable) {
-                return;
-            }
+            //if (unsatisfiable) {
+            //    return;
+            //}
 
 			stack.push(constant);
 		}
 
 		@Override
 		public void postVisit(IntVariable variable) {
-            if (unsatisfiable) {
-                return;
-            }
+            // if (unsatisfiable) {
+            //     return;
+            // }
 
             if (replace && constants.containsKey(variable)) {
                 stack.push(constants.get(variable));
@@ -252,9 +255,9 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
-            if (unsatisfiable) {
-                return;
-            }
+            // if (unsatisfiable) {
+            //     return;
+            // }
 
             replace = true;
 			int arity = operation.getOperator().getArity();
