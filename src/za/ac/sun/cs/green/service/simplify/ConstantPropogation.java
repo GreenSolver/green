@@ -136,7 +136,7 @@ public class ConstantPropogation extends BasicService {
                     Expression l = stack.pop();
 
                     if (l instanceof IntConstant && r instanceof IntVariable) {
-                        stack.push(new Operation(op, l, r));
+                        stack.push(new Operation(op, r, l));
                         changed = true;
                     } else {
                         stack.push(operation);
