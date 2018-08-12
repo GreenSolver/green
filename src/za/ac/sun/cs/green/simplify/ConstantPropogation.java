@@ -125,7 +125,7 @@ public class ConstantPropogation extends BasicService {
 
 		@Override
 		public void postVisit(IntVariable variable) {
-            if (replace && constants.contains(variable)) {
+            if (replace && constants.containsKey(variable)) {
                 stack.push(constants.get(variable));
             } else {
                 stack.push(variable);
