@@ -66,25 +66,22 @@ public class ConstantPropogation extends BasicService {
 
             int n = 0;
             while (changed) {
-                OrderingVisitor orderingVisitor = new OrderingVisitor();
                 ConstantVisitor constantVisitor = new ConstantVisitor(constants);
+                OrderingVisitor orderingVisitor = new OrderingVisitor();
                 SimplifyVisitor simplifyVisitor = new SimplifyVisitor();
 
-                expression.accept(orderingVisitor);
-                expression = orderingVisitor.getExpression();
-                System.out.println("Reordered Expression: " + expression);
                 expression.accept(constantVisitor);
                 expression = constantVisitor.getExpression();
-                System.out.println("Sub Constants: " + expression);
+                expression.accept(orderingVisitor);
+                expression = orderingVisitor.getExpression();
                 expression.accept(simplifyVisitor);
                 expression = simplifyVisitor.getExpression();
-                System.out.println("Symplified: " + expression);
                 changed = orderingVisitor.hasChanged() || 
                     constantVisitor.hasChanged() ||
                     simplifyVisitor.hasChanged();
 
-                if (n++ > 10) {
-                    log.log(Level.FINEST, "still changed after 10 iterations: " + expression);
+                if (n++ > 50) {
+                    log.log(Level.SEVERE, "Failed to simplify further after 50 attempts");
                     break;
                 }
 
