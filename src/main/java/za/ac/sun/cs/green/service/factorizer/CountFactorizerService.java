@@ -47,18 +47,18 @@ public class CountFactorizerService extends BasicService {
 		if (result == null) {
 			final Instance p = instance.getParent();
 
-			FactorExpression fc0 = null;
+            FactorExpressionOld fc0 = null;
 			if (p != null) {
-				fc0 = (FactorExpression) p.getData(FactorExpression.class);
+				fc0 = (FactorExpressionOld) p.getData(FactorExpressionOld.class);
 				if (fc0 == null) {
 					// Construct the parent's factor and store it
-					fc0 = new FactorExpression(null, p.getFullExpression());
-					p.setData(FactorExpression.class, fc0);
+					fc0 = new FactorExpressionOld(null, p.getFullExpression());
+					p.setData(FactorExpressionOld.class, fc0);
 				}
 			}
 
-			final FactorExpression fc = new FactorExpression(fc0, instance.getExpression());
-			instance.setData(FactorExpression.class, fc);
+			final FactorExpressionOld fc = new FactorExpressionOld(fc0, instance.getExpression());
+			instance.setData(FactorExpressionOld.class, fc);
 
 			result = new HashSet<Instance>();
 			for (Expression e : fc.getFactors()) {
