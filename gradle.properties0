@@ -1,3 +1,3 @@
-greenRepoAddress=http://repo.jacogeld.org:8081/repository/snapshots/
-greenRepoUsername=username
-greenRepoPassword=password
+artifactory_contextUrl=http://repo.jacogeld.org/artifactory/
+artifactory_user=username
+artifactory_password=password

@@ -3,6 +3,7 @@ plugins {
 	id 'java'
 	id 'eclipse'
 	id 'com.palantir.git-version' version '0.12.0-rc2'
+	id 'com.jfrog.artifactory' version '4.8.1'
 	id 'maven-publish'
 }
 
@@ -31,16 +32,33 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
+			groupId = group
 			version gitVersion() + '-SNAPSHOT'
 		}
 	}
-	repositories {
-		maven {
-			credentials {
-				username project.getProperty('greenRepoUsername')
-				password project.getProperty('greenRepoPassword')
-			}
-			url project.getProperty('greenRepoAddress')
+}
+
+artifactory {
+	contextUrl = project.getProperty('artifactory_contextUrl')
+	publish {
+		repository {
+			repoKey = 'gradle-dev-local'
+			username = project.getProperty('artifactory_user')
+			password = project.getProperty('artifactory_password')
+			maven = true
+		}
+		defaults {
+			publications('mavenJava')
+			publishArtifacts = true
+			publishPom = true
+		}
+	}
+	resolve {
+		repository {
+			repoKey = 'gradle-dev'
+			username = project.getProperty('artifactory_user')
+			password = project.getProperty('artifactory_password')
+			maven = true
 		}
 	}
 }
