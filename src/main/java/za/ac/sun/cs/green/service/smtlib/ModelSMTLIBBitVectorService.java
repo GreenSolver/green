@@ -38,6 +38,8 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
+			//b = new StringBuilder(); 
+			//b.append("(set-option :produce-models true)(set-logic FloatingPoint)(declare-fun v () (_ Float32))(assert (and (and (bvsge v #x00000000) (bvsle v #x00000032)) (bvsge v #x00000001)))(check-sat)");
 			return solve0(b.toString(), t.getVariables());
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
@@ -143,7 +145,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			String n = variable.getName();
 			if (v == null) {
 				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () BitVec)");
+				b.append("(declare-fun ").append(n).append(" () (_ BitVec 32))");
 				defs.add(b.toString());
 				b.setLength(0);
 				// lower bound
@@ -165,7 +167,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			String n = variable.getName();
 			if (v == null) {
 				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () BitVec)");
+				b.append("(declare-fun ").append(n).append(" () (_ BitVec 64))");
 				defs.add(b.toString());
 				b.setLength(0);
 				// lower bound
