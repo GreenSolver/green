@@ -81,6 +81,7 @@ public class ModelZ3BitVectorService extends ModelSMTLIBBitVectorService {
 
 			long a = System.currentTimeMillis() - startTime;
 			timeConsumption += a;
+			System.out.println(output);
 			Map<Variable,Object> tmp = retrieveModel(output, variables);
 			satTimeConsumption += a;
 			return tmp;
