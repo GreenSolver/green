@@ -9,6 +9,7 @@ import org.junit.Test;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.*;
+import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.util.Configuration;
 
 public class ModelSMTLIBBitVectorServiceTest {
@@ -22,8 +23,7 @@ public class ModelSMTLIBBitVectorServiceTest {
         Properties props = new Properties();
         props.setProperty("green.services", "model");
         props.setProperty("green.service.model", "(z3)");
-        //props.setProperty("green.service.model.smtlib", "za.ac.sun.cs.green.service.smtlib.ModelSMTLIBBitVectorService");
-        props.setProperty("green.service.model.z3", "za.ac.sun.cs.green.service.z3.ModelZ3BitVectorService");
+        props.setProperty("green.service.model.z3", "za.ac.sun.cs.green.service.z3.ModelZ3FloatService");
         props.setProperty("green.z3.path", DEFAULT_Z3_PATH);
         Configuration config = new Configuration(solver, props);
         config.configure();
@@ -31,12 +31,62 @@ public class ModelSMTLIBBitVectorServiceTest {
     
 	@Test
 	public void test01() {
-		RealVariable v = new RealVariable("v", 0.0, 99.0);
-		RealConstant c = new RealConstant(0.5);
-		Operation o = new Operation(Operation.Operator.GE, v, c);
+		RealVariable v = new RealVariable("v", -99.0, 99.0);
+		RealConstant c = new RealConstant(-0.5);
+		Operation o = new Operation(Operation.Operator.LE, v, c);
+		
 		Instance in = new Instance(solver, null, o);
-		Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) in.request("model");
-		//ModelSMTLIBBitVectorService in2 = (ModelSMTLIBBitVectorService) in.request("smtlib");
+		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
+		
+		Object output = model.get(v);
+		System.out.println(output.getClass().toString());
+		assert output instanceof RealConstant;
+		
+		double out = Double.parseDouble(output.toString());
+		assert out <= -0.5 && out >=-99.0;
 	}
 
+	@Test
+	public void test02() {
+		IntVariable v = new IntVariable("v", -99, 99);
+		IntConstant c = new IntConstant(20);
+		Operation o = new Operation(Operation.Operator.LE, v, c);
+		
+		Instance in = new Instance(solver, null, o);
+		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
+		
+		Object output = model.get(v);
+		assert output instanceof IntConstant;
+		
+		int out = Integer.parseInt(output.toString());
+		assert out <= 20 && out >=-99;
+	}
+	
+	@Test
+	public void test03() {
+		IntVariable v1 = new IntVariable("v1", 0, 50);
+		IntConstant c1 = new IntConstant(2);
+		RealVariable v2 = new RealVariable("v2", 0.0, 50.0);
+		RealConstant c2 = new RealConstant(25.0);
+		
+		Operation t1 =  new Operation(Operator.GT, v2, c2);
+		Operation t2 = new Operation(Operator.LT, v1, c1);
+		Operation t3 = new Operation(Operator.NE, v1, v2);
+		Operation o = new Operation(Operator.AND, new Operation(Operator.AND, t1, t2), t3);
+		
+		Instance in = new Instance(solver, null, o);
+		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
+		
+		Object v1Val = model.get(v1);
+		Object v2Val = model.get(v2);
+		assert v1Val instanceof IntConstant;
+		assert v2Val instanceof RealConstant;
+		
+		int val1 = Integer.parseInt(v1Val.toString());
+		double val2 = Double.parseDouble(v2Val.toString());
+		assert val1 >= 0 && val1 < 2;
+		assert val2 > 25.0 && val2 <= 50.0;
+		assert val2 != val1;
+		
+	}
 }
