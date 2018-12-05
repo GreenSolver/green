@@ -66,9 +66,15 @@ public class ModelZ3Service extends ModelSMTLIBService {
 				long a = System.currentTimeMillis() - startTime;
 				timeConsumption += a;
 				unsatTimeConsumption += a;
+				stdin.close();
+				stdout.close();
+				process.destroy();
 				return null;
 			} else if (!output.equals("sat")) {
 				log.fatal("Z3 returned a null: " + output);
+				stdin.close();
+				stdout.close();
+				process.destroy();
 				return null;
 			}
 
