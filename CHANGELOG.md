@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - ...
 
 
+## [0.1.4] - 2018.12.05
+
+### Added
+- The log level is now read from the configuration
+- More timing information is collected and displayed (SATService, SATCanonizerService, SATFactorizerService, RedisStore)
+- New in-memory store
+- New redis client that operates asynchronously
+
+### Fixed
+- Z3 processes are now killed after the complete their work
+
 
 ## [0.1.3] - 2018.07.17
 
