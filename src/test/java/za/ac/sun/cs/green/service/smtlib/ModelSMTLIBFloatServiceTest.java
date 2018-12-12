@@ -12,7 +12,7 @@ import za.ac.sun.cs.green.expr.*;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.util.Configuration;
 
-public class ModelSMTLIBBitVectorServiceTest {
+public class ModelSMTLIBFloatServiceTest {
 
 	private static final String DEFAULT_Z3_PATH = "/usr/bin/z3";
 	public static Green solver;
