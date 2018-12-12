@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - ...
 
 
+## [0.1.5] - 2018.12.12
+
+### Added
+- Support for real variables and constants in SMTLIB
+
+
 ## [0.1.4] - 2018.12.05
 
 ### Added
