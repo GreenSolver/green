@@ -33,7 +33,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
-			b.append("(set-logic QF_BV)"); // Quantifier Free Bit Vector
+			// b.append("(set-logic QF_BV)"); // Quantifier Free Bit Vector
 			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
@@ -110,7 +110,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 		private String transformNegative(int v) {
 			if (v < 0) {
 				StringBuilder b = new StringBuilder();
-				b.append("(bvsub ").append(-v).append(')');
+				b.append("(bvneg ").append(-v).append(')');
 				return b.toString();
 			} else {
 				return Integer.toString(v);
@@ -120,7 +120,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 		private String transformNegative(double v) {
 			if (v < 0) {
 				StringBuilder b = new StringBuilder();
-				b.append("(bvsub ").append(-v).append(')');
+				b.append("(fp.neg ").append(-v).append(')');
 				return b.toString();
 			} else {
 				return Double.toString(v);
@@ -145,7 +145,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			String n = variable.getName();
 			if (v == null) {
 				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () (_ BitVec 32))");
+				b.append("(declare-fun ").append(n).append(" () (_ BitVec 64))");
 				defs.add(b.toString());
 				b.setLength(0);
 				// lower bound
@@ -167,14 +167,14 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			String n = variable.getName();
 			if (v == null) {
 				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () (_ BitVec 64))");
+				b.append("(declare-fun ").append(n).append(" () (_ Float64))");
 				defs.add(b.toString());
 				b.setLength(0);
 				// lower bound
-				b.append("(and (bvsge ").append(n).append(' ');
+				b.append("(and (fp.geq ").append(n).append(' ');
 				b.append(transformNegative(variable.getLowerBound()));
 				// upper bound
-				b.append(") (bvsle ").append(n).append(' ');
+				b.append(") (fp.leq ").append(n).append(' ');
 				b.append(transformNegative(variable.getUpperBound()));
 				b.append("))");
 				domains.add(b.toString());
@@ -200,12 +200,66 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 				return s;
 			} else {
 				StringBuilder b = new StringBuilder();
-				b.append("(to_real ").append(s).append(')');
+				b.append("(_ to_fp 11 53 RNE ").append(s).append(')');
 				return b.toString();
 			}
 		}
 
-		private String setOperator(Operator op) throws TranslatorUnsupportedOperation {
+		private String setFPOperator(Operator op) throws TranslatorUnsupportedOperation{
+			switch (op) {
+			case EQ:
+				return "fp.eq";
+			case LT:
+				return "fp.lt";
+			case LE:
+				return "fp.leq";
+			case GT:
+				return "fp.gt";
+			case GE:
+				return "fp.geq";
+			case NOT:
+				return "not";
+			case AND:
+				return "and";
+			case OR:
+				return "or";
+			case IMPLIES:
+				return "=>"; // not sure about this one?
+			case ADD:
+				return "fp.add";
+			case SUB:
+				return "fp.sub";
+			case MUL:
+				return "fp.mul";
+			case DIV:
+				return "fp.div";
+			case MOD:
+				return "fp.mod";
+			case SQRT:
+				return "fp.sqrt";
+			case BIT_AND:
+			case BIT_OR:
+			case BIT_XOR:
+			case SHIFTL:
+			case SHIFTR:
+			case SHIFTUR:
+			case SIN:
+			case COS:
+			case TAN:
+			case ASIN:
+			case ACOS:
+			case ATAN:
+			case ATAN2:
+			case ROUND:
+			case LOG:
+			case EXP:
+			case POWER:
+			default:
+				throw new TranslatorUnsupportedOperation("unsupported operation " + op);
+			}
+		}
+		
+		private String setBVOperator(Operator op) throws TranslatorUnsupportedOperation {
 			switch (op) {
 			case EQ:
 				return "=";
@@ -242,8 +296,11 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			case BIT_XOR:
 				return "bvxor";
 			case SHIFTL:
+				return "bvshl";
 			case SHIFTR:
+				return "bvashr";
 			case SHIFTUR:
+				return "bvshr";
 			case SIN:
 			case COS:
 			case TAN:
@@ -283,7 +340,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 				} else {
 					Class<? extends Variable> v = superType(l, r);
 					StringBuilder b = new StringBuilder();
-					b.append('(').append(setOperator(op)).append(' ');
+					//b.append('(').append(setOperator(op)).append(' ');
 					b.append(adjust(l, v)).append(' ');
 					b.append(adjust(r, v)).append(')');
 					stack.push(new TranslatorPair(b.toString(), v));
@@ -294,7 +351,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 				}
 				Class<? extends Variable> v = IntVariable.class;
 				StringBuilder b = new StringBuilder();
-				b.append('(').append(setOperator(op)).append(' ');
+				//b.append('(').append(setOperator(op)).append(' ');
 				b.append(adjust(l, v)).append(')');
 				stack.push(new TranslatorPair(b.toString(), v));
 			}

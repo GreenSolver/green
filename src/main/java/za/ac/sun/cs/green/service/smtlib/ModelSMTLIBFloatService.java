@@ -39,7 +39,6 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
-			System.out.println(b);
 			return solve0(b.toString(), t.getVariables());
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
