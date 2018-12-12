@@ -39,7 +39,6 @@ public class ModelSMTLIBBitVectorServiceTest {
 		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
 		
 		Object output = model.get(v);
-		System.out.println(output.getClass().toString());
 		assert output instanceof RealConstant;
 		
 		double out = Double.parseDouble(output.toString());
@@ -67,7 +66,7 @@ public class ModelSMTLIBBitVectorServiceTest {
 		IntVariable v1 = new IntVariable("v1", 0, 50);
 		IntConstant c1 = new IntConstant(2);
 		RealVariable v2 = new RealVariable("v2", 0.0, 50.0);
-		RealConstant c2 = new RealConstant(25.0);
+		RealConstant c2 = new RealConstant(25.5);
 		
 		Operation t1 =  new Operation(Operator.GT, v2, c2);
 		Operation t2 = new Operation(Operator.LT, v1, c1);
@@ -85,8 +84,24 @@ public class ModelSMTLIBBitVectorServiceTest {
 		int val1 = Integer.parseInt(v1Val.toString());
 		double val2 = Double.parseDouble(v2Val.toString());
 		assert val1 >= 0 && val1 < 2;
-		assert val2 > 25.0 && val2 <= 50.0;
+		assert val2 > 25.5 && val2 <= 50.0;
 		assert val2 != val1;
-		
 	}
+	
+	@Test
+	public void test04() {
+		IntConstant c1 = new IntConstant(1);
+		RealConstant c2 = new RealConstant(1.5);
+		IntVariable v1 = new IntVariable("v1", 0, 2);
+		
+		Operation t1 = new Operation(Operator.GT, v1, c1);
+		Operation t2 = new Operation(Operator.LT, v1, c2);
+		Operation o = new Operation(Operator.AND, t1, t2);
+		
+		Instance in = new Instance(solver, null, o);
+		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
+		assertNull(model);
+	}
+	
+	
 }
