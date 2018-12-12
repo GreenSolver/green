@@ -1,6 +1,8 @@
 package za.ac.sun.cs.green.service.smtlib;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 import java.util.Properties;
@@ -39,10 +41,11 @@ public class ModelSMTLIBFloatServiceTest {
 		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
 		
 		Object output = model.get(v);
-		assert output instanceof RealConstant;
+		assert(output instanceof RealConstant);
 		
 		double out = Double.parseDouble(output.toString());
-		assert out <= -0.5 && out >=-99.0;
+		assertTrue(out <= -0.5);
+		assertTrue(out >=-99.0);
 	}
 
 	@Test
@@ -53,12 +56,13 @@ public class ModelSMTLIBFloatServiceTest {
 		
 		Instance in = new Instance(solver, null, o);
 		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
-		
+		assertNotNull(model);
+
 		Object output = model.get(v);
-		assert output instanceof IntConstant;
+		assertTrue(output instanceof IntConstant);
 		
 		int out = Integer.parseInt(output.toString());
-		assert out <= 20 && out >=-99;
+		assertTrue(out <= 20 && out >=-99);
 	}
 	
 	@Test
@@ -75,17 +79,18 @@ public class ModelSMTLIBFloatServiceTest {
 		
 		Instance in = new Instance(solver, null, o);
 		Map<Variable, Object> model = (Map<Variable, Object>) in.request("model");
-		
+		assertNotNull(model);
+
 		Object v1Val = model.get(v1);
 		Object v2Val = model.get(v2);
-		assert v1Val instanceof IntConstant;
-		assert v2Val instanceof RealConstant;
+		assertTrue(v1Val instanceof IntConstant);
+		assertTrue(v2Val instanceof RealConstant);
 		
 		int val1 = Integer.parseInt(v1Val.toString());
 		double val2 = Double.parseDouble(v2Val.toString());
-		assert val1 >= 0 && val1 < 2;
-		assert val2 > 25.5 && val2 <= 50.0;
-		assert val2 != val1;
+		assertTrue(val1 >= 0 && val1 < 2);
+		assertTrue(val2 > 25.5 && val2 <= 50.0);
+		assertTrue(val2 != val1);
 	}
 	
 	@Test
