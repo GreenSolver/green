@@ -20,9 +20,9 @@ import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelService;
 import za.ac.sun.cs.green.util.Misc;
 
-public abstract class ModelSMTLIBService extends ModelService {
+public abstract class ModelSMTLIBBitVectorService extends ModelService {
 
-	public ModelSMTLIBService(Green solver) {
+	public ModelSMTLIBBitVectorService(Green solver) {
 		super(solver);
 	}
 
@@ -33,11 +33,13 @@ public abstract class ModelSMTLIBService extends ModelService {
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
-			//b.append("(set-logic QF_LIA)"); // Quantifier Free Linear Integer Arithmetic
+			// b.append("(set-logic QF_BV)"); // Quantifier Free Bit Vector
 			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
+			//b = new StringBuilder(); 
+			//b.append("(set-option :produce-models true)(set-logic FloatingPoint)(declare-fun v () (_ Float32))(assert (and (and (bvsge v #x00000000) (bvsle v #x00000032)) (bvsge v #x00000001)))(check-sat)");
 			return solve0(b.toString(), t.getVariables());
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
@@ -79,7 +81,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 		private final List<String> domains;
 
 		public Translator() {
-			stack = new Stack<ModelSMTLIBService.TranslatorPair>();
+			stack = new Stack<ModelSMTLIBBitVectorService.TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
 			domains = new LinkedList<String>();
@@ -108,7 +110,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 		private String transformNegative(int v) {
 			if (v < 0) {
 				StringBuilder b = new StringBuilder();
-				b.append("(- ").append(-v).append(')');
+				b.append("(bvneg ").append(-v).append(')');
 				return b.toString();
 			} else {
 				return Integer.toString(v);
@@ -118,7 +120,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 		private String transformNegative(double v) {
 			if (v < 0) {
 				StringBuilder b = new StringBuilder();
-				b.append("(- ").append(-v).append(')');
+				b.append("(fp.neg ").append(-v).append(')');
 				return b.toString();
 			} else {
 				return Double.toString(v);
@@ -143,14 +145,14 @@ public abstract class ModelSMTLIBService extends ModelService {
 			String n = variable.getName();
 			if (v == null) {
 				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () Int)");
+				b.append("(declare-fun ").append(n).append(" () (_ BitVec 64))");
 				defs.add(b.toString());
 				b.setLength(0);
 				// lower bound
-				b.append("(and (>= ").append(n).append(' ');
+				b.append("(and (bvsge ").append(n).append(' ');
 				b.append(transformNegative(variable.getLowerBound()));
 				// upper bound
-				b.append(") (<= ").append(n).append(' ');
+				b.append(") (bvsle ").append(n).append(' ');
 				b.append(transformNegative(variable.getUpperBound()));
 				b.append("))");
 				domains.add(b.toString());
@@ -165,14 +167,14 @@ public abstract class ModelSMTLIBService extends ModelService {
 			String n = variable.getName();
 			if (v == null) {
 				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () Real)");
+				b.append("(declare-fun ").append(n).append(" () (_ Float64))");
 				defs.add(b.toString());
 				b.setLength(0);
 				// lower bound
-				b.append("(and (>= ").append(n).append(' ');
+				b.append("(and (fp.geq ").append(n).append(' ');
 				b.append(transformNegative(variable.getLowerBound()));
 				// upper bound
-				b.append(") (<= ").append(n).append(' ');
+				b.append(") (fp.leq ").append(n).append(' ');
 				b.append(transformNegative(variable.getUpperBound()));
 				b.append("))");
 				domains.add(b.toString());
@@ -198,23 +200,23 @@ public abstract class ModelSMTLIBService extends ModelService {
 				return s;
 			} else {
 				StringBuilder b = new StringBuilder();
-				b.append("(to_real ").append(s).append(')');
+				b.append("(_ to_fp 11 53 RNE ").append(s).append(')');
 				return b.toString();
 			}
 		}
 
-		private String setOperator(Operator op) throws TranslatorUnsupportedOperation {
+		private String setFPOperator(Operator op) throws TranslatorUnsupportedOperation{
 			switch (op) {
 			case EQ:
-				return "=";
+				return "fp.eq";
 			case LT:
-				return "<";
+				return "fp.lt";
 			case LE:
-				return "<=";
+				return "fp.leq";
 			case GT:
-				return ">";
+				return "fp.gt";
 			case GE:
-				return ">=";
+				return "fp.geq";
 			case NOT:
 				return "not";
 			case AND:
@@ -224,21 +226,81 @@ public abstract class ModelSMTLIBService extends ModelService {
 			case IMPLIES:
 				return "=>"; // not sure about this one?
 			case ADD:
-				return "+";
+				return "fp.add";
 			case SUB:
-				return "-";
+				return "fp.sub";
 			case MUL:
-				return "*";
+				return "fp.mul";
 			case DIV:
-				return "div";
+				return "fp.div";
 			case MOD:
-				return "mod";
+				return "fp.mod";
+			case SQRT:
+				return "fp.sqrt";
 			case BIT_AND:
 			case BIT_OR:
 			case BIT_XOR:
 			case SHIFTL:
 			case SHIFTR:
 			case SHIFTUR:
+			case SIN:
+			case COS:
+			case TAN:
+			case ASIN:
+			case ACOS:
+			case ATAN:
+			case ATAN2:
+			case ROUND:
+			case LOG:
+			case EXP:
+			case POWER:
+			default:
+				throw new TranslatorUnsupportedOperation("unsupported operation " + op);
+			}
+		}
+		
+		private String setBVOperator(Operator op) throws TranslatorUnsupportedOperation {
+			switch (op) {
+			case EQ:
+				return "=";
+			case LT:
+				return "bvslt";
+			case LE:
+				return "bvsle";
+			case GT:
+				return "bvsgt";
+			case GE:
+				return "bvsge";
+			case NOT:
+				return "not";
+			case AND:
+				return "and";
+			case OR:
+				return "or";
+			case IMPLIES:
+				return "=>"; // not sure about this one?
+			case ADD:
+				return "bvadd";
+			case SUB:
+				return "bvsub";
+			case MUL:
+				return "bvmul";
+			case DIV:
+				return "bvsdiv";
+			case MOD:
+				return "bvsmod";
+			case BIT_AND:
+				return "bvand";
+			case BIT_OR:
+				return "bvor";
+			case BIT_XOR:
+				return "bvxor";
+			case SHIFTL:
+				return "bvshl";
+			case SHIFTR:
+				return "bvashr";
+			case SHIFTUR:
+				return "bvshr";
 			case SIN:
 			case COS:
 			case TAN:
@@ -278,7 +340,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 				} else {
 					Class<? extends Variable> v = superType(l, r);
 					StringBuilder b = new StringBuilder();
-					b.append('(').append(setOperator(op)).append(' ');
+					//b.append('(').append(setOperator(op)).append(' ');
 					b.append(adjust(l, v)).append(' ');
 					b.append(adjust(r, v)).append(')');
 					stack.push(new TranslatorPair(b.toString(), v));
@@ -289,7 +351,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 				}
 				Class<? extends Variable> v = IntVariable.class;
 				StringBuilder b = new StringBuilder();
-				b.append('(').append(setOperator(op)).append(' ');
+				//b.append('(').append(setOperator(op)).append(' ');
 				b.append(adjust(l, v)).append(')');
 				stack.push(new TranslatorPair(b.toString(), v));
 			}

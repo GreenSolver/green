@@ -8,6 +8,7 @@ import java.util.Stack;
 
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.expr.BoolVariable;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
@@ -20,9 +21,9 @@ import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelService;
 import za.ac.sun.cs.green.util.Misc;
 
-public abstract class ModelSMTLIBService extends ModelService {
+public abstract class ModelSMTLIBFloatService extends ModelService {
 
-	public ModelSMTLIBService(Green solver) {
+	public ModelSMTLIBFloatService(Green solver) {
 		super(solver);
 	}
 
@@ -34,7 +35,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
 			//b.append("(set-logic QF_LIA)"); // Quantifier Free Linear Integer Arithmetic
-			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
+			//b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
@@ -79,7 +80,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 		private final List<String> domains;
 
 		public Translator() {
-			stack = new Stack<ModelSMTLIBService.TranslatorPair>();
+			stack = new Stack<ModelSMTLIBFloatService.TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
 			domains = new LinkedList<String>();
@@ -184,7 +185,9 @@ public abstract class ModelSMTLIBService extends ModelService {
 		private Class<? extends Variable> superType(TranslatorPair left, TranslatorPair right) {
 			assert left != null;
 			assert right != null;
-			if ((left.getType() == RealVariable.class) || (right.getType() == RealVariable.class)) {
+			if ((left.getType() == BoolVariable.class) || (right.getType() == BoolVariable.class)) {
+				return BoolVariable.class;
+			} else if ((left.getType() == RealVariable.class) || (right.getType() == RealVariable.class)) {
 				return RealVariable.class;
 			} else {
 				return IntVariable.class;
@@ -194,12 +197,28 @@ public abstract class ModelSMTLIBService extends ModelService {
 		private String adjust(TranslatorPair term, Class<? extends Variable> type) {
 			String s = term.getString();
 			Class<? extends Variable> t = term.getType();
-			if (t == type) {
+			if (t == type || type == BoolVariable.class) {
 				return s;
 			} else {
 				StringBuilder b = new StringBuilder();
 				b.append("(to_real ").append(s).append(')');
 				return b.toString();
+			}
+		}
+		
+		private boolean isRelop(Operator op) {
+			switch (op) {
+			case EQ:
+			case LT:
+			case LE:
+			case GT:
+			case GE:
+			case NOT:
+			case AND:
+			case OR:
+				return true;
+			default:
+				return false;
 			}
 		}
 
@@ -274,14 +293,14 @@ public abstract class ModelSMTLIBService extends ModelService {
 					b.append("(not (= ");
 					b.append(adjust(l, v)).append(' ');
 					b.append(adjust(r, v)).append("))");
-					stack.push(new TranslatorPair(b.toString(), v));
+					stack.push(new TranslatorPair(b.toString(), BoolVariable.class));
 				} else {
 					Class<? extends Variable> v = superType(l, r);
 					StringBuilder b = new StringBuilder();
 					b.append('(').append(setOperator(op)).append(' ');
 					b.append(adjust(l, v)).append(' ');
 					b.append(adjust(r, v)).append(')');
-					stack.push(new TranslatorPair(b.toString(), v));
+					stack.push(new TranslatorPair(b.toString(), isRelop(op) ? BoolVariable.class : v));
 				}
 			} else if (arity == 1) {
 				if (!stack.isEmpty()) {
