@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.Level;
 
 public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
-    String DRIVE = new File("").getAbsolutePath() + "/";
+	String DRIVE = new File("").getAbsolutePath() + "/";
 
 	private final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
 
@@ -36,7 +36,8 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	}
 
 	@Override
-	protected ModelCore solve0(String smtQuery, Map<Variable, String> variables, Map<String, Expression> coreClauseMapping) {
+	protected ModelCore solve0(String smtQuery, Map<Variable, String> variables,
+			Map<String, Expression> coreClauseMapping) {
 		long startTime = System.currentTimeMillis();
 		try {
 			Process process = Runtime.getRuntime().exec(z3Command);
@@ -50,22 +51,22 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
 			boolean issat = false;
 			switch (output) {
-				case "sat":
-					smtQuery = "(get-model)";
-					issat = true;
-					break;
-				case "unsat":
-					smtQuery = "(get-unsat-core)";
-					break;
-				default:
-					log.fatal("Z3 returned a null: " + output);
-					return null;
+			case "sat":
+				smtQuery = "(get-model)";
+				issat = true;
+				break;
+			case "unsat":
+				smtQuery = "(get-unsat-core)";
+				break;
+			default:
+				log.fatal("Z3 returned a null: " + output);
+				return null;
 			}
 
 			stdin.write((smtQuery + "(exit)\n").getBytes());
 			stdin.flush();
 			stdin.close();
-            output = outReader.lines().collect(Collectors.joining());
+			output = outReader.lines().collect(Collectors.joining());
 			stdout.close();
 			process.destroy();
 
@@ -76,49 +77,53 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 				ModelCore tmp = retrieveModel(output, variables);
 				satTimeConsumption += a;
 				return tmp;
-            } else {
+			} else {
 				ModelCore tmp = retrieveCore(output, coreClauseMapping);
 				unsatTimeConsumption += a;
 				return tmp;
-            }
+			}
 		} catch (IOException x) {
 			log.log(Level.FATAL, x.getMessage(), x);
 		}
-        return null;
+		return null;
 	}
 
-    private ModelCore retrieveModel(String output, Map<Variable, String> variables) {
+	private ModelCore retrieveModel(String output, Map<Variable, String> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
-        output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
-        output = output.replaceAll("\\(define-fun\\s+([\\w-]+)\\s*\\(\\)\\s*[\\w]+\\s+([^@]+)\\s*\\)@", "$1 == $2 ;; ");
+		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
+		output = output.replaceAll("\\(define-fun\\s+([\\w-]+)\\s*\\(\\)\\s*[\\w]+\\s+([^@]+)\\s*\\)@", "$1 == $2 ;; ");
 
 		final Map<String, String> assignment = new HashMap<>();
 		for (String asgn : output.split(";;")) {
-		    if (asgn.contains("==")) {
-                String[] pair = asgn.split("==");
-                assignment.put(pair[0].trim(), pair[1].trim());
-            }
-        }
+			if (asgn.contains("==")) {
+				String[] pair = asgn.split("==");
+				assignment.put(pair[0].trim(), pair[1].trim());
+			}
+		}
 
 		HashMap<Variable, Constant> model = new HashMap<>();
 		for (Map.Entry<Variable, String> entry : variables.entrySet()) {
-		    Variable var = entry.getKey();
-		    String name = entry.getValue();
-		    if (assignment.containsKey(name)) {
-                Constant value = null;
-                if (var instanceof IntVariable) {
-                	String val = assignment.get(name);
+			Variable var = entry.getKey();
+			String name = entry.getValue();
+			if (assignment.containsKey(name)) {
+				Constant value = null;
+				if (var instanceof IntVariable) {
+					String val = assignment.get(name);
 					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
 					value = new IntConstant(Integer.parseInt(val));
+				} else if (var instanceof IntegerVariable) {
+					String val = assignment.get(name);
+					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
+					value = new IntegerConstant(Long.parseLong(val));
 				} else if (var instanceof RealVariable) {
-                    value = new RealConstant(Double.parseDouble(assignment.get(name)));
-                }
-		        if (value != null) {
-                    model.put(var, value);
-                }
-            }
-        }
-		return new ModelCore(true, model,null);
+					value = new RealConstant(Double.parseDouble(assignment.get(name)));
+				}
+				if (value != null) {
+					model.put(var, value);
+				}
+			}
+		}
+		return new ModelCore(true, model, null);
 	}
 
 	private ModelCore retrieveCore(String output, Map<String, Expression> coreClauseMapping) {

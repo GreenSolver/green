@@ -10,6 +10,8 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.expr.IntegerConstant;
+import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.expr.RealConstant;
@@ -107,13 +109,13 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			return b.toString();
 		}
 
-		private String transformNegative(int v) {
+		private String transformNegative(long v) {
 			if (v < 0) {
 				StringBuilder b = new StringBuilder();
 				b.append("(bvneg ").append(-v).append(')');
 				return b.toString();
 			} else {
-				return Integer.toString(v);
+				return Long.toString(v);
 			}
 		}
 
@@ -133,6 +135,12 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			stack.push(new TranslatorPair(transformNegative(val), IntVariable.class));
 		}
 
+		@Override
+		public void postVisit(IntegerConstant constant) {
+			long val = constant.getValue();
+			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
+		}
+		
 		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
@@ -161,6 +169,28 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			stack.push(new TranslatorPair(n, IntVariable.class));
 		}
 
+		@Override
+		public void postVisit(IntegerVariable variable) {
+			String v = varMap.get(variable);
+			String n = variable.getName();
+			if (v == null) {
+				StringBuilder b = new StringBuilder();
+				b.append("(declare-fun ").append(n).append(" () (_ BitVec 64))");
+				defs.add(b.toString());
+				b.setLength(0);
+				// lower bound
+				b.append("(and (bvsge ").append(n).append(' ');
+				b.append(transformNegative(variable.getLowerBound()));
+				// upper bound
+				b.append(") (bvsle ").append(n).append(' ');
+				b.append(transformNegative(variable.getUpperBound()));
+				b.append("))");
+				domains.add(b.toString());
+				varMap.put(variable, n);
+			}
+			stack.push(new TranslatorPair(n, IntegerVariable.class));
+		}
+		
 		@Override
 		public void postVisit(RealVariable variable) {
 			String v = varMap.get(variable);
