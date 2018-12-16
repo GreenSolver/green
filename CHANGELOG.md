@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Support for 64-bit integer constants and variables
+- ...
 
 ### Changed
 - ...
@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - ...
+
+
+## [0.1.6] - 2018.12.16
+
+### Added
+- Support for 64-bit integer constants and variables [fc2b03b](https://github.com/GreenSolver/green/commit/fc2b03bbb3b1e40f5c934644dc3f4b113f0519f4)
 
 
 ## [0.1.5] - 2018.12.12
