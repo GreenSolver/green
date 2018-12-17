@@ -62,13 +62,16 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 	private static class TranslatorPair {
 		private final String string;
 		private final Class<? extends Variable> type;
+
 		public TranslatorPair(final String string, final Class<? extends Variable> type) {
 			this.string = string;
 			this.type = type;
 		}
+
 		public String getString() {
 			return string;
 		}
+
 		public Class<? extends Variable> getType() {
 			return type;
 		}
@@ -88,11 +91,11 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			domains = new LinkedList<String>();
 		}
 
-        public List<String> getVariableDecls() {
-            return defs;
-        }
+		public List<String> getVariableDecls() {
+			return defs;
+		}
 
-        public Map<Variable, String> getVariables() {
+		public Map<Variable, String> getVariables() {
 			return varMap;
 		}
 
@@ -108,13 +111,13 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			return b.toString();
 		}
 
-		private String transformNegative(int v) {
+		private String transformNegative(long v) {
 			if (v < 0) {
 				StringBuilder b = new StringBuilder();
 				b.append("(- ").append(-v).append(')');
 				return b.toString();
 			} else {
-				return Integer.toString(v);
+				return Long.toString(v);
 			}
 		}
 
@@ -139,7 +142,7 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			long val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
@@ -189,7 +192,7 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			}
 			stack.push(new TranslatorPair(n, IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealVariable variable) {
 			String v = varMap.get(variable);
@@ -220,7 +223,7 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			} else if ((left.getType() == RealVariable.class) || (right.getType() == RealVariable.class)) {
 				return RealVariable.class;
 			} else {
-				return IntVariable.class;
+				return IntegerVariable.class;
 			}
 		}
 
@@ -235,7 +238,7 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 				return b.toString();
 			}
 		}
-		
+
 		private boolean isRelop(Operator op) {
 			switch (op) {
 			case EQ:
@@ -336,7 +339,7 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 				if (!stack.isEmpty()) {
 					l = stack.pop();
 				}
-				Class<? extends Variable> v = IntVariable.class;
+				Class<? extends Variable> v = IntegerVariable.class;
 				StringBuilder b = new StringBuilder();
 				b.append('(').append(setOperator(op)).append(' ');
 				b.append(adjust(l, v)).append(')');

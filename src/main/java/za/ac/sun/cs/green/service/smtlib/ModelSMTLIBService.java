@@ -36,7 +36,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
 			//b.append("(set-logic QF_LIA)"); // Quantifier Free Linear Integer Arithmetic
-			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
+			//b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
@@ -61,13 +61,16 @@ public abstract class ModelSMTLIBService extends ModelService {
 	private static class TranslatorPair {
 		private final String string;
 		private final Class<? extends Variable> type;
+
 		public TranslatorPair(final String string, final Class<? extends Variable> type) {
 			this.string = string;
 			this.type = type;
 		}
+
 		public String getString() {
 			return string;
 		}
+
 		public Class<? extends Variable> getType() {
 			return type;
 		}
@@ -87,11 +90,11 @@ public abstract class ModelSMTLIBService extends ModelService {
 			domains = new LinkedList<String>();
 		}
 
-        public List<String> getVariableDecls() {
-            return defs;
-        }
+		public List<String> getVariableDecls() {
+			return defs;
+		}
 
-        public Map<Variable, String> getVariables() {
+		public Map<Variable, String> getVariables() {
 			return varMap;
 		}
 
@@ -138,7 +141,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 			long val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
@@ -188,7 +191,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 			}
 			stack.push(new TranslatorPair(n, IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealVariable variable) {
 			String v = varMap.get(variable);
