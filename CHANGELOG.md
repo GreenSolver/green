@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - ...
 
 
+## [0.1.7] - 2018.12.17
+
+### Changed
+- Improved support for real constraints [371ec58](https://github.com/GreenSolver/green/commit/371ec58ec7149ace312007b9fe1f9bb6b7b73787)
+
+
 ## [0.1.6] - 2018.12.16
 
 ### Added
