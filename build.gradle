@@ -1,6 +1,7 @@
 plugins {
 	id 'application'
 	id 'java'
+	id 'jacoco'
 	id 'eclipse'
 	id 'com.palantir.git-version' version '0.12.0-rc2'
 	id 'com.jfrog.artifactory' version '4.8.1'
@@ -36,6 +37,13 @@ publishing {
 			version gitVersion() + '-SNAPSHOT'
 		}
 	}
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
 }
 
 artifactory {
