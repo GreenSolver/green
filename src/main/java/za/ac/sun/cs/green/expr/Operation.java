@@ -10,79 +10,71 @@ public class Operation extends Expression {
 	}
 
 	public static enum Operator {
-		EQ("==", 2, Fix.INFIX),
-		NE("!=", 2, Fix.INFIX),
-		LT("<", 2, Fix.INFIX),
-		LE("<=", 2, Fix.INFIX),
-		GT(">", 2, Fix.INFIX),
-		GE(">=", 2, Fix.INFIX),
-		AND("&&", 2, Fix.INFIX),
-		OR("||", 2, Fix.INFIX),
-		IMPLIES("=>", 2, Fix.INFIX),
-		NOT("!", 1, Fix.INFIX),
-		ADD("+", 2, Fix.INFIX),
-		SUB("-", 2, Fix.INFIX),
-		MUL("*", 2, Fix.INFIX),
-		DIV("/", 2, Fix.INFIX),
-		MOD("%", 2, Fix.INFIX),
-		NEG("-", 1, Fix.INFIX),
-		BIT_AND("&", 2, Fix.INFIX),
-		BIT_OR("|", 2, Fix.INFIX),
-		BIT_XOR("^", 2, Fix.INFIX),
-		BIT_NOT("~", 1, Fix.INFIX),
-		SHIFTL("<<", 2, Fix.INFIX),
-		SHIFTR(">>", 2, Fix.INFIX),
-		SHIFTUR(">>>", 2, Fix.INFIX),
-		BIT_CONCAT("BIT_CONCAT", 2, Fix.PREFIX),
-		SIN("SIN", 1),
-		COS("COS", 1),
-		TAN("TAN", 1),
-		ASIN("ASIN", 1),
-		ACOS("ACOS", 1),
-		ATAN("ATAN", 1),
-		ATAN2("ATAN2", 2),
-		ROUND("ROUND", 1),
-		LOG("LOG", 1),
-		EXP("EXP", 1),
-		POWER("POWER", 2),
-		SQRT("SQRT", 1),
-        FLOOR("FLOOR", 1),
+		EQ("==", 2, Fix.INFIX), NE("!=", 2, Fix.INFIX), LT("<", 2, Fix.INFIX), LE("<=", 2, Fix.INFIX), GT(">", 2,
+				Fix.INFIX), GE(">=", 2, Fix.INFIX), AND("&&", 2, Fix.INFIX), OR("||", 2, Fix.INFIX), IMPLIES("=>", 2,
+						Fix.INFIX), NOT("!", 1, Fix.INFIX), ADD("+", 2, Fix.INFIX), SUB("-", 2, Fix.INFIX), MUL("*", 2,
+								Fix.INFIX), DIV("/", 2, Fix.INFIX), MOD("%", 2, Fix.INFIX), NEG("-", 1,
+										Fix.INFIX), BIT_AND("&", 2, Fix.INFIX), BIT_OR("|", 2, Fix.INFIX), BIT_XOR("^",
+												2, Fix.INFIX), BIT_NOT("~", 1, Fix.INFIX), SHIFTL("<<", 2,
+														Fix.INFIX), SHIFTR(">>", 2, Fix.INFIX), SHIFTUR(">>>", 2,
+																Fix.INFIX), BIT_CONCAT("BIT_CONCAT", 2,
+																		Fix.PREFIX), SIN("SIN", 1), COS("COS", 1), TAN(
+																				"TAN", 1), ASIN("ASIN", 1), ACOS("ACOS",
+																						1), ATAN("ATAN", 1), ATAN2(
+																								"ATAN2",
+																								2), ROUND("ROUND",
+																										1), LOG("LOG",
+																												1), EXP("EXP",
+																														1), POWER(
+																																"POWER",
+																																2), SQRT(
+																																		"SQRT",
+																																		1), FLOOR(
+																																				"FLOOR",
+																																				1),
 		// String Operations
-		SUBSTRING("SUBSTRING", 3, Fix.POSTFIX),
-		CONCAT("CONCAT", 2, Fix.POSTFIX),
-		TRIM("TRIM", 1, Fix.POSTFIX), 
-		REPLACE("REPLACE", 3, Fix.POSTFIX),
-		REPLACEFIRST("REPLACEFIRST", 3, Fix.POSTFIX),  
-		TOLOWERCASE("TOLOWERCASE", 2, Fix.POSTFIX),
-		TOUPPERCASE("TOUPPERCASE", 2, Fix.POSTFIX), 
-		VALUEOF("VALUEOF", 2, Fix.POSTFIX),
+		SUBSTRING("SUBSTRING", 3, Fix.POSTFIX), CONCAT("CONCAT", 2, Fix.POSTFIX), TRIM("TRIM", 1, Fix.POSTFIX), REPLACE(
+				"REPLACE", 3, Fix.POSTFIX), REPLACEFIRST("REPLACEFIRST", 3, Fix.POSTFIX), TOLOWERCASE("TOLOWERCASE", 2,
+						Fix.POSTFIX), TOUPPERCASE("TOUPPERCASE", 2, Fix.POSTFIX), VALUEOF("VALUEOF", 2, Fix.POSTFIX),
 		// String Comparators
-		NOTCONTAINS("NOTCONTAINS", 2, Fix.POSTFIX),
-		CONTAINS("CONTAINS", 2, Fix.POSTFIX),
-		LASTINDEXOFCHAR("LASTINDEXOFCHAR", 3, Fix.POSTFIX),
-		LASTINDEXOFSTRING("LASTINDEXOFSTRING", 3, Fix.POSTFIX),
-		STARTSWITH("STARTSWITH", 3, Fix.POSTFIX),
-		NOTSTARTSWITH("NOTSTARTSWITH", 3, Fix.POSTFIX),
-		ENDSWITH("ENDSWITH", 2, Fix.POSTFIX),
-		NOTENDSWITH("NOTENDSWITH", 2, Fix.POSTFIX),
-		EQUALS("EQUALS", 2, Fix.POSTFIX),
-		NOTEQUALS("NOTEQUALS", 2, Fix.POSTFIX),
-		EQUALSIGNORECASE("EQUALSIGNORECASE", 2, Fix.POSTFIX),
-		NOTEQUALSIGNORECASE("NOTEQUALSIGNORECASE", 2, Fix.POSTFIX),
-		EMPTY("EMPTY", 1, Fix.POSTFIX),
-		NOTEMPTY("NOTEMPTY", 1, Fix.POSTFIX),
-		ISINTEGER("ISINTEGER", 1, Fix.POSTFIX),
-		NOTINTEGER("NOTINTEGER", 1, Fix.POSTFIX),
-		ISFLOAT("ISFLOAT", 1, Fix.POSTFIX),
-		NOTFLOAT("NOTFLOAT", 1, Fix.POSTFIX),
-		ISLONG("ISLONG", 1, Fix.POSTFIX),
-		NOTLONG("NOTLONG", 1, Fix.POSTFIX),
-		ISDOUBLE("ISDOUBLE", 1, Fix.POSTFIX),
-		NOTDOUBLE("NOTDOUBLE", 1, Fix.POSTFIX),
-		ISBOOLEAN("ISBOOLEAN", 1, Fix.POSTFIX),
-		NOTBOOLEAN("NOTBOOLEAN", 1, Fix.POSTFIX),
-		REGIONMATCHES("REGIONMATCHES", 6, Fix.POSTFIX),
-		NOTREGIONMATCHES("NOTREGIONMATCHES", 6, Fix.POSTFIX);
+		NOTCONTAINS("NOTCONTAINS", 2, Fix.POSTFIX), CONTAINS("CONTAINS", 2, Fix.POSTFIX), LASTINDEXOFCHAR(
+				"LASTINDEXOFCHAR", 3,
+				Fix.POSTFIX), LASTINDEXOFSTRING("LASTINDEXOFSTRING", 3, Fix.POSTFIX), STARTSWITH("STARTSWITH", 3,
+						Fix.POSTFIX), NOTSTARTSWITH("NOTSTARTSWITH", 3, Fix.POSTFIX), ENDSWITH("ENDSWITH", 2,
+								Fix.POSTFIX), NOTENDSWITH("NOTENDSWITH", 2, Fix.POSTFIX), EQUALS("EQUALS", 2,
+										Fix.POSTFIX), NOTEQUALS("NOTEQUALS", 2, Fix.POSTFIX), EQUALSIGNORECASE(
+												"EQUALSIGNORECASE", 2,
+												Fix.POSTFIX), NOTEQUALSIGNORECASE("NOTEQUALSIGNORECASE", 2,
+														Fix.POSTFIX), EMPTY("EMPTY", 1, Fix.POSTFIX), NOTEMPTY(
+																"NOTEMPTY", 1, Fix.POSTFIX), ISINTEGER("ISINTEGER", 1,
+																		Fix.POSTFIX), NOTINTEGER("NOTINTEGER", 1,
+																				Fix.POSTFIX), ISFLOAT("ISFLOAT", 1,
+																						Fix.POSTFIX), NOTFLOAT(
+																								"NOTFLOAT", 1,
+																								Fix.POSTFIX), ISLONG(
+																										"ISLONG", 1,
+																										Fix.POSTFIX), NOTLONG(
+																												"NOTLONG",
+																												1,
+																												Fix.POSTFIX), ISDOUBLE(
+																														"ISDOUBLE",
+																														1,
+																														Fix.POSTFIX), NOTDOUBLE(
+																																"NOTDOUBLE",
+																																1,
+																																Fix.POSTFIX), ISBOOLEAN(
+																																		"ISBOOLEAN",
+																																		1,
+																																		Fix.POSTFIX), NOTBOOLEAN(
+																																				"NOTBOOLEAN",
+																																				1,
+																																				Fix.POSTFIX), REGIONMATCHES(
+																																						"REGIONMATCHES",
+																																						6,
+																																						Fix.POSTFIX), NOTREGIONMATCHES(
+																																								"NOTREGIONMATCHES",
+																																								6,
+																																								Fix.POSTFIX);
 
 		private final String string;
 
@@ -117,9 +109,9 @@ public class Operation extends Expression {
 
 	}
 
-	public static final IntConstant ZERO = new IntConstant(0);
+	public static final IntegerConstant ZERO = new IntegerConstant(0);
 
-	public static final IntConstant ONE = new IntConstant(1);
+	public static final IntegerConstant ONE = new IntegerConstant(1);
 
 	public static final Expression FALSE = new Operation(Operation.Operator.EQ, ZERO, ONE);
 
@@ -137,15 +129,17 @@ public class Operation extends Expression {
 	public static Expression apply(Operator operator, Expression... operands) {
 		switch (operator) {
 		case ADD:
-			int result = 0;
+			long result = 0;
 			for (Expression operand : operands) {
-				if (!(operand instanceof IntConstant)) {
-					return new Operation(operator, operands);
-				} else {
+				if (operand instanceof IntConstant) {
 					result += ((IntConstant) operand).getValue();
+				} else if (operand instanceof IntegerConstant) {
+					result += ((IntegerConstant) operand).getValue();
+				} else {
+					return new Operation(operator, operands);
 				}
 			}
-			return new IntConstant(result);
+			return new IntegerConstant(result);
 		default:
 			return new Operation(operator, operands);
 		}
@@ -206,26 +200,26 @@ public class Operation extends Expression {
 		visitor.postVisit(this);
 	}
 
-//	@Override
-//	public int compareTo(Expression expression) {
-//		Operation operation = (Operation) expression;
-//		int result = operator.compareTo(operation.operator);
-//		if (result != 0) {
-//			return result;
-//		}
-//		if (operands.length < operation.operands.length) {
-//			return -1;
-//		} else if (operands.length > operation.operands.length) {
-//			return 1;
-//		}
-//		for (int i = 0; i < operands.length; i++) {
-//			result = operands[i].compareTo(operation.operands[i]);
-//			if (result != 0) {
-//				return result;
-//			}
-//		}
-//		return 0;
-//	}
+	//	@Override
+	//	public int compareTo(Expression expression) {
+	//		Operation operation = (Operation) expression;
+	//		int result = operator.compareTo(operation.operator);
+	//		if (result != 0) {
+	//			return result;
+	//		}
+	//		if (operands.length < operation.operands.length) {
+	//			return -1;
+	//		} else if (operands.length > operation.operands.length) {
+	//			return 1;
+	//		}
+	//		for (int i = 0; i < operands.length; i++) {
+	//			result = operands[i].compareTo(operation.operands[i]);
+	//			if (result != 0) {
+	//				return result;
+	//			}
+	//		}
+	//		return 0;
+	//	}
 
 	@Override
 	public boolean equals(Object object) {

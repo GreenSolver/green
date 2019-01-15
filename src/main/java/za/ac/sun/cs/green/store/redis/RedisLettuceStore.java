@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
-import redis.clients.jedis.Jedis;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.api.sync.RedisCommands;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.store.BasicStore;
 import za.ac.sun.cs.green.util.Configuration;
@@ -15,18 +18,28 @@ import za.ac.sun.cs.green.util.Reporter;
  * 
  * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
-public class RedisStore extends BasicStore {
+public class RedisLettuceStore extends BasicStore {
 
 	/**
-	 * The time (in seconds) of inactivity until the connection to the redis store timeout.
+	 * Representation of the Redis client.
 	 */
-	private static final int TIMEOUT = 2000;
+	private final RedisClient redisClient;
+
+	/**
+	 * Connection to the Redis server.
+	 */
+	private final StatefulRedisConnection<String, String> redisConnection;
 	
 	/**
-	 * Connection to the redis store.
+	 * Synchronous Redis command channel.
 	 */
-	private Jedis db = null;
-
+	private final RedisCommands<String, String> syncCommands;
+	
+	/**
+	 * Asynchronous Redis command channel.
+	 */
+	private final RedisAsyncCommands<String, String> asyncCommands;
+	
 	/**
 	 * Number of times <code>get(...)</code> was called.
 	 */
@@ -53,11 +66,14 @@ public class RedisStore extends BasicStore {
 	/**
 	 * Constructor to create a default connection to a redis store running on the local computer.
 	 */
-	public RedisStore(Green solver, Properties properties) {
+	public RedisLettuceStore(Green solver, Properties properties) {
 		super(solver);
 		String h = properties.getProperty("green.redis.host", DEFAULT_REDIS_HOST);
 		int p = Configuration.getIntegerProperty(properties, "green.redis.port", DEFAULT_REDIS_PORT);
-		db = new Jedis(h, p, TIMEOUT);
+		redisClient = RedisClient.create("redis://" + h + ":" + p + "/0");
+		redisConnection = redisClient.connect();
+		syncCommands = redisConnection.sync();
+		asyncCommands = redisConnection.async();
 	}
 	
 	/**
@@ -66,9 +82,12 @@ public class RedisStore extends BasicStore {
 	 * @param host the host on which the redis store is running
 	 * @param port the port on which the redis store is listening
 	 */
-	public RedisStore(Green solver, String host, int port) {
+	public RedisLettuceStore(Green solver, String host, int port) {
 		super(solver);
-		db = new Jedis(host, port, TIMEOUT);
+		redisClient = RedisClient.create("redis://" + host + ":" + port + "/0");
+		redisConnection = redisClient.connect();
+		syncCommands = redisConnection.sync();
+		asyncCommands = redisConnection.async();
 	}
 
 	@Override
@@ -84,7 +103,7 @@ public class RedisStore extends BasicStore {
 		long start = System.currentTimeMillis();
 		retrievalCount++;
 		try {
-			String s = db.get(key);
+			String s = syncCommands.get(key);
 			timeGet += (System.currentTimeMillis()-start);
 			return (s == null) ? null : fromString(s);
 		} catch (IOException x) {
@@ -101,7 +120,7 @@ public class RedisStore extends BasicStore {
 		long start = System.currentTimeMillis();
 		insertionCount++;
 		try {
-			db.set(key, toString(value));
+			asyncCommands.set(key, toString(value));
 		} catch (IOException x) {
 			LOGGER.fatal("io problem", x);
 		}
@@ -110,7 +129,7 @@ public class RedisStore extends BasicStore {
 	
 	public void flushAll() {
   //      long start = System.currentTimeMillis();
-        db.flushAll();
+		syncCommands.flushall();
     //    timeFlush += (System.currentTimeMillis()-start);
 }
 
