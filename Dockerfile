@@ -1,8 +1,6 @@
 #FROM openjdk:8
 
-FROM gradle:jdk8 as builder
-
-COPY --chown=gradle:gradle . /green
+FROM gradle:jdk8
 
 MAINTAINER Phillip van Heerden <vanheerden.phillip@gmail.com>
 
@@ -40,6 +38,9 @@ WORKDIR /z3/
 RUN mv z3-4.7.1-x64-ubuntu-16.04/ z3/
 
 # Update the build.properties file with the new z3 paths
+
+#RUN sed -i '16s/.*/z3path = \/z3\/z3\/bin\/z3/' build.properties
+#RUN sed -i '17s/.*/z3lib = \/z3\/z3\/bin/' build.properties
+
+COPY --chown=gradle:gradle . /green
 WORKDIR /green/
-RUN sed -i '16s/.*/z3path = \/z3\/z3\/bin\/z3/' build.properties
-RUN sed -i '17s/.*/z3lib = \/z3\/z3\/bin/' build.properties
