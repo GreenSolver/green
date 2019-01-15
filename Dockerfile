@@ -1,6 +1,6 @@
 #FROM openjdk:8
 
-FROM gradle:jdk10
+FROM gradle:latest
 
 MAINTAINER Phillip van Heerden <vanheerden.phillip@gmail.com>
 
