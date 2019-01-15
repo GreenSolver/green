@@ -1,4 +1,8 @@
-FROM openjdk:8
+#FROM openjdk:8
+
+FROM gradle:jdk8 as builder
+
+COPY --chown=gradle:gradle . /green
 
 MAINTAINER Phillip van Heerden <vanheerden.phillip@gmail.com>
 
