@@ -1,8 +1,21 @@
+sudo: required
+
+services:
+ - docker
+
 language: java
-install:
-   - cp gradle.properties0 gradle.properties
-   - ./gradlew assemble
-test:
-    post:
-        - if [ -e ./gradlew ]; then ./gradlew jacocoTestReport;else gradle jacocoTestReport;fi
-        - bash <(curl -s https://codecov.io/bash)
+
+before_install:
+ - docker build -t green .
+
+script:
+ - docker run green /bin/sh -c "cp gradle.properties0 gradle.properties; ./gradlew assemble; ./gradlew test"
+
+#language: java
+#install:
+#   - cp gradle.properties0 gradle.properties
+#   - ./gradlew assemble
+#test:
+#    post:
+#        - if [ -e ./gradlew ]; then ./gradlew jacocoTestReport;else gradle jacocoTestReport;fi
+#        - bash <(curl -s https://codecov.io/bash)
