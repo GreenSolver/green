@@ -1,6 +1,6 @@
 #FROM openjdk:8
 
-FROM gradle:latest
+FROM frekele/gradle 
 
 MAINTAINER Phillip van Heerden <vanheerden.phillip@gmail.com>
 
