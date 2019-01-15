@@ -9,7 +9,7 @@ before_install:
  - docker build -t green .
 
 script:
- - docker run green /bin/sh -c "./gradlew test"
+ - docker run green /bin/sh -c "cp gradle.properties0 gradle.properties;./gradlew test"
 
 #language: java
 install:
