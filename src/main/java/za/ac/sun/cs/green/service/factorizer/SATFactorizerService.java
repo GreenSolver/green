@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SATFactorizerService extends BasicService {
 
+public class SATFactorizerService extends BasicService {
     private FactorExpression factorizer;
     private static final String FACTORS = "FACTORS";
     private static final String FACTORS_UNSOLVED = "FACTORS_UNSOLVED";

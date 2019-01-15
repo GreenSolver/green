@@ -1,7 +1,9 @@
-package za.ac.sun.cs.green.store.redis;
+package za.ac.sun.cs.green.store.memstore;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import redis.clients.jedis.Jedis;
@@ -15,17 +17,7 @@ import za.ac.sun.cs.green.util.Reporter;
  * 
  * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
-public class RedisStore extends BasicStore {
-
-	/**
-	 * The time (in seconds) of inactivity until the connection to the redis store timeout.
-	 */
-	private static final int TIMEOUT = 2000;
-	
-	/**
-	 * Connection to the redis store.
-	 */
-	private Jedis db = null;
+public class MemStore extends BasicStore {
 
 	/**
 	 * Number of times <code>get(...)</code> was called.
@@ -38,39 +30,24 @@ public class RedisStore extends BasicStore {
 	private int insertionCount = 0;
 
 	/**
-	 * The default host of the redis server.
+	 * The Memory Store
+	 * 
 	 */
-	private final String DEFAULT_REDIS_HOST = "localhost";
-
-	/**
-	 * Options passed to the LattE executable.
-	 */
-	private final int DEFAULT_REDIS_PORT = 6379;
+	private Map<String,String> db;
 	
 	private long timePut = 0;
 	private long timeGet = 0;
 	
-	/**
-	 * Constructor to create a default connection to a redis store running on the local computer.
-	 */
-	public RedisStore(Green solver, Properties properties) {
-		super(solver);
-		String h = properties.getProperty("green.redis.host", DEFAULT_REDIS_HOST);
-		int p = Configuration.getIntegerProperty(properties, "green.redis.port", DEFAULT_REDIS_PORT);
-		db = new Jedis(h, p, TIMEOUT);
-	}
+	
 	
 	/**
-	 * Constructor to create a connection to a redis store given the host and the port.
-	 * 
-	 * @param host the host on which the redis store is running
-	 * @param port the port on which the redis store is listening
+	 * Constructor to create memory store
 	 */
-	public RedisStore(Green solver, String host, int port) {
+	public MemStore(Green solver, Properties properties) {
 		super(solver);
-		db = new Jedis(host, port, TIMEOUT);
+		db = new HashMap<String,String>();
 	}
-
+	
 	@Override
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
@@ -101,17 +78,11 @@ public class RedisStore extends BasicStore {
 		long start = System.currentTimeMillis();
 		insertionCount++;
 		try {
-			db.set(key, toString(value));
+			db.put(key, toString(value));
 		} catch (IOException x) {
 			LOGGER.fatal("io problem", x);
 		}
 		timePut += (System.currentTimeMillis()-start);
 	}
-	
-	public void flushAll() {
-  //      long start = System.currentTimeMillis();
-        db.flushAll();
-    //    timeFlush += (System.currentTimeMillis()-start);
-}
 
 }

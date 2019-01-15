@@ -1,45 +1,19 @@
 plugins {
 	id 'application'
 	id 'java'
+	id 'jacoco'
 	id 'eclipse'
-	id 'de.fuerstenau.buildconfig' version '1.1.8'
+	id 'com.palantir.git-version' version '0.12.0-rc2'
+	id 'com.jfrog.artifactory' version '4.8.1'
 	id 'maven-publish'
 }
 
 mainClassName = 'za.ac.sun.cs.green.Green'
 group = 'za.ac.sun.cs'
 
-def getLongVersionName = { ->
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'describe', '--tags'
-		standardOutput = stdout
-	}
-	return stdout.toString().trim()
-}
-
-def getShortVersionName = { ->
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'describe', '--tags', '--abbrev=0'
-		standardOutput = stdout
-	}
-	return stdout.toString().trim()
-}
-
-version = getLongVersionName()
-
 repositories {
-	mavenCentral()
 	jcenter()
-}
-
-buildConfig {
-	sourceSets {
-		main {
-			packageName = 'za.ac.sun.cs.green'
-		}
-  	}
+	mavenCentral()
 }
 
 dependencies {
@@ -49,6 +23,7 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-exec', version: '1.3'
 	compile group: 'org.apfloat', name: 'apfloat', version: '1.8.2'
 	compile group: 'redis.clients', name: 'jedis', version: '2.4.2'
+	compile group: 'io.lettuce', name: 'lettuce-core', version: '5.0.5.RELEASE'
 	compile group: 'org.choco-solver', name: 'choco-solver', version: '4.0.6'
 	compile group: 'org.sosy-lab', name: 'javasmt-solver-z3', version: 'z3-4.4.1-1558-gf96cfea'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -58,16 +33,40 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-			version getShortVersionName() + '-SNAPSHOT'
+			groupId = group
+			version gitVersion() + '-SNAPSHOT'
 		}
 	}
-	repositories {
-		maven {
-			credentials {
-				username project.getProperty('greenRepoUsername')
-				password project.getProperty('greenRepoPassword')
-			}
-			url project.getProperty('greenRepoAddress')
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+artifactory {
+	contextUrl = project.getProperty('artifactory_contextUrl')
+	publish {
+		repository {
+			repoKey = 'gradle-dev-local'
+			username = project.getProperty('artifactory_user')
+			password = project.getProperty('artifactory_password')
+			maven = true
+		}
+		defaults {
+			publications('mavenJava')
+			publishArtifacts = true
+			publishPom = true
+		}
+	}
+	resolve {
+		repository {
+			repoKey = 'gradle-dev'
+			username = project.getProperty('artifactory_user')
+			password = project.getProperty('artifactory_password')
+			maven = true
 		}
 	}
 }

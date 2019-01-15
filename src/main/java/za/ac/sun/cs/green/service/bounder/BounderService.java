@@ -9,7 +9,11 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.expr.IntegerConstant;
+import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
+import za.ac.sun.cs.green.expr.RealConstant;
+import za.ac.sun.cs.green.expr.RealVariable;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
@@ -57,13 +61,10 @@ public class BounderService extends BasicService {
 			Expression e = bound(instance.getFullExpression());
 			final Instance p = instance.getParent();
 			if (p != null) {
-				e = new Operation(Operation.Operator.AND,
-						p.getFullExpression(), e);
+				e = new Operation(Operation.Operator.AND, p.getFullExpression(), e);
 			}
-			final Instance q = new Instance(getSolver(), instance.getSource(),
-					null, e);
-			final Instance i = new Instance(getSolver(), instance.getSource(),
-					q, instance.getExpression());
+			final Instance q = new Instance(getSolver(), instance.getSource(), null, e);
+			final Instance i = new Instance(getSolver(), instance.getSource(), q, instance.getExpression());
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
@@ -72,10 +73,8 @@ public class BounderService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = "
-				+ invocationCount);
-		reporter.report(getClass().getSimpleName(), "totalVariables = "
-				+ totalVariableCount);
+		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
+		reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
 	}
 
 	/**
@@ -92,18 +91,34 @@ public class BounderService extends BasicService {
 		invocationCount++;
 		Expression e = null;
 		try {
-			Set<Variable> variables = new VariableCollector()
-					.getVariables(expression);
+			Set<Variable> variables = new VariableCollector().getVariables(expression);
 			totalVariableCount += variables.size();
 			for (Variable v : variables) {
 				if (v instanceof IntVariable) {
 					IntVariable iv = (IntVariable) v;
-					Operation lower = new Operation(Operation.Operator.GE, iv,
-							new IntConstant(iv.getLowerBound()));
-					Operation upper = new Operation(Operation.Operator.LE, iv,
-							new IntConstant(iv.getUpperBound()));
-					Operation bound = new Operation(Operation.Operator.AND,
-							lower, upper);
+					Operation lower = new Operation(Operation.Operator.GE, iv, new IntConstant(iv.getLowerBound()));
+					Operation upper = new Operation(Operation.Operator.LE, iv, new IntConstant(iv.getUpperBound()));
+					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
+					if (e == null) {
+						e = bound;
+					} else {
+						e = new Operation(Operation.Operator.AND, e, bound);
+					}
+				} else if (v instanceof IntegerVariable) {
+					IntegerVariable iv = (IntegerVariable) v;
+					Operation lower = new Operation(Operation.Operator.GE, iv, new IntegerConstant(iv.getLowerBound()));
+					Operation upper = new Operation(Operation.Operator.LE, iv, new IntegerConstant(iv.getUpperBound()));
+					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
+					if (e == null) {
+						e = bound;
+					} else {
+						e = new Operation(Operation.Operator.AND, e, bound);
+					}
+				} else if (v instanceof RealVariable) {
+					RealVariable iv = (RealVariable) v;
+					Operation lower = new Operation(Operation.Operator.GE, iv, new RealConstant(iv.getLowerBound()));
+					Operation upper = new Operation(Operation.Operator.LE, iv, new RealConstant(iv.getUpperBound()));
+					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
 					if (e == null) {
 						e = bound;
 					} else {
@@ -127,8 +142,7 @@ public class BounderService extends BasicService {
 			variables = new HashSet<Variable>();
 		}
 
-		public Set<Variable> getVariables(Expression expression)
-				throws VisitorException {
+		public Set<Variable> getVariables(Expression expression) throws VisitorException {
 			variables.clear();
 			expression.accept(this);
 			return variables;

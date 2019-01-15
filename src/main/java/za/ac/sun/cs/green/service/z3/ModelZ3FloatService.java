@@ -2,7 +2,7 @@ package za.ac.sun.cs.green.service.z3;
 
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.*;
-import za.ac.sun.cs.green.service.smtlib.ModelCoreSMTLIBService;
+import za.ac.sun.cs.green.service.smtlib.ModelSMTLIBFloatService;
 import za.ac.sun.cs.green.util.Reporter;
 
 import java.io.*;
@@ -11,10 +11,9 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 
-public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
-	String DRIVE = new File("").getAbsolutePath() + "/";
+public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 
-	private final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
+	private final String DEFAULT_Z3_PATH;
 
 	private final String DEFAULT_Z3_ARGS = "-smt2 -in";
 
@@ -27,17 +26,30 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	private long satTimeConsumption = 0;
 	private long unsatTimeConsumption = 0;
 
-	public ModelCoreZ3Service(Green solver, Properties properties) {
+	public ModelZ3FloatService(Green solver, Properties properties) {
 		super(solver);
+		String DRIVE = new File("").getAbsolutePath() + "/";
+		String sub = "lib/z3/build/z3";
+		String z3Path = DRIVE + sub;
+		InputStream is = SATZ3Service.class.getClassLoader().getResourceAsStream("green/build.properties");
+		if (is != null) {
+			Properties p = new Properties();
+			try {
+				p.load(is);
+				z3Path = p.getProperty("z3path");
+			} catch (IOException e) {
+				// do nothing
+			}
+		}
 
+		DEFAULT_Z3_PATH = z3Path;
 		String p = properties.getProperty("green.z3.path", DEFAULT_Z3_PATH);
 		String a = properties.getProperty("green.z3.args", DEFAULT_Z3_ARGS);
 		z3Command = p + ' ' + a;
 	}
 
 	@Override
-	protected ModelCore solve0(String smtQuery, Map<Variable, String> variables,
-			Map<String, Expression> coreClauseMapping) {
+	protected Map<Variable, Object> solve0(String smtQuery, Map<Variable, String> variables) {
 		long startTime = System.currentTimeMillis();
 		try {
 			Process process = Runtime.getRuntime().exec(z3Command);
@@ -49,21 +61,23 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 			stdin.flush();
 			String output = outReader.readLine();
 
-			boolean issat = false;
-			switch (output) {
-			case "sat":
-				smtQuery = "(get-model)";
-				issat = true;
-				break;
-			case "unsat":
-				smtQuery = "(get-unsat-core)";
-				break;
-			default:
+			if (output.equals("unsat")) {
+				long a = System.currentTimeMillis() - startTime;
+				timeConsumption += a;
+				unsatTimeConsumption += a;
+				stdin.close();
+				stdout.close();
+				process.destroy();
+				return null;
+			} else if (!output.equals("sat")) {
 				log.fatal("Z3 returned a null: " + output);
+				stdin.close();
+				stdout.close();
+				process.destroy();
 				return null;
 			}
 
-			stdin.write((smtQuery + "(exit)\n").getBytes());
+			stdin.write("(get-model)(exit)\n".getBytes());
 			stdin.flush();
 			stdin.close();
 			output = outReader.lines().collect(Collectors.joining());
@@ -72,36 +86,46 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
 			long a = System.currentTimeMillis() - startTime;
 			timeConsumption += a;
-
-			if (issat) {
-				ModelCore tmp = retrieveModel(output, variables);
-				satTimeConsumption += a;
-				return tmp;
-			} else {
-				ModelCore tmp = retrieveCore(output, coreClauseMapping);
-				unsatTimeConsumption += a;
-				return tmp;
-			}
+			Map<Variable, Object> tmp = retrieveModel(output, variables);
+			satTimeConsumption += a;
+			return tmp;
 		} catch (IOException x) {
 			log.log(Level.FATAL, x.getMessage(), x);
 		}
 		return null;
 	}
 
-	private ModelCore retrieveModel(String output, Map<Variable, String> variables) {
+	private Map<Variable, Object> retrieveModel(String output, Map<Variable, String> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
 		output = output.replaceAll("\\(define-fun\\s+([\\w-]+)\\s*\\(\\)\\s*[\\w]+\\s+([^@]+)\\s*\\)@", "$1 == $2 ;; ");
-
 		final Map<String, String> assignment = new HashMap<>();
 		for (String asgn : output.split(";;")) {
 			if (asgn.contains("==")) {
 				String[] pair = asgn.split("==");
+				pair[1] = pair[1].trim();
+				if (pair[1].charAt(0) == ('(')) {
+					pair[1] = pair[1].substring(1, pair[1].length() - 1).trim();
+					boolean negate = false;
+					if (pair[1].charAt(0) == '-') {
+						negate = true;
+						pair[1] = pair[1].substring(1, pair[1].length()).trim();
+						pair[1] = pair[1].substring(2, pair[1].length() - 1).trim();
+					} else {
+						pair[1] = pair[1].substring(1, pair[1].length()).trim();
+					}
+					String[] nums = pair[1].split(" ");
+					float numerator = Float.parseFloat(nums[0]);
+					float denominator = Float.parseFloat(nums[1]);
+					float fin = numerator / denominator;
+					fin = negate ? -fin : fin;
+					pair[1] = fin + "";
+				}
 				assignment.put(pair[0].trim(), pair[1].trim());
 			}
 		}
 
-		HashMap<Variable, Constant> model = new HashMap<>();
+		HashMap<Variable, Object> model = new HashMap<>();
 		for (Map.Entry<Variable, String> entry : variables.entrySet()) {
 			Variable var = entry.getKey();
 			String name = entry.getValue();
@@ -123,19 +147,7 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 				}
 			}
 		}
-		return new ModelCore(true, model, null);
-	}
-
-	private ModelCore retrieveCore(String output, Map<String, Expression> coreClauseMapping) {
-		String[] clauseNames = output.replaceAll("^\\s*\\(\\s*([^\\s].*[^\\s]*)\\s*\\)\\s*$", "$1").split("\\s+");
-		Set<Expression> clauses = new HashSet<>();
-		for (String namedClause : clauseNames) {
-			Expression realClause = coreClauseMapping.get(namedClause);
-			if (realClause != null) {
-				clauses.add(realClause);
-			}
-		}
-		return new ModelCore(false, null, clauses);
+		return model;
 	}
 
 	@Override
@@ -144,4 +156,5 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 		reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
 		reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
 	}
+
 }

@@ -12,6 +12,8 @@ import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.expr.IntegerConstant;
+import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.util.Configuration;
 
@@ -63,7 +65,7 @@ public class BounderServiceTest {
 	}
 
 	@Test
-	public void test01() {
+	public void test01a() {
 		IntVariable v = new IntVariable("v", 0, 99);
 		IntConstant c = new IntConstant(0);
 		Operation o = new Operation(Operation.Operator.EQ, v, c);
@@ -71,10 +73,29 @@ public class BounderServiceTest {
 	}
 
 	@Test
-	public void test02() {
+	public void test02a() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
 		IntVariable v2 = new IntVariable("v2", 9, 19);
 		IntConstant c = new IntConstant(0);
+		Operation o1 = new Operation(Operation.Operator.EQ, v1, c);
+		Operation o2 = new Operation(Operation.Operator.EQ, v2, c);
+		Operation o = new Operation(Operation.Operator.AND, o1, o2);
+		check(o, "(v1==0)&&(v2==0)", "v1==0", "v1>=0", "v1<=99", "v2==0", "v2>=9", "v2<=19");
+	}
+	
+	@Test
+	public void test01b() {
+		IntegerVariable v = new IntegerVariable("v", 0, 999999999999L);
+		IntegerConstant c = new IntegerConstant(0);
+		Operation o = new Operation(Operation.Operator.EQ, v, c);
+		check(o, "v==0", "v==0", "v>=0", "v<=999999999999");
+	}
+	
+	@Test
+	public void test02b() {
+		IntegerVariable v1 = new IntegerVariable("v1", 0, 99);
+		IntegerVariable v2 = new IntegerVariable("v2", 9, 19);
+		IntegerConstant c = new IntegerConstant(0);
 		Operation o1 = new Operation(Operation.Operator.EQ, v1, c);
 		Operation o2 = new Operation(Operation.Operator.EQ, v2, c);
 		Operation o = new Operation(Operation.Operator.AND, o1, o2);

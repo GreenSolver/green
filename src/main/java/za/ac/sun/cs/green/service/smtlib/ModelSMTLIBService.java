@@ -19,27 +19,28 @@ import za.ac.sun.cs.green.expr.RealVariable;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
-import za.ac.sun.cs.green.service.SATService;
+import za.ac.sun.cs.green.service.ModelService;
 import za.ac.sun.cs.green.util.Misc;
 
-public abstract class SATSMTLIBService extends SATService {
+public abstract class ModelSMTLIBService extends ModelService {
 
-	public SATSMTLIBService(Green solver) {
+	public ModelSMTLIBService(Green solver) {
 		super(solver);
 	}
 
 	@Override
-	protected Boolean solve(Instance instance) {
+	protected Map<Variable, Object> model(Instance instance) {
 		try {
 			Translator t = new Translator();
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
-			b.append("(set-option :produce-models false)");
-			b.append("(set-logic AUFLIRA)"); // AUFLIA ???
-			b.append(Misc.join(t.getVariables(), " "));
+			b.append("(set-option :produce-models true)");
+			//b.append("(set-logic QF_LIA)"); // Quantifier Free Linear Integer Arithmetic
+			//b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
+			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
-			return solve0(b.toString());
+			return solve0(b.toString(), t.getVariables());
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
 		} catch (VisitorException x) {
@@ -48,24 +49,19 @@ public abstract class SATSMTLIBService extends SATService {
 		return null;
 	}
 
-	protected abstract Boolean solve0(String smtQuery);
+	protected abstract Map<Variable, Object> solve0(String smtQuery, Map<Variable, String> variables);
 
 	@SuppressWarnings("serial")
-	private static class TranslatorUnsupportedOperation extends
-			VisitorException {
-
+	private static class TranslatorUnsupportedOperation extends VisitorException {
 		public TranslatorUnsupportedOperation(String message) {
 			super(message);
 		}
-
 	}
 
 	private static class TranslatorPair {
-		
 		private final String string;
-		
 		private final Class<? extends Variable> type;
-		
+
 		public TranslatorPair(final String string, final Class<? extends Variable> type) {
 			this.string = string;
 			this.type = type;
@@ -74,37 +70,33 @@ public abstract class SATSMTLIBService extends SATService {
 		public String getString() {
 			return string;
 		}
-		
+
 		public Class<? extends Variable> getType() {
 			return type;
 		}
-
 	}
-	
+
 	private static class Translator extends Visitor {
 
 		private final Stack<TranslatorPair> stack;
-
 		private Map<Variable, String> varMap;
-
 		private final List<String> defs;
-
 		private final List<String> domains;
 
 		public Translator() {
-			stack = new Stack<SATSMTLIBService.TranslatorPair>();
+			stack = new Stack<ModelSMTLIBService.TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
 			domains = new LinkedList<String>();
 		}
 
-		public List<String> getVariables() {
+		public List<String> getVariableDecls() {
 			return defs;
 		}
 
-		/*
-		 * public Map<Variable, String> getVarMapping() { return varMap; }
-		 */
+		public Map<Variable, String> getVariables() {
+			return varMap;
+		}
 
 		public String getTranslation() {
 			StringBuilder b = new StringBuilder();
@@ -149,7 +141,7 @@ public abstract class SATSMTLIBService extends SATService {
 			long val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
@@ -199,7 +191,7 @@ public abstract class SATSMTLIBService extends SATService {
 			}
 			stack.push(new TranslatorPair(n, IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealVariable variable) {
 			String v = varMap.get(variable);
@@ -223,10 +215,12 @@ public abstract class SATSMTLIBService extends SATService {
 		}
 
 		private Class<? extends Variable> superType(TranslatorPair left, TranslatorPair right) {
+			assert left != null;
+			assert right != null;
 			if ((left.getType() == RealVariable.class) || (right.getType() == RealVariable.class)) {
 				return RealVariable.class;
 			} else {
-				return IntVariable.class;
+				return IntegerVariable.class;
 			}
 		}
 
@@ -241,9 +235,8 @@ public abstract class SATSMTLIBService extends SATService {
 				return b.toString();
 			}
 		}
-		
-		private String setOperator(Operator op)
-				throws TranslatorUnsupportedOperation {
+
+		private String setOperator(Operator op) throws TranslatorUnsupportedOperation {
 			switch (op) {
 			case EQ:
 				return "=";
@@ -255,6 +248,8 @@ public abstract class SATSMTLIBService extends SATService {
 				return ">";
 			case GE:
 				return ">=";
+			case NOT:
+				return "not";
 			case AND:
 				return "and";
 			case OR:
@@ -290,13 +285,11 @@ public abstract class SATSMTLIBService extends SATService {
 			case POWER:
 			case SQRT:
 			default:
-				throw new TranslatorUnsupportedOperation(
-						"unsupported operation " + op);
+				throw new TranslatorUnsupportedOperation("unsupported operation " + op);
 			}
 		}
 
-		public void postVisit(Operation operation)
-				throws TranslatorUnsupportedOperation {
+		public void postVisit(Operation operation) throws TranslatorUnsupportedOperation {
 			TranslatorPair l = null;
 			TranslatorPair r = null;
 			Operator op = operation.getOperator();
@@ -308,24 +301,29 @@ public abstract class SATSMTLIBService extends SATService {
 				if (!stack.isEmpty()) {
 					l = stack.pop();
 				}
+				if (op.equals(Operator.NE)) {
+					Class<? extends Variable> v = superType(l, r);
+					StringBuilder b = new StringBuilder();
+					b.append("(not (= ");
+					b.append(adjust(l, v)).append(' ');
+					b.append(adjust(r, v)).append("))");
+					stack.push(new TranslatorPair(b.toString(), v));
+				} else {
+					Class<? extends Variable> v = superType(l, r);
+					StringBuilder b = new StringBuilder();
+					b.append('(').append(setOperator(op)).append(' ');
+					b.append(adjust(l, v)).append(' ');
+					b.append(adjust(r, v)).append(')');
+					stack.push(new TranslatorPair(b.toString(), v));
+				}
 			} else if (arity == 1) {
 				if (!stack.isEmpty()) {
 					l = stack.pop();
 				}
-			}
-			if (op.equals(Operator.NE)) {
-				Class<? extends Variable> v = superType(l, r);
-				StringBuilder b = new StringBuilder();
-				b.append("(not (= ");
-				b.append(adjust(l, v)).append(' ');
-				b.append(adjust(r, v)).append("))");
-				stack.push(new TranslatorPair(b.toString(), v));
-			} else {
-				Class<? extends Variable> v = superType(l, r);
+				Class<? extends Variable> v = IntegerVariable.class;
 				StringBuilder b = new StringBuilder();
 				b.append('(').append(setOperator(op)).append(' ');
-				b.append(adjust(l, v)).append(' ');
-				b.append(adjust(r, v)).append(')');
+				b.append(adjust(l, v)).append(')');
 				stack.push(new TranslatorPair(b.toString(), v));
 			}
 		}

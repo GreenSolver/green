@@ -21,6 +21,10 @@ public abstract class SATService extends BasicService {
 	private int satCount = 0;
 	private int unsatCount = 0;
 	
+	private long keyTime = 0;
+	
+	private long moreTime = 0;
+	
 
 	public SATService(Green solver) {
 		super(solver);
@@ -34,6 +38,8 @@ public abstract class SATService extends BasicService {
 		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
 		reporter.report(getClass().getSimpleName(), "SAT queries = " + satCount);
 		reporter.report(getClass().getSimpleName(), "UNSAT queries = " + unsatCount);
+		reporter.report(getClass().getSimpleName(), "time to get Key = " + keyTime);
+		reporter.report(getClass().getSimpleName(), "outside Redis Time incl keyime= " + moreTime);
 	}
 
 	@Override
@@ -59,7 +65,9 @@ public abstract class SATService extends BasicService {
 
 	private Boolean solve0(Instance instance) {
 		invocationCount++;
+		long start = System.currentTimeMillis();
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
+		keyTime += (System.currentTimeMillis() - start);
 		Boolean result = store.getBoolean(key);
 		if (result == null) {
 			cacheMissCount++;
@@ -70,6 +78,7 @@ public abstract class SATService extends BasicService {
 		} else {
 			cacheHitCount++;
 		}
+		moreTime += (System.currentTimeMillis() - start);
 		return result;
 	}
 
