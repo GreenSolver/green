@@ -1,9 +1,7 @@
 language: java
-before_script:
+install:
    - cp gradle.properties0 gradle.properties
-script: 
-   - ant build
-   - ant test
+   - ./gradlew assemble
 test:
     post:
         - if [ -e ./gradlew ]; then ./gradlew jacocoTestReport;else gradle jacocoTestReport;fi
