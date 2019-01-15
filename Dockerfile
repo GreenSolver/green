@@ -3,8 +3,8 @@ FROM openjdk:8
 MAINTAINER Phillip van Heerden <vanheerden.phillip@gmail.com>
 
 # Update the system
-# RUN apt update -y
-# RUN apt upgrade -y
+RUN apt update -y
+RUN apt upgrade -y
 
 # Install ant, libgomp1 (GCC OpenMP support library), vim, patchelf, and tmux.
 # These should be available on the NARGA machines.
