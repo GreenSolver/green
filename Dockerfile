@@ -1,7 +1,5 @@
 FROM openjdk:8
 
-FROM frekele/gradle 
-
 MAINTAINER Phillip van Heerden <vanheerden.phillip@gmail.com>
 
 # Update the system
@@ -49,5 +47,5 @@ RUN wget -q https://services.gradle.org/distributions/gradle-4.8-bin.zip \
 ENV GRADLE_HOME /opt/gradle-4.8
 ENV PATH $PATH:/opt/gradle-4.8/bin
 
-COPY --chown=gradle:gradle . /green
+#COPY --chown=gradle:gradle . /green
 WORKDIR /green/
