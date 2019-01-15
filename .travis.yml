@@ -1,4 +1,6 @@
 language: java
+before_script:
+   - cp gradle.properties0 gradle.properties
 script: 
    - ant build
    - ant test
