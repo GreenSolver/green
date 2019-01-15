@@ -3,7 +3,7 @@ sudo: required
 services:
  - docker
 
-language: java
+#language: java
 
 before_install:
  - docker build -t green .
