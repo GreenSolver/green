@@ -37,8 +37,8 @@ RUN mv z3-4.7.1-x64-ubuntu-16.04/ z3/
 
 # Update the build.properties file with the new z3 paths
 
-#RUN sed -i '16s/.*/z3path = \/z3\/z3\/bin\/z3/' build.properties
-#RUN sed -i '17s/.*/z3lib = \/z3\/z3\/bin/' build.properties
+RUN sed -i '16s/.*/z3path = \/z3\/z3\/bin\/z3/' build.properties
+RUN sed -i '17s/.*/z3lib = \/z3\/z3\/bin/' build.properties
 
 RUN wget -q https://services.gradle.org/distributions/gradle-4.8-bin.zip \
     && unzip gradle-4.8-bin.zip -d /opt \
