@@ -1,9 +1,5 @@
 package za.ac.sun.cs.green.service.factorizer;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Service;
@@ -11,112 +7,97 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.service.BasicService;
 import za.ac.sun.cs.green.util.Reporter;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+
 public class SATFactorizerService extends BasicService {
+    private FactorExpression factorizer;
+    private static final String FACTORS = "FACTORS";
+    private static final String FACTORS_UNSOLVED = "FACTORS_UNSOLVED";
 
-	private static final String FACTORS = "FACTORS";
+    private int invocationCount = 0; // number of times factorizer has been invoked
+    private int constraintCount = 0; // constraints processed
+    private int factorCount = 0; // number of facotirs
+    private long timeConsumption = 0;
 
-	private static final String FACTORS_UNSOLVED = "FACTORS_UNSOLVED";
-	
-	/**
-	 * Number of times the slicer has been invoked.
-	 */
-	private int invocationCount = 0;
+    public SATFactorizerService(Green solver) {
+        super(solver);
+        factorizer = new FactorExpression(log);
+    }
 
-	/**
-	 * Total number of constraints processed.
-	 */
-	private int constraintCount = 0;
+    @Override
+    public Set<Instance> processRequest(Instance instance) {
+        long startTime = System.currentTimeMillis();
+        invocationCount++;
 
-	/**
-	 * Number of factored constraints returned.
-	 */
-	private int factorCount = 0;
-	
-	private long timeTaken = 0;
+        @SuppressWarnings("unchecked")
+        Set<Instance> result = (Set<Instance>) instance.getData(getClass());
+        if (result == null) {
+            final Set<Expression> factors = factorizer.factorize(instance.getFullExpression());
+            instance.setData(FactorExpression.class, factors);
 
-	public SATFactorizerService(Green solver) {
-		super(solver);
-	}
+            result = new HashSet<Instance>();
+            for (Expression e : factors) {
+//				log.info("Factorizer computes instance for :" + e);
+                final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
+                result.add(i);
+            }
 
-	@Override
-	public Set<Instance> processRequest(Instance instance) {
-		long start = System.currentTimeMillis();
-		invocationCount++;
-		@SuppressWarnings("unchecked")
-		Set<Instance> result = (Set<Instance>) instance.getData(FACTORS);
-		if (result == null) {
-			final Instance p = instance.getParent();
+            result = Collections.unmodifiableSet(result);
+            instance.setData(FACTORS, result);
+            instance.setData(FACTORS_UNSOLVED, new HashSet<Instance>(result));
 
-			FactorExpression fc0 = null;
-			if (p != null) {
-				fc0 = (FactorExpression) p.getData(FactorExpression.class);
-				if (fc0 == null) {
-					// Construct the parent's factor and store it
-					fc0 = new FactorExpression(null, p.getFullExpression());
-					p.setData(FactorExpression.class, fc0);
-				}
-			}
+//			log.info("Factorizer exiting with " + result.size() + " results");
+            constraintCount++;
+            factorCount += factors.size();
+        }
+        timeConsumption += (System.currentTimeMillis() - startTime);
+        return result;
+    }
 
-			final FactorExpression fc = new FactorExpression(fc0, instance.getExpression());
-			instance.setData(FactorExpression.class, fc);
+    @Override
+    public Object childDone(Instance instance, Service subservice, Instance subinstance, Object result) {
+        Boolean issat = (Boolean) result;
+        if ((issat != null) && !issat) {
+            return false;
+        }
+        @SuppressWarnings("unchecked")
+        HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
+        if (unsolved.contains(subinstance)) {
+            // Remove the subinstance now that it is solved
+            unsolved.remove(subinstance);
+            instance.setData(FACTORS_UNSOLVED, unsolved);
+            // Return true if no more unsolved factors; else return null to carry on the computation
+            return (unsolved.isEmpty()) ? result : null;
+        } else {
+            // We have already solved this subinstance; return null to carry on the computation
+            return null;
+        }
+    }
 
-			result = new HashSet<Instance>();
-			for (Expression e : fc.getFactors()) {
-				//log.info("Factorizer computes instance for :" + e);
-				final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
-				result.add(i);
-			}
-			result = Collections.unmodifiableSet(result);
-			instance.setData(FACTORS, result);
-			instance.setData(FACTORS_UNSOLVED, new HashSet<Instance>(result));
+    @Override
+    public Object allChildrenDone(Instance instance, Object result) {
+        @SuppressWarnings("unchecked")
+        HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
+        if (unsolved.size() >= 1 && result == null) {
+            log.fatal("Unsolved Factors but result is null -> concurrency bug");
+            result = true;
+        }
+        return result;
+    }
 
-			//log.info("Factorize exiting with " + result.size() + " results");
+    @Override
+    public void report(Reporter reporter) {
+        reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
+        reporter.report(getClass().getSimpleName(), "totalConstraints = " + constraintCount);
+        reporter.report(getClass().getSimpleName(), "factoredConstraints = " + factorCount);
+        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
 
-			constraintCount += 1;
-			factorCount += fc.getNumFactors();
-		}
-		timeTaken += (System.currentTimeMillis() - start);
-		return result;
-	}
-
-	@Override
-	public Object childDone(Instance instance, Service subservice, Instance subinstance, Object result) {
-		Boolean issat = (Boolean) result;
-		if ((issat != null) && !issat) {
-			return false;
-		}
-		@SuppressWarnings("unchecked")
-		HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
-		if (unsolved.contains(subinstance)) {
-			// Remove the subinstance now that it is solved 
-			unsolved.remove(subinstance);
-			instance.setData(FACTORS_UNSOLVED, unsolved);
-			// Return true if no more unsolved factors; else return null to carry on the computation
-			return (unsolved.isEmpty()) ? result : null; 
-		} else {
-			// We have already solved this subinstance; return null to carry on the computation
-			return null;
-		}
-	}
-	
-
-	@Override
-	public Object allChildrenDone(Instance instance, Object result) {
-		@SuppressWarnings("unchecked")
-		HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
-		if (unsolved.size() >= 1 && result == null) {
-			log.fatal("Unsolved Factors but result is null -> concurrency bug");
-			result = true;
-		}
-		return result;
-	}
-	
-	@Override
-	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "totalConstraints = " + constraintCount);
-		reporter.report(getClass().getSimpleName(), "factoredConstraints = " + factorCount);
-		reporter.report(getClass().getSimpleName(), "factoredTime = " + timeTaken);
-	}
-
+//        reporter.report(getClass().getSimpleName(), "collectorTime = " + factorizer.collectorTime);
+//        reporter.report(getClass().getSimpleName(), "connectedTime = " + factorizer.connectedTime);
+//        reporter.report(getClass().getSimpleName(), "conjunctsTime = " + factorizer.conjunctsTime);
+    }
 }
+

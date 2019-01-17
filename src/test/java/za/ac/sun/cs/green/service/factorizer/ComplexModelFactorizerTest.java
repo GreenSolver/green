@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Properties;
 
@@ -22,7 +23,8 @@ import za.ac.sun.cs.green.util.Configuration;
 public class ComplexModelFactorizerTest {
 
 	public static Green solver;
-    private static final String DEFAULT_Z3_PATH = "/usr/bin/z3";
+    private static final String DRIVE = new File("").getAbsolutePath() + "/";
+    private static final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
 	
 	private static Properties setupNoCanon(Properties props) {
 		props.setProperty("green.service.model", "(bounder (factor z3))");

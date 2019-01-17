@@ -7,7 +7,7 @@ import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.service.BasicService;
-import za.ac.sun.cs.green.service.factorizer.FactorExpression;
+import za.ac.sun.cs.green.service.factorizer.FactorExpressionOld;
 import za.ac.sun.cs.green.util.Reporter;
 
 public class SATFactorSlicerService extends BasicService {
@@ -49,18 +49,18 @@ public class SATFactorSlicerService extends BasicService {
 			final Instance p = instance.getParent();
 			
 			// Handle two initial conditions: no parent and no FactoredConstraint for the parent
-			FactorExpression fc0 = null;
+			FactorExpressionOld fc0 = null;
 			if (p!=null) {
-				fc0 = (FactorExpression) p.getData(FactorExpression.class);
+				fc0 = (FactorExpressionOld) p.getData(FactorExpressionOld.class);
 				if (fc0==null) {
 					// Construct the parent's factor and store it 
-					fc0 = new FactorExpression(null, p.getFullExpression());
-					p.setData(FactorExpression.class, fc0);
+					fc0 = new FactorExpressionOld(null, p.getFullExpression());
+					p.setData(FactorExpressionOld.class, fc0);
 				}
 			}
 			
-			final FactorExpression fc = new FactorExpression(fc0, instance.getExpression());
-			instance.setData(FactorExpression.class, fc);
+			final FactorExpressionOld fc = new FactorExpressionOld(fc0, instance.getExpression());
+			instance.setData(FactorExpressionOld.class, fc);
 
 			final Expression e = fc.getDependentFactor(instance.getExpression());
 
