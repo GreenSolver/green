@@ -86,7 +86,9 @@ public class CountBarvinokService extends CountService {
 	/**
 	 * The location of the LattE executable file.
 	 */
-	private final String DEFAULT_BARVINOK_PATH = "barvlatte";
+	private final String DEFAULT_BARVINOK_PATH;
+    	private final String BARVINOK_PATH = "barvinoklattepath";
+    	private final String resourceName = "build.properties";
 
 	/**
 	 * Options passed to the Barvinok executable.
@@ -113,6 +115,28 @@ public class CountBarvinokService extends CountService {
 	public CountBarvinokService(Green solver, Properties properties) {
 		super(solver);
 		log = solver.getLogger();
+		
+		String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barvlatte";
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		InputStream resourceStream;
+		try {
+		    resourceStream = loader.getResourceAsStream(resourceName);
+		    if (resourceStream == null) {
+			// If properties are correct, override with that specified path.
+			resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
+
+		    }
+		    if (resourceStream != null) {
+			properties.load(resourceStream);
+			barvPath = properties.getProperty(BARVINOK_PATH);
+			resourceStream.close();
+		    }
+		} catch (IOException x) {
+		    // ignore
+		}
+
+		DEFAULT_BARVINOK_PATH = barvPath;
+		
 		String p = properties.getProperty("green.barvinok.path", DEFAULT_BARVINOK_PATH);
 		String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
 		barvinokCommand = p + ' ' + a + FILENAME;
