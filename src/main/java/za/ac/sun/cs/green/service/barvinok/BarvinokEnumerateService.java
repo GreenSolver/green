@@ -92,7 +92,9 @@ public class BarvinokEnumerateService extends BasicService {
     /*
      * The location of the iscc executable file.
      */
-    private final String DEFAULT_BARVENUM_PATH = "lib/barvinok-0.39/barviscc";
+    private final String DEFAULT_BARVENUM_PATH;
+    private final String BARVENUM_PATH = "barvinokisccpath";
+    private final String resourceName = "build.properties";
 
     /*
      * Options passed to the Barvinok executable.
@@ -158,9 +160,32 @@ public class BarvinokEnumerateService extends BasicService {
     public BarvinokEnumerateService(Green solver, Properties properties) {
         super(solver);
         log = solver.getLogger();
-        String p = properties.getProperty("green.barvinok.path", DEFAULT_BARVENUM_PATH);
+
+        String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barviscc";
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream;
+        try {
+            resourceStream = loader.getResourceAsStream(resourceName);
+            if (resourceStream == null) {
+                // If properties are correct, override with that specified path.
+                resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
+
+            }
+            if (resourceStream != null) {
+                properties.load(resourceStream);
+                barvPath = properties.getProperty(BARVENUM_PATH);
+                resourceStream.close();
+            }
+        } catch (IOException x) {
+            // ignore
+        }
+
+        DEFAULT_BARVENUM_PATH = barvPath;
+
+        String p = properties.getProperty("green.barvinok.path", BARVENUM_PATH);
         String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
         barvinokCommand = p + ' ' + a + FILENAME;
+
         log.debug("barvinokCommand=" + barvinokCommand);
         log.debug("directory=" + directory);
     }
