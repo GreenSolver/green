@@ -250,6 +250,33 @@ public class Operation extends Expression {
 		}
 		return h;
 	}
+	
+    	private StringBuilder strRep() {
+		StringBuilder sb = new StringBuilder();
+		if ((operands[0] instanceof Constant) || (operands[0] instanceof Variable)) {
+		    sb.append(operands[0].getString());
+		} else {
+	//			sb.append('(');
+		    sb.append(operands[0].getString());
+	//			sb.append(')');
+		}
+		sb.append(operator.toString());
+		if ((operands[1] instanceof Constant) || (operands[1] instanceof Variable)) {
+		    sb.append(operands[1].getString());
+		} else {
+	//		    sb.append('(');
+		    sb.append(operands[1].getString());
+	//			sb.append(')');
+		}
+		return sb;
+    	}
+	
+	public String getString() {
+		if (stringRep == null) {
+		    stringRep = strRep().toString();
+		}
+		return stringRep;
+    	}
 
 	@Override
 	public String toString() {
