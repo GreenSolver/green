@@ -18,6 +18,10 @@ public class SATZ3Service extends SATSMTLIBService {
 	private final String z3Command;
 	private final String resourceName = "build.properties";
 	
+    	private long timeConsumption = 0;
+    	private long satTimeConsumption = 0;
+    	private long unsatTimeConsumption = 0;
+	
 	public SATZ3Service(Green solver, Properties properties) {
 		super(solver);
 		String z3Path = new File("").getAbsolutePath() + "/lib/z3/build/z3";
@@ -49,7 +53,8 @@ public class SATZ3Service extends SATSMTLIBService {
 
 	@Override
 	protected Boolean solve0(String smtQuery) {
-		String output = "";
+        long startTime = System.currentTimeMillis();
+        String output = "";
 		try {
 			Process process = Runtime.getRuntime().exec(z3Command);
 			OutputStream stdin = process.getOutputStream();
@@ -64,14 +69,35 @@ public class SATZ3Service extends SATSMTLIBService {
 		} catch (IOException x) {
 			log.fatal(x.getMessage(), x);
 		}
-		if (output.equals("sat")) {
+        long a = System.currentTimeMillis() - startTime;
+        timeConsumption += a;
+
+        if (output.equals("sat")) {
+            satTimeConsumption += a;
 			return true;
 		} else if (output.equals("unsat")) {
+            unsatTimeConsumption += a;
 			return false;
 		} else {
 			log.fatal("Z3 returned a null {}", output) ;
 			return null;
 		}
 	}
+
+    @Override
+    public void report(Reporter reporter) {
+        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+        reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
+        reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
+        reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
+        reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
+        reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
+        reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
+        reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
+        reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
+        reporter.report(getClass().getSimpleName(), "SAT queries = " + satCount);
+        reporter.report(getClass().getSimpleName(), "UNSAT queries = " + unsatCount);
+        reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
+    }
 
 }
