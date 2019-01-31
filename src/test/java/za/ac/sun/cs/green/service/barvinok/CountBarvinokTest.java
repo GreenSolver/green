@@ -19,20 +19,44 @@ import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.util.Configuration;
 
 public class CountBarvinokTest {
-
+	
 	public static Green solver = null;
-    private static final String DEFAULT_BARVINOK_PATH = "lib/barvinok-0.39/barvlatte";
+    	private static String DEFAULT_BARVINOK_PATH;
+    	private static final String BARVINOK_PATH = "barvinoklattepath";
+    	private static final String resourceName = "build.properties";
 
-	@BeforeClass
+    	@BeforeClass
 	public static void initialize() {	
 		solver = new Green();
-		Properties props = new Properties();
-		props.setProperty("green.services", "count");
-		props.setProperty("green.service.count", "barvinok");
-		props.setProperty("green.service.count.barvinok",
+		Properties properties = new Properties();
+        properties.setProperty("green.services", "count");
+        properties.setProperty("green.service.count", "barvinok");
+        properties.setProperty("green.service.count.barvinok",
 				"za.ac.sun.cs.green.service.barvinok.CountBarvinokService");
-		props.setProperty("green.barvinok.path", DEFAULT_BARVINOK_PATH);
-		Configuration config = new Configuration(solver, props);
+
+        String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barvlatte";
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream;
+        try {
+            resourceStream = loader.getResourceAsStream(resourceName);
+            if (resourceStream == null) {
+                // If properties are correct, override with that specified path.
+                resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
+
+            }
+            if (resourceStream != null) {
+                properties.load(resourceStream);
+                barvPath = properties.getProperty(BARVINOK_PATH);
+                resourceStream.close();
+            }
+        } catch (IOException x) {
+            // ignore
+        }
+
+        DEFAULT_BARVINOK_PATH = barvPath;
+
+        properties.setProperty("green.barvinok.path", DEFAULT_BARVINOK_PATH);
+		Configuration config = new Configuration(solver, properties);
 		config.configure();
 	}
 
