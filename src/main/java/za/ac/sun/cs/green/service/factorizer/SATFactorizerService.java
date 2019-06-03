@@ -11,15 +11,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-
 public class SATFactorizerService extends BasicService {
+
     private FactorExpression factorizer;
     private static final String FACTORS = "FACTORS";
     private static final String FACTORS_UNSOLVED = "FACTORS_UNSOLVED";
 
     private int invocationCount = 0; // number of times factorizer has been invoked
     private int constraintCount = 0; // constraints processed
-    private int factorCount = 0; // number of facotirs
+    private int factorCount = 0; // number of factors
     private long timeConsumption = 0;
 
     public SATFactorizerService(Green solver) {
@@ -33,13 +33,21 @@ public class SATFactorizerService extends BasicService {
         invocationCount++;
 
         @SuppressWarnings("unchecked")
-        Set<Instance> result = (Set<Instance>) instance.getData(getClass());
+        Set<Instance> result = (Set<Instance>) instance.getData(FACTORS);
         if (result == null) {
-            final Set<Expression> factors = factorizer.factorize(instance.getFullExpression());
-            instance.setData(FactorExpression.class, factors);
+//            final Instance p = instance.getParent();
+//            if (p != null) {
+//                factorizer = (FactorExpression) p.getData(FactorExpression.class);
+//            }
+//            if (factorizer != null) {
+//                return null;
+//            }
+            final FactorExpression fc = new FactorExpression(instance.getFullExpression());
+            instance.setData(FactorExpression.class, fc);
+            factorizer = fc;
 
             result = new HashSet<Instance>();
-            for (Expression e : factors) {
+            for (Expression e : fc.getFactors()) {
 //				log.info("Factorizer computes instance for :" + e);
                 final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
                 result.add(i);
@@ -51,7 +59,7 @@ public class SATFactorizerService extends BasicService {
 
 //			log.info("Factorizer exiting with " + result.size() + " results");
             constraintCount++;
-            factorCount += factors.size();
+            factorCount += fc.getNumFactors();
         }
         timeConsumption += (System.currentTimeMillis() - startTime);
         return result;
@@ -93,6 +101,7 @@ public class SATFactorizerService extends BasicService {
         reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
         reporter.report(getClass().getSimpleName(), "totalConstraints = " + constraintCount);
         reporter.report(getClass().getSimpleName(), "factoredConstraints = " + factorCount);
+        reporter.report(getClass().getSimpleName(), "conjunctCount = " + factorizer.getConjunctCount());
         reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
 
 //        reporter.report(getClass().getSimpleName(), "collectorTime = " + factorizer.collectorTime);
