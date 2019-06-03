@@ -31,8 +31,7 @@ public class SATCanonizerService extends BasicService {
 	 * Number of times the slicer has been invoked.
 	 */
 	private int invocations = 0;
-
-	private long timeTaken = 0;
+    private long timeConsumption = 0;
 
 	public SATCanonizerService(Green solver) {
 		super(solver);
@@ -40,8 +39,8 @@ public class SATCanonizerService extends BasicService {
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
-		long start = System.currentTimeMillis();
-		@SuppressWarnings("unchecked")
+        long startTime = System.currentTimeMillis();
+        @SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
 			final Map<Variable, Variable> map = new HashMap<Variable, Variable>();
@@ -50,15 +49,15 @@ public class SATCanonizerService extends BasicService {
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
-		timeTaken += (System.currentTimeMillis() - start);
+        timeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
 	@Override
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
-		reporter.report(getClass().getSimpleName(), "time = " + timeTaken);
-	}
+        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+    }
 
 	public Expression canonize(Expression expression, Map<Variable, Variable> map) {
 		try {
