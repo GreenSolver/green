@@ -10,7 +10,7 @@ import java.util.*;
  * @date: 2018/06/20
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018),
+ * Supervisor:  Willem Visser   (2018,2019),
  *              Jaco Geldenhuys (2017)
  *
  * Description:
