@@ -1,18 +1,31 @@
 package za.ac.sun.cs.green.expr;
 
-public abstract class Expression implements Comparable<Expression> {
+import java.io.Serializable;
 
-	public abstract void accept(Visitor visitor) throws VisitorException;
+public abstract class Expression implements Comparable<Expression>, Serializable {
 
-	@Override
-	public final int compareTo(Expression expression) {
-		return toString().compareTo(expression.toString());
-	}
+    private String stringRep = null;
+    public abstract void accept(Visitor visitor) throws VisitorException;
 
-	@Override
-	public abstract boolean equals(Object object);
+    public String getString() {
+        if (stringRep == null) {
+            stringRep = this.toString();
+        }
+        return stringRep;
+    }
 
-	@Override
-	public abstract String toString();
+    public Double satDelta = 0.0;
+
+    @Override
+    public final int compareTo(Expression expression) {
+        // TODO
+        return getString().compareTo(expression.getString());
+    }
+
+    @Override
+    public abstract boolean equals(Object object);
+
+    @Override
+    public abstract String toString();
 
 }
