@@ -8,19 +8,18 @@ import java.util.HashMap;
 import java.util.Stack;
 
 /**
- * @date: 2017/08/14
+ * @date: 2018/11/21
  * @author: JH Taljaard.
  * @contributer: Jaco Geldenhuys
- * Student Number: 18509193.
  *
  * Description:
  * Translator for isl output
  */
 public class ISLTranslator {
 
-    protected static Stack<Object> stack = null;
-    protected static ArrayList<IntVariable> vars = null;
-    protected static ArrayList<IntVariable> bounds = null;
+    protected Stack<Object> stack = null;
+    protected ArrayList<IntVariable> vars = null;
+    protected ArrayList<IntVariable> bounds = null;
 
     public ISLTranslator() {
         stack = new Stack<Object>();
@@ -35,7 +34,7 @@ public class ISLTranslator {
      * @param input a String in isl format.
      * @return hashmap of cases to formulas.
      */
-    public HashMap translate(String input) {
+    public HashMap<Expression, Expression> translate(String input) {
         Parser p = new Parser(input);
         p.parse();
         return p.getCases();
@@ -47,24 +46,25 @@ public class ISLTranslator {
      * @return String representation of Green expression in isl format.
      */
     public String translate(Expression expression) throws VisitorException {
-        ISLVisitor islVisitor = new ISLVisitor();
+        ISLVisitor islVisitor = new ISLVisitor(stack, vars);
         expression.accept(islVisitor);
-        int i = 0;
         StringBuilder ans = new StringBuilder();
         // start expression
-        ans.append("P := "); // declare query
+        String queryName = "P";
+        ans.append(queryName).append(" := "); // declare query
 
         // prepend bounds variables
         if (vars != null) {
             // declare bounds
             ans.append("[");
-            constructBounds();
-            for (i = 0; i < bounds.size()-1; i++) {
+            constructBounds(vars, bounds);
+            int n = bounds.size()-1; // leaving the last one
+            for (int i = 0; i < n; i++) {
                 ans.append(bounds.get(i));
                 ans.append(",");
             }
             // end bounds declaration
-            ans.append(bounds.get(bounds.size()-1));
+            ans.append(bounds.get(n)); // adds last element
             // end variable declarations
             ans.append("] ");
             ans.append(" -> ");
@@ -74,45 +74,54 @@ public class ISLTranslator {
         ans.append("{");
 
         // declare variables
-        ans.append("[");
-        for (i = 0; i < vars.size()-1; i++) {
-            ans.append(vars.get(i));
-            ans.append(",");
-        }
-        ans.append(vars.get(vars.size()-1));
-        // end variable declarations
-        ans.append("] : ");
+        String varDecl = addVarDecls(vars, bounds);
+        ans.append(varDecl);
 
         while (!stack.empty()) {
             ans.append(stack.pop());
         }
 
+        assert stack.isEmpty();
+
         // add bounds
-        String bounds = addBounds();
-        ans.append(bounds);
+        String boundDecl = addBounds(vars, bounds);
+        ans.append(boundDecl);
 
         ans.append("};\n"); // close function
-        ans.append("card P;"); // calculate cardinality
+        ans.append("card ").append(queryName).append(";"); // calculate cardinality
 
-        assert stack.isEmpty();
         return ans.toString();
     }
 
-    private void constructBounds() {
+    private void constructBounds(ArrayList<IntVariable> vars, ArrayList<IntVariable> bounds) {
         for (IntVariable x : vars) {
-            IntVariable upper = new IntVariable(x.toString()+"min",0,0);
-            IntVariable lower = new IntVariable(x.toString()+"max",0,0);
+            IntVariable upper = new IntVariable(x.getString() + "min",0,0);
+            IntVariable lower = new IntVariable(x.getString() + "max",0,0);
 
             bounds.add(upper);
             bounds.add(lower);
         }
     }
 
-    private String addBounds() {
+    private String addVarDecls(ArrayList<IntVariable> vars, ArrayList<IntVariable> bounds) {
+        StringBuilder varDecl = new StringBuilder();
+        varDecl.append("[");
+        int n = vars.size()-1;
+        for (int i = 0; i < n; i++) {
+            varDecl.append(vars.get(i));
+            varDecl.append(",");
+        }
+        varDecl.append(vars.get(n));
+        // end variable declarations
+        varDecl.append("] : ");
+        return varDecl.toString();
+    }
+
+    private String addBounds(ArrayList<IntVariable> vars, ArrayList<IntVariable> bounds) {
         StringBuilder bound = new StringBuilder();
         int j = 0;
         for (IntVariable var : vars) {
-            bound.append(" and (").append(bounds.get(j).toString()).append(" <= ").append(var.toString()).append(" <= ").append(bounds.get(j + 1)).append(")");
+            bound.append(" and (").append(bounds.get(j).getString()).append(" <= ").append(var.getString()).append(" <= ").append(bounds.get(j + 1)).append(")");
             j = j + 2;
         }
         return bound.toString();
@@ -121,9 +130,13 @@ public class ISLTranslator {
 
 class ISLVisitor extends Visitor {
 
-    private Stack<Object> stack = ISLTranslator.stack;
-    private ArrayList<IntVariable> vars = ISLTranslator.vars;
-    private ArrayList<IntVariable> bounds = ISLTranslator.bounds;
+    private Stack<Object> stack;
+    private ArrayList<IntVariable> vars;
+
+    public ISLVisitor(Stack<Object> stack, ArrayList<IntVariable> vars) {
+        this.stack = stack;
+        this.vars = vars;
+    }
 
     @Override
     public void postVisit(IntConstant constant) {
@@ -133,9 +146,7 @@ class ISLVisitor extends Visitor {
     @Override
     public void postVisit(IntVariable variable) {
         if (!vars.contains(variable)) {
-            if (!bounds.contains(variable)) {
-                vars.add(variable);
-            }
+            vars.add(variable);
         }
         stack.push(variable);
     }
