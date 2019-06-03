@@ -3,10 +3,10 @@ package za.ac.sun.cs.green.service.grulia;
 import java.util.*;
 
 /**
- * @date: 2018/06/20
+ * @date: 2018/08/23
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018),
+ * Supervisor:  Willem Visser   (2018,2019),
  *              Jaco Geldenhuys (2017)
  *
  * Description:
@@ -42,6 +42,17 @@ public class UnsatRepoA extends LinearRepo {
     @Override
     public int size() {
         return this.entries.size();
+    }
+
+    @Override
+    public void flushAll() {
+
+    }
+
+    @Override
+    public void clear() {
+        entries.clear();
+        unsatHashcache.clear();
     }
 
     @Override

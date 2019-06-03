@@ -15,14 +15,14 @@ import java.util.*;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @date: 2017/06/09
+ * @date: 2018/08/23
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor: Jaco Geldenhuys (2017)
- * Mentor: Willem Visser (2017)
+ * Supervisor:  Willem Visser (2018,2019),
+ *              Jaco Geldenhuys (2017)
  *
  * Description:
- * JUnit tests for GruliaService
+ * JUnit test of Grulia
  */
 public class GruliaServiceTest {
 
@@ -35,7 +35,6 @@ public class GruliaServiceTest {
         props.setProperty("green.services", "sat");
         props.setProperty("green.service.sat", "(grulia)");
         props.setProperty("green.service.sat.grulia", "za.ac.sun.cs.green.service.grulia.GruliaService");
-
         Configuration config = new Configuration(solver, props);
         config.configure();
     }
@@ -43,6 +42,7 @@ public class GruliaServiceTest {
     @AfterClass
     public static void report() {
         solver.report();
+        solver.getStore().flushAll();
     }
 
     private void check(Expression expression, String expected) {
