@@ -6,37 +6,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import za.ac.sun.cs.green.expr.IntConstant;
-import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.Operation;
-import za.ac.sun.cs.green.expr.RealConstant;
-import za.ac.sun.cs.green.expr.RealVariable;
-import za.ac.sun.cs.green.expr.Variable;
-import za.ac.sun.cs.green.expr.Visitor;
-import za.ac.sun.cs.green.expr.VisitorException;
-
-import com.microsoft.z3.ArithExpr;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.Z3Exception;
+import com.microsoft.z3.*;
+import za.ac.sun.cs.green.expr.*;
 
 class Z3JavaTranslator extends Visitor {
 	
 	private Context context = null;
-
 	private Stack<Expr> stack = null;
-	
 	private List<BoolExpr> domains = null;
+	private Map<Expression, BoolExpr> asserts = null; // maps the Green expressions to Context expressions
+    private Map<BoolExpr, Expression> coreClauseMapping; // maps the Context names to Green expressions
+	private Map<Variable, Expr> v2e = null; // maps Green variables to Context format
+    private int counter = 0; // counter for the predicate names
 
-	private Map<Variable, Expr> v2e = null;
+    public int getVariableCount() {
+        return v2e.size();
+    }
+    public Map<Expression, BoolExpr> getAsserts() {
+        return asserts;
+    }
 
-	public Z3JavaTranslator(Context c) {
+    public Z3JavaTranslator(Context c) {
 		this.context = c;
 		stack = new Stack<Expr>();
 		v2e = new HashMap<Variable, Expr>();
-		domains = new LinkedList<BoolExpr>();
-	}
+		domains = new LinkedList<>();
+		asserts = new HashMap<>();
+        coreClauseMapping = new HashMap<>();
+    }
 
 	public BoolExpr getTranslation() {
 		BoolExpr result = (BoolExpr)stack.pop();
@@ -45,18 +42,28 @@ class Z3JavaTranslator extends Visitor {
 		for (BoolExpr expr : domains) {
 			try {
 				result = context.mkAnd(result,expr);
-			} catch (Z3Exception e) {
+            } catch (Z3Exception e) {
 				e.printStackTrace();
 			}
 		}
 		/* was end of old comment */
 		return result;
 	}
+
+    public Map<BoolExpr, Expression> getCoreMappings() {
+        // TODO: Optimise
+        for (Expression e : asserts.keySet()) {
+            BoolExpr px = context.mkBoolConst("q" + counter++);
+            // px is the predicate name (in Context object)
+            // e is the Green expression of the assertion/clause
+            coreClauseMapping.put(px, e);
+        }
+        return coreClauseMapping;
+    }
 	
 	public Map<Variable, Expr> getVariableMap() {
 		return v2e;
 	}
-	
 
 	@Override
 	public void postVisit(IntConstant constant) {			
@@ -79,15 +86,21 @@ class Z3JavaTranslator extends Visitor {
 	@Override
 	public void postVisit(IntVariable variable) {
 		Expr v = v2e.get(variable);
-		if (v == null) {
+        if (v == null) {
 			Integer lower = variable.getLowerBound();
 			Integer upper = variable.getUpperBound();
 			try {
 				v = context.mkIntConst(variable.getName());
 				// now add bounds
 				BoolExpr low  = context.mkGe((ArithExpr)v,(ArithExpr)context.mkInt(lower));
-				BoolExpr high = context.mkLe((ArithExpr)v,(ArithExpr)context.mkInt(upper));
-				domains.add(context.mkAnd(low,high));
+				Operation eLow = new Operation(Operation.Operator.GE, variable, new IntConstant(lower));
+                asserts.put(eLow, low);
+                BoolExpr high = context.mkLe((ArithExpr)v,(ArithExpr)context.mkInt(upper));
+                Operation eHigh = new Operation(Operation.Operator.GE, variable, new IntConstant(upper));
+                asserts.put(eHigh, high);
+                BoolExpr domain = context.mkAnd(low,high);
+				domains.add(domain);
+				asserts.put(new Operation(Operation.Operator.AND, eLow, eHigh), domain); // This one is needed
 			} catch (Z3Exception e) {
 				e.printStackTrace();
 			}
@@ -135,32 +148,50 @@ class Z3JavaTranslator extends Visitor {
 		}
 		try {
 			switch (operation.getOperator()) {
-			case NOT: 
-				stack.push(context.mkNot((BoolExpr) l));
+			case NOT:
+			    BoolExpr not = context.mkNot((BoolExpr) l);
+			    asserts.put(operation, not);
+				stack.push(not);
 				break;
 			case EQ:
-				stack.push(context.mkEq(l, r));
+			    BoolExpr eq = context.mkEq(l, r);
+                asserts.put(operation, eq);
+                stack.push(eq);
 				break;
 			case NE:
-				stack.push(context.mkNot(context.mkEq(l, r)));
+                BoolExpr ne = context.mkNot(context.mkEq(l, r));
+                asserts.put(operation, ne);
+                stack.push(ne);
 				break;
 			case LT:
-				stack.push(context.mkLt((ArithExpr) l, (ArithExpr) r));
+			    BoolExpr lt = context.mkLt((ArithExpr) l, (ArithExpr) r);
+                asserts.put(operation, lt);
+                stack.push(lt);
 				break;
 			case LE:
-				stack.push(context.mkLe((ArithExpr) l, (ArithExpr) r));
+                BoolExpr le = context.mkLe((ArithExpr) l, (ArithExpr) r);
+                asserts.put(operation, le);
+                stack.push(le);
 				break;
 			case GT:
-				stack.push(context.mkGt((ArithExpr) l, (ArithExpr) r));
+                BoolExpr gt = context.mkGt((ArithExpr) l, (ArithExpr) r);
+                asserts.put(operation, gt);
+                stack.push(gt);
 				break;
 			case GE:
-				stack.push(context.mkGe((ArithExpr) l, (ArithExpr) r));
+			    BoolExpr ge = context.mkGe((ArithExpr) l, (ArithExpr) r);
+                asserts.put(operation, ge);
+                stack.push(ge);
 				break;
 			case AND:
-				stack.push(context.mkAnd((BoolExpr) l, (BoolExpr) r));
+			    BoolExpr and = context.mkAnd((BoolExpr) l, (BoolExpr) r);
+                asserts.put(operation, and);
+				stack.push(and);
 				break;
 			case OR:
-				stack.push(context.mkOr((BoolExpr) l, (BoolExpr) r));
+			    BoolExpr or = context.mkOr((BoolExpr) l, (BoolExpr) r);
+			    asserts.put(operation, or);
+				stack.push(or);
 				break;
 			case IMPLIES:
 				stack.push(context.mkImplies((BoolExpr) l, (BoolExpr) r));

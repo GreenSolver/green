@@ -1,6 +1,7 @@
 package za.ac.sun.cs.green.store;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import org.apfloat.Apint;
 
@@ -127,5 +128,25 @@ public interface Store {
 	 */
 	public void put(String key, Serializable value);
 
+    /**
+     * Flush all to redis
+     */
+    public void flushAll();
+
+    /**
+     * Clear the cache.
+     */
+    public void clear();
+
+    /**
+     * Test if the store is set.
+     */
+    public boolean isSet();
+
+    /**
+     * Returns the key of all entries in the cache
+     * @return Set of keys
+     */
+    public Set<String> keySet();
 
 }

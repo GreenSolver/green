@@ -1,9 +1,6 @@
 package za.ac.sun.cs.green.service.barvinok;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Collections;
@@ -36,8 +33,11 @@ import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.service.CountService;
 
 /***
- * [Dependency]
+ * [Dependencies]
  * -    Barvinok library installation: http://barvinok.gforge.inria.fr/
+ *      Which depends on:
+ *      || GMP: https://gmplib.org/list-archives/gmp-announce/2014-March/000042.html
+ *      || NTL: http://www.shoup.net/ntl/download.html
  * -    A script file (barvlatte) is needed to pass the input from the Sevice to Barvinok.
  *
  * Script contents:
@@ -52,9 +52,20 @@ import za.ac.sun.cs.green.service.CountService;
 
 public class CountBarvinokService extends CountService {
 
-	private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
+    private static final String DRIVE = new File("").getAbsolutePath();
 
-	private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
+    //    private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
+    private static final String DIRECTORY = DRIVE + "/out";
+
+    /**
+     * The location of the LattE executable file.
+     */
+    private final String DEFAULT_BARVINOK_PATH;
+    private final String BARVINOK_PATH = "barvinoklattepath";
+    private final String resourceName = "build.properties";
+
+
+    private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
 	
 	private static final int RANDOM = new Random().nextInt(9);
 
@@ -84,11 +95,6 @@ public class CountBarvinokService extends CountService {
 	private static final String ANSWER_PATTERN = "";
 
 	/**
-	 * The location of the LattE executable file.
-	 */
-	private final String DEFAULT_BARVINOK_PATH = "barvlatte";
-
-	/**
 	 * Options passed to the Barvinok executable.
 	 */
 	private final String DEFAULT_BARVINOK_ARGS = " ";
@@ -113,6 +119,28 @@ public class CountBarvinokService extends CountService {
 	public CountBarvinokService(Green solver, Properties properties) {
 		super(solver);
 		log = solver.getLogger();
+
+        String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barvlatte";
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream;
+        try {
+            resourceStream = loader.getResourceAsStream(resourceName);
+            if (resourceStream == null) {
+                // If properties are correct, override with that specified path.
+                resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
+
+            }
+            if (resourceStream != null) {
+                properties.load(resourceStream);
+                barvPath = properties.getProperty(BARVINOK_PATH);
+                resourceStream.close();
+            }
+        } catch (IOException x) {
+            // ignore
+        }
+
+        DEFAULT_BARVINOK_PATH = barvPath;
+
 		String p = properties.getProperty("green.barvinok.path", DEFAULT_BARVINOK_PATH);
 		String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
 		barvinokCommand = p + ' ' + a + FILENAME;
@@ -682,7 +710,7 @@ public class CountBarvinokService extends CountService {
 				DefaultExecutor executor = new DefaultExecutor();
 				executor.setStreamHandler(new PumpStreamHandler(outputStream));
 				executor.setWorkingDirectory(new File(directory));
-				executor.setExitValues(null); 
+				executor.setExitValues(null);
 				executor.execute(CommandLine.parse(barvinokCommand));
 				result = outputStream.toString();
 			} catch (ExecuteException e) {
