@@ -2,6 +2,7 @@
 /build/
 /bin/
 /out/
+/.idea/
 /.classpath
 /.project
 /.settings/
