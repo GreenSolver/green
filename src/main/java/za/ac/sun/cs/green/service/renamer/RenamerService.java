@@ -144,7 +144,7 @@ public class RenamerService extends BasicService {
 		public void postVisit(IntegerVariable variable) {
 			Variable v = map.get(variable);
 			if (v == null) {
-				v = new IntegerVariable("v" + map.size(), variable.getLowerBound(), variable.getUpperBound());
+				v = new IntegerVariable("v" + map.size(), variable.getLowerBound(), variable.getUpperBound(), variable.getSize());
 				map.put(variable, v);
 			}
 			stack.push(v);

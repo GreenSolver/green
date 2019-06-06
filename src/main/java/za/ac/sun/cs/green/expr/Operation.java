@@ -145,7 +145,8 @@ public class Operation extends Expression {
 					return new Operation(operator, operands);
 				}
 			}
-			return new IntegerConstant(result);
+			// TODO
+			return new IntegerConstant(result, Long.SIZE);
 		default:
 			return new Operation(operator, operands);
 		}
