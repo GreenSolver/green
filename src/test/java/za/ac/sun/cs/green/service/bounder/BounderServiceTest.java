@@ -20,6 +20,8 @@ import za.ac.sun.cs.green.util.Configuration;
 public class BounderServiceTest {
 
 	public static Green solver;
+    private final static int SIZE32 = 32;
+    private final static int SIZE64 = 64;
 
 	@BeforeClass
 	public static void initialize() {
@@ -85,17 +87,17 @@ public class BounderServiceTest {
 	
 	@Test
 	public void test01b() {
-		IntegerVariable v = new IntegerVariable("v", 0, 999999999999L);
-		IntegerConstant c = new IntegerConstant(0);
+		IntegerVariable v = new IntegerVariable("v", 0, 999999999999L, SIZE64);
+		IntegerConstant c = new IntegerConstant(0, SIZE64);
 		Operation o = new Operation(Operation.Operator.EQ, v, c);
 		check(o, "v==0", "v==0", "v>=0", "v<=999999999999");
 	}
 	
 	@Test
 	public void test02b() {
-		IntegerVariable v1 = new IntegerVariable("v1", 0, 99);
-		IntegerVariable v2 = new IntegerVariable("v2", 9, 19);
-		IntegerConstant c = new IntegerConstant(0);
+		IntegerVariable v1 = new IntegerVariable("v1", 0, 99, SIZE32);
+		IntegerVariable v2 = new IntegerVariable("v2", 9, 19, SIZE32);
+		IntegerConstant c = new IntegerConstant(0, SIZE32);
 		Operation o1 = new Operation(Operation.Operator.EQ, v1, c);
 		Operation o2 = new Operation(Operation.Operator.EQ, v2, c);
 		Operation o = new Operation(Operation.Operator.AND, o1, o2);
