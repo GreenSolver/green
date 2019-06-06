@@ -209,7 +209,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				bn.setLength(0);
 				b.append("(>= ").append(n).append(' ').append(transformNegative(variable.getLowerBound())).append(')');
 				String lbound = b.toString();
-				Expression lboundExpr = new Operation(Operator.GE, variable, new IntegerConstant(variable.getLowerBound()));
+				Expression lboundExpr = new Operation(Operator.GE, variable, new IntegerConstant(variable.getLowerBound(), variable.getSize()));
 				b.setLength(0);
 				bn.append(n).append("-lower");
 				b.append("(define-const ").append(bn);
@@ -222,7 +222,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				bn.setLength(0);
 				b.append("(<= ").append(n).append(' ').append(transformNegative(variable.getUpperBound())).append(')');
 				String ubound = b.toString();
-				Expression uboundExpr = new Operation(Operator.LE, variable, new IntegerConstant(variable.getUpperBound()));
+				Expression uboundExpr = new Operation(Operator.LE, variable, new IntegerConstant(variable.getUpperBound(), variable.getSize()));
 				b.setLength(0);
 				bn.append(n).append("-upper");
 				b.append("(define-const ").append(bn);
