@@ -109,8 +109,8 @@ public class BounderService extends BasicService {
 					}
 				} else if (v instanceof IntegerVariable) {
 					IntegerVariable iv = (IntegerVariable) v;
-					Operation lower = new Operation(Operation.Operator.GE, iv, new IntegerConstant(iv.getLowerBound()));
-					Operation upper = new Operation(Operation.Operator.LE, iv, new IntegerConstant(iv.getUpperBound()));
+					Operation lower = new Operation(Operation.Operator.GE, iv, new IntegerConstant(iv.getLowerBound(), iv.getSize()));
+					Operation upper = new Operation(Operation.Operator.LE, iv, new IntegerConstant(iv.getUpperBound(), iv.getSize()));
 					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
 					if (e == null) {
 						e = bound;

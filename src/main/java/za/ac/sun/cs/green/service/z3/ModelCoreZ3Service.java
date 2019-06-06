@@ -128,7 +128,7 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 				} else if (var instanceof IntegerVariable) {
 					String val = assignment.get(name);
 					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
-					value = new IntegerConstant(Long.parseLong(val));
+					value = new IntegerConstant(Long.parseLong(val), ((IntegerVariable) var).getSize());
 				} else if (var instanceof RealVariable) {
                     value = new RealConstant(Double.parseDouble(assignment.get(name)));
                 }
