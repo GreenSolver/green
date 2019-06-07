@@ -111,6 +111,9 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
                         val = new IntConstant(Integer.parseInt(z3Val.toString()));
                     } else if (z3Val.isRatNum()) {
                         val = new RealConstant(Double.parseDouble(z3Val.toString()));
+                    } else if (z3Val.isBV()) {
+                        // TODO: Fix size
+                        val = new IntegerConstant(Long.parseLong(z3Val.toString()), 32);
                     } else {
                         log.log(Level.WARN, "Error unsupported type for variable " + z3Val);
                         return null;
