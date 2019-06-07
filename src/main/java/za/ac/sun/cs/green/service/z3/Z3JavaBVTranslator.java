@@ -14,13 +14,18 @@ class Z3JavaBVTranslator extends Visitor {
 	private Context context = null;
 	private Stack<Expr> stack = null;
 	private List<BoolExpr> domains = null;
-	private Map<Variable, Expr> v2e = null;
+    private Map<Expression, Expr> asserts = null; // maps the Green expressions to Context expressions
+    private Map<BoolExpr, Expression> coreClauseMapping; // maps the Context names to Green expressions
+    private Map<Variable, Expr> v2e = null; // maps Green variables to Context format
+    private int counter = 0; // counter for the predicate names
 
 	public Z3JavaBVTranslator(Context c) {
 		this.context = c;
 		stack = new Stack<Expr>();
 		v2e = new HashMap<Variable, Expr>();
 		domains = new LinkedList<BoolExpr>();
+        asserts = new HashMap<>();
+        coreClauseMapping = new HashMap<>();
 	}
 
 	public BoolExpr getTranslation() {
@@ -37,10 +42,27 @@ class Z3JavaBVTranslator extends Visitor {
 		/* was end of old comment */
 		return result;
 	}
+
+    public Map<BoolExpr, Expression> getCoreMappings() {
+        // TODO: Optimise
+        for (Expression e : asserts.keySet()) {
+            BoolExpr px = context.mkBoolConst("q" + counter++);
+            // px is the predicate name (in Context object)
+            // e is the Green expression of the assertion/clause
+            coreClauseMapping.put(px, e);
+        }
+        return coreClauseMapping;
+    }
 	
 	public Map<Variable, Expr> getVariableMap() {
 		return v2e;
 	}
+    public int getVariableCount() {
+        return v2e.size();
+    }
+    public Map<Expression, Expr> getAsserts() {
+        return asserts;
+    }
 
 	@Override
 	public void postVisit(IntegerConstant constant) {
@@ -91,8 +113,16 @@ class Z3JavaBVTranslator extends Visitor {
                 v = context.mkBVConst(variable.getName(), size);
                 // now add bounds
                 BoolExpr low  = context.mkBVSGE(v, context.mkBV(lower, size));
+                Operation eLow = new Operation(Operation.Operator.GE, variable, new IntegerConstant(lower, size));
+                asserts.put(eLow, low);
+
                 BoolExpr high = context.mkBVSLE(v, context.mkBV(upper, size));
+                Operation eHigh = new Operation(Operation.Operator.GE, variable, new IntegerConstant(upper, size));
+                asserts.put(eHigh, high);
+
+                BoolExpr domain = context.mkAnd(low,high);
                 domains.add(context.mkAnd(low,high));
+                asserts.put(new Operation(Operation.Operator.AND, eLow, eHigh), domain); // This one is needed
             } catch (Z3Exception e) {
                 e.printStackTrace();
             }
@@ -109,6 +139,7 @@ class Z3JavaBVTranslator extends Visitor {
 			Double upper = variable.getUpperBound();
 			int size = variable.getSize();
 			try {
+			    // TODO: Add Asserts
 			    if (size == 32) {
                     v = context.mkConst(variable.getName(), context.mkFPSort32());
                     // now add bounds
@@ -153,58 +184,95 @@ class Z3JavaBVTranslator extends Visitor {
 		try {
 			switch (operation.getOperator()) {
 			case NOT:
-                stack.push(context.mkBVNot((BitVecExpr) l));
-				break;
+			    Expr not = context.mkBVNot((BitVecExpr) l);
+                asserts.put(operation, not);
+                stack.push(not);
+                break;
 			case EQ:
-				stack.push(context.mkEq(l, r));
+			    Expr eq = context.mkEq(l, r);
+                asserts.put(operation, eq);
+                stack.push(eq);
 				break;
 			case NE:
-				stack.push(context.mkNot(context.mkEq(l, r)));
+			    Expr ne = context.mkNot(context.mkEq(l, r));
+                asserts.put(operation, ne);
+                stack.push(ne);
 				break;
 			case LT:
-                stack.push(context.mkBVSLT((BitVecExpr) l, (BitVecExpr) r));
+                Expr lt = null;
+                if (l instanceof ArithExpr && r instanceof ArithExpr) {
+                    lt = context.mkLt((ArithExpr) l, (ArithExpr) r);
+                } else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
+                    System.out.println("##@!@");
+                } else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
+                    System.out.println("##@!@");
+                } else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
+                    lt = context.mkBVSLT((BitVecExpr) l, (BitVecExpr) r);
+                }
+                asserts.put(operation, lt);
+                stack.push(lt);
+
 				break;
 			case LE:
+			    Expr le = null;
 			    if (l instanceof ArithExpr && r instanceof ArithExpr) {
-                    stack.push(context.mkLe((ArithExpr) l, (ArithExpr) r));
-                } else if (l instanceof BoolExpr && r instanceof BitVecExpr) {
-//                    stack.push(context.mkLe((ArithExpr) l, (BitVecExpr) r));
+                    le = context.mkLe((ArithExpr) l, (ArithExpr) r);
+                } else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
                     System.out.println("##@!@");
-                } else if (l instanceof BitVecExpr && r instanceof BoolExpr) {
-//                    stack.push(context.mkLe((BitVecExpr) l, (BitVecExpr) r));
+                } else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
                     System.out.println("##@!@");
                 } else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-                    stack.push(context.mkBVSLE((BitVecExpr) l, (BitVecExpr) r));
+                    le = context.mkBVSLE((BitVecExpr) l, (BitVecExpr) r);
                 }
+                asserts.put(operation, le);
+                stack.push(le);
 				break;
 			case GT:
-				stack.push(context.mkBVSGT((BitVecExpr) l, (BitVecExpr) r));
-				break;
-			case GE:
+                Expr gt = null;
                 if (l instanceof ArithExpr && r instanceof ArithExpr) {
-                    stack.push(context.mkGe((ArithExpr) l, (ArithExpr) r));
-                } else if (l instanceof BoolExpr && r instanceof BitVecExpr) {
+                    gt = context.mkGt((ArithExpr) l, (ArithExpr) r);
+                } else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
                     System.out.println("##@!@");
-                } else if (l instanceof BitVecExpr && r instanceof BoolExpr) {
+                } else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
                     System.out.println("##@!@");
                 } else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-                    stack.push(context.mkBVSGE((BitVecExpr) l, (BitVecExpr) r));
+                    gt = context.mkBVSGT((BitVecExpr) l, (BitVecExpr) r);
                 }
-				break;
+                asserts.put(operation, gt);
+                stack.push(gt);
+                break;
+			case GE:
+                Expr ge = null;
+                if (l instanceof ArithExpr && r instanceof ArithExpr) {
+                    ge = context.mkGe((ArithExpr) l, (ArithExpr) r);
+                } else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
+                    System.out.println("##@!@");
+                } else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
+                    System.out.println("##@!@");
+                } else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
+                    ge = context.mkBVSGE((BitVecExpr) l, (BitVecExpr) r);
+                }
+                asserts.put(operation, ge);
+                stack.push(ge);
+                break;
 			case AND:
-			    if (l instanceof BoolExpr && r instanceof BoolExpr) {
-                    stack.push(context.mkAnd((BoolExpr) l, (BoolExpr) r));
+                Expr and = null;
+                if (l instanceof BoolExpr && r instanceof BoolExpr) {
+                    and = context.mkAnd((BoolExpr) l, (BoolExpr) r);
                 } else if (l instanceof BoolExpr && r instanceof BitVecExpr) {
-//                    stack.push(context.mkBVAND((BitVecExpr) l, (BitVecExpr) r));
                     System.out.println("##@!@");
                 } else if (l instanceof BitVecExpr && r instanceof BoolExpr) {
                     System.out.println("##@!@");
                 } else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-                    stack.push(context.mkBVAND((BitVecExpr) l, (BitVecExpr) r));
+                    and = context.mkBVAND((BitVecExpr) l, (BitVecExpr) r);
                 }
-				break;
+                asserts.put(operation, and);
+                stack.push(and);
+                break;
 			case OR:
-				stack.push(context.mkBVOR((BitVecExpr) l, (BitVecExpr) r));
+                Expr or = context.mkBVOR((BitVecExpr) l, (BitVecExpr) r);
+                asserts.put(operation, or);
+                stack.push(or);
 				break;
 //			case IMPLIES:
 //				stack.push(context.mkImplies(l, r));
