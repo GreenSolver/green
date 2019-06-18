@@ -1,8 +1,8 @@
 package za.ac.sun.cs.green.service.grulia;
 
-import za.ac.sun.cs.green.expr.*;
-import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.Instance;
+import za.ac.sun.cs.green.expr.*;
 import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.SATService1;
 import za.ac.sun.cs.green.service.z3.ModelCoreZ3JavaService;
@@ -32,7 +32,7 @@ import java.util.*;
  * as a service in GREEN -- Grulia.
  *
  */
-public class GruliaService extends SATService1 {
+public class GruliaBVService extends SATService1 {
 
 	/*
 	##################################################################
@@ -279,7 +279,7 @@ public class GruliaService extends SATService1 {
      *
      * @param solver the {@link Green} solver this service will be added to
      */
-    public GruliaService(Green solver) {
+    public GruliaBVService(Green solver) {
         super(solver);
         if (binarysearch) {
             SAT_REPO = new SatRepoB(solver, default_zero);
@@ -343,7 +343,7 @@ public class GruliaService extends SATService1 {
         properties.setProperty("green.services", "solver");
         properties.setProperty("green.service.solver", "(z3mc)");
 //        props.setProperty("green.service.solver.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
-        properties.setProperty("green.service.solver.z3mc", "za.ac.sun.cs.green.service.z3.ModelCoreZ3JavaService");
+        properties.setProperty("green.service.solver.z3mc", "za.ac.sun.cs.green.service.z3.ModelCoreZ3JavaBVService");
 //        properties.setProperty("green.service.solver.z3mc", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
         mcs = new ModelCoreZ3JavaService(solver, properties);
 //        mcs = new ModelCoreZ3Service(solver, properties);
@@ -781,7 +781,7 @@ public class GruliaService extends SATService1 {
     }
 }
 
-class GruliaVisitor extends Visitor {
+class GruliaBVVisitor extends Visitor {
 
     /*
      * Local stack to calculate the SAT-Delta value
@@ -933,7 +933,7 @@ class GruliaVisitor extends Visitor {
     }
 }
 
-class GruliaExpressionEvaluator extends Visitor {
+class GruliaBVExpressionEvaluator extends Visitor {
 
     /*
      * Local stack for the evaluation of the expression.
