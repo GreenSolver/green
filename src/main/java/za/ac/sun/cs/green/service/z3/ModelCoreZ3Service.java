@@ -27,25 +27,6 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
 	public ModelCoreZ3Service(Green solver, Properties properties) {
 		super(solver);
-		String z3Path = new File("").getAbsolutePath() + "/lib/z3/build/z3";
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream resourceStream;
-		try {
-		    resourceStream = loader.getResourceAsStream(resourceName);
-		    if (resourceStream == null) {
-			// If properties are correct, override with that specified path.
-			resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
-		    }
-		    if (resourceStream != null) {
-			properties.load(resourceStream);
-			z3Path = properties.getProperty("z3path");
-
-			resourceStream.close();
-		    }
-		} catch (IOException x) {
-		    // ignore
-		}
-
         String z3Path = "/z3/build/z3";
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream resourceStream;

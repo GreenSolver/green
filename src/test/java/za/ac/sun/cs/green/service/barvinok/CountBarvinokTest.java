@@ -23,7 +23,6 @@ public class CountBarvinokTest {
 	
 	public static Green solver = null;
 
-	@BeforeClass
 	private static String DEFAULT_BARVINOK_PATH;
 	private static final String BARVINOK_PATH = "barvinoklattepath";
 	private static final String resourceName = "build.properties";
