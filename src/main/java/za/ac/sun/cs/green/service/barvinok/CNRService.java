@@ -75,13 +75,6 @@ public class CNRService extends CountService {
     private final String CNR_PATH = "barvinokisccpath";
     private final String resourceName = "build.properties";
 
-    /*
-     * The location of the iscc executable file.
-     */
-    private final String DEFAULT_BARVENUM_PATH;
-    private final String BARVENUM_PATH = "barvinokisccpath";
-    private final String resourceName = "build.properties";
-
     private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
 
     private static final int RANDOM = new Random().nextInt(9);
