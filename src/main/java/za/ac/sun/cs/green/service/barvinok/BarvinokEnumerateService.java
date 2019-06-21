@@ -2,7 +2,6 @@ package za.ac.sun.cs.green.service.barvinok;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.logging.log4j.Logger;
 import org.apfloat.Apint;
@@ -10,13 +9,10 @@ import org.apfloat.Apint;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.*;
-import za.ac.sun.cs.green.service.BasicService;
+import za.ac.sun.cs.green.service.CountService;
 import za.ac.sun.cs.green.util.Reporter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -24,8 +20,8 @@ import java.util.*;
  * @date: 2017/07/26
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Mentor: Willem Visser
- * Supervisor: Jaco Geldenhuys
+ * Supervisor:  Willem Visser   (2018),
+ *              Jaco Geldenhuys (2017)
  *
  * Description:
  * Get the recurring function from Barvinok.
@@ -59,11 +55,23 @@ import java.util.*;
  * The DEFAULT_BARVENUM_PATH must be appropriately updated such that it points to
  * <isccpath> the script file.
  */
-public class BarvinokEnumerateService extends BasicService {
+public class BarvinokEnumerateService extends CountService {
 
     private static final Boolean DEBUG = false;
 
+    /*
+     * File where the iscc input is stored.
+     */
+    private static final String DRIVE = new File("").getAbsolutePath();
+
     private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
+
+    /*
+     * The location of the iscc executable file.
+     */
+    private final String DEFAULT_BARVENUM_PATH;
+    private final String BARVENUM_PATH = "barvinokisccpath";
+    private final String resourceName = "build.properties";
 
     private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
 
@@ -84,15 +92,7 @@ public class BarvinokEnumerateService extends BasicService {
         }
     }
 
-    /*
-     * File where the iscc input is stored.
-     */
     private static final String FILENAME = directory + "/iscc-barvinok.in";
-
-    /*
-     * The location of the iscc executable file.
-     */
-    private final String DEFAULT_BARVENUM_PATH = "lib/barvinok-0.39/barviscc";
 
     /*
      * Options passed to the Barvinok executable.
@@ -148,7 +148,7 @@ public class BarvinokEnumerateService extends BasicService {
      * The use is for look-ups in the MODEL_MAPPING
      * for the evaluator.
      */
-    protected static ArrayList<IntVariable> vars;
+    protected static HashMap<IntVariable, Boolean> vars;
 
     /*
      * Store all the bound variables of the formula
@@ -158,9 +158,32 @@ public class BarvinokEnumerateService extends BasicService {
     public BarvinokEnumerateService(Green solver, Properties properties) {
         super(solver);
         log = solver.getLogger();
-        String p = properties.getProperty("green.barvinok.path", DEFAULT_BARVENUM_PATH);
+
+        String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barviscc";
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream;
+        try {
+            resourceStream = loader.getResourceAsStream(resourceName);
+            if (resourceStream == null) {
+                // If properties are correct, override with that specified path.
+                resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
+
+            }
+            if (resourceStream != null) {
+                properties.load(resourceStream);
+                barvPath = properties.getProperty(BARVENUM_PATH);
+                resourceStream.close();
+            }
+        } catch (IOException x) {
+            // ignore
+        }
+
+        DEFAULT_BARVENUM_PATH = barvPath;
+
+        String p = properties.getProperty("green.barvinok.path", BARVENUM_PATH);
         String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
         barvinokCommand = p + ' ' + a + FILENAME;
+
         log.debug("barvinokCommand=" + barvinokCommand);
         log.debug("directory=" + directory);
     }
@@ -183,6 +206,7 @@ public class BarvinokEnumerateService extends BasicService {
     }
 
     protected Apint solve(Instance instance) {
+        // Wrapper function to calculate time consumption.
         invocationCount++;
         long startTime = System.currentTimeMillis();
         Apint count = null;
@@ -195,14 +219,14 @@ public class BarvinokEnumerateService extends BasicService {
 
     private Apint solve0(Instance instance) {
         String result = "";
-        vars = new ArrayList<>();
+        vars = new HashMap<>();
         bounds = new ArrayList<>();
         MODEL_MAPPING = new HashMap<IntVariable, Object>();
         HashMap<Expression, Expression> cases = null;
 
         if (store != null) {
             //check in store
-            cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().toString());
+            cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().getString());
 
             if (cases == null) {
                 //  not in store
@@ -225,7 +249,7 @@ public class BarvinokEnumerateService extends BasicService {
 
                         // add to store
                         // key: query; value: case -> expression tree
-                        store.put(instance.getFullExpression().toString(), cases);
+                        store.put(instance.getFullExpression().getString(), cases);
                     }
                 } catch (TranslatorUnsupportedOperation x) {
                     log.warn(x.getMessage(), x);
@@ -258,15 +282,17 @@ public class BarvinokEnumerateService extends BasicService {
 
         try {
             //extract bounds
-            BoundsVisitor bv = new BoundsVisitor();
+            BoundsVisitor bv = new BoundsVisitor(vars, bounds, MODEL_MAPPING);
+
             instance.getFullExpression().accept(bv);
         } catch (VisitorException e) {
             e.printStackTrace();
         }
 
         //evaluate formulas
-        EvaluatorVisitor evaluator = new EvaluatorVisitor();
+        EvaluatorVisitor evaluator = new EvaluatorVisitor(MODEL_MAPPING);
         try {
+            assert (cases != null);
             for (Expression k : cases.keySet()) {
                 k.accept(evaluator);
                 if (evaluator.isSat()) {
@@ -282,12 +308,12 @@ public class BarvinokEnumerateService extends BasicService {
     }
 
     /**
-     * Stores the input in a file, invokes LattE on the file, captures and
+     * Stores the input in a file, invokes barvinok on the file, captures and
      * processes the output, and returns the number of satisfying solutions
      * as a string.
      *
      * @param input
-     *            the LattE input as an H-matrix
+     *            the Barvinok input
      * @return the number of satisfying solutions as a string
      */
     private String invokeISCC(String input) {
@@ -310,9 +336,6 @@ public class BarvinokEnumerateService extends BasicService {
             executor.setExitValues(null);
             executor.execute(CommandLine.parse(barvinokCommand));
             result = outputStream.toString();
-        } catch (ExecuteException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException();
@@ -339,7 +362,12 @@ public class BarvinokEnumerateService extends BasicService {
 
 class EvaluatorVisitor extends Visitor {
 
-    Stack<Object> stack = new Stack<>();
+    private Stack<Object> stack = new Stack<>();
+    private Map<IntVariable, Object> modelMapping;
+
+    public EvaluatorVisitor(Map<IntVariable, Object> modelMapping) {
+        this.modelMapping = modelMapping;
+    }
 
     public Boolean isSat() {
         return (Boolean) stack.pop();
@@ -350,7 +378,7 @@ class EvaluatorVisitor extends Visitor {
         if (x instanceof Integer) {
             return (Integer) x;
         } else {
-            return new Integer(((Double) x).intValue());
+            return ((Double) x).intValue();
         }
     }
 
@@ -399,6 +427,7 @@ class EvaluatorVisitor extends Visitor {
         Double leftD, rightD;
         Boolean leftB, rightB;
 
+        // apply operation
         switch (op) {
             case MUL:
                 if (l instanceof Integer) {
@@ -412,6 +441,7 @@ class EvaluatorVisitor extends Visitor {
                 } else {
                     rightD = (Double) r;
                 }
+                assert (leftD != null && rightD != null);
 
                 stack.push(leftD * rightD);
                 break;
@@ -427,6 +457,7 @@ class EvaluatorVisitor extends Visitor {
                 } else {
                     rightD = (Double) r;
                 }
+                assert (leftD != null && rightD != null);
 
                 stack.push(leftD / rightD);
                 break;
@@ -442,6 +473,7 @@ class EvaluatorVisitor extends Visitor {
                 } else {
                     rightD = (Double) r;
                 }
+                assert (leftD != null && rightD != null);
 
                 stack.push(Math.pow(leftD, rightD));
                 break;
@@ -456,7 +488,7 @@ class EvaluatorVisitor extends Visitor {
                         x = Math.floor((Double) l);
                     }
                 } else if (r != null) {
-                    if (l instanceof Integer) {
+                    if (r instanceof Integer) {
                         Double z = new Double((Integer) r);
                         x = Math.floor(z);
                     } else {
@@ -478,6 +510,7 @@ class EvaluatorVisitor extends Visitor {
                 } else {
                     rightD = (Double) r;
                 }
+                assert (leftD != null && rightD != null);
 
                 stack.push(leftD + rightD);
                 break;
@@ -493,6 +526,7 @@ class EvaluatorVisitor extends Visitor {
                 } else {
                     rightD = (Double) r;
                 }
+                assert (leftD != null && rightD != null);
 
                 stack.push(leftD - rightD);
                 break;
@@ -518,8 +552,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation rOperation = (Operation) operation.getOperand(1);
                     Operation.Operator rOperator = rOperation.getOperator();
 
-                    assert (rOperation.toString().equals(op.LE.toString())) || (rOperation.toString().equals(op.LE.toString()));
-                    assert rOperation.getOperand(0) instanceof IntVariable;
+//                    assert (rOperation.toString().equals(op.LE.toString())) || (rOperation.toString().equals(op.LE.toString()));
+//                    assert rOperation.getOperand(0) instanceof IntVariable;
 
                     if (l instanceof Integer) {
                         leftD = new Double((Integer) l);
@@ -537,8 +571,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation lOperation = (Operation) operation.getOperand(0);
                     Operation.Operator lOperator = lOperation.getOperator();
 
-                    assert (lOperation.toString().equals(op.LE.toString())) || (lOperation.toString().equals(op.LE.toString()));
-                    assert lOperation.getOperand(0) instanceof IntVariable;
+//                    assert (lOperation.toString().equals(op.LE.toString())) || (lOperation.toString().equals(op.LE.toString()));
+//                    assert lOperation.getOperand(0) instanceof IntVariable;
 
                     leftB = (Boolean) l;
                     leftD = getVariableValue((IntVariable) lOperation.getOperand(1));
@@ -559,6 +593,7 @@ class EvaluatorVisitor extends Visitor {
             case OR:
                 leftB = (Boolean) l;
                 rightB = (Boolean) r;
+                assert (leftB != null && rightB != null);
 
                 SAT = (leftB || rightB);
                 stack.push(SAT);
@@ -566,6 +601,7 @@ class EvaluatorVisitor extends Visitor {
             case AND:
                 leftB = (Boolean) l;
                 rightB = (Boolean) r;
+                assert (leftB != null && rightB != null);
 
                 SAT = (leftB && rightB);
                 stack.push(SAT);
@@ -596,7 +632,7 @@ class EvaluatorVisitor extends Visitor {
                         rightD = (Double) r;
                     }
 
-                    SAT = (leftD == rightD);
+                    SAT = (leftD.equals(rightD));
                     stack.push(SAT);
                 } else if (((l instanceof Integer)||(l instanceof Double)) && (r instanceof Boolean)) {
                     assert operation.getOperand(1) instanceof Operation;
@@ -604,8 +640,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation rOperation = (Operation) operation.getOperand(1);
                     Operation.Operator rOperator = rOperation.getOperator();
 
-                    assert (rOperation.toString().equals(op.EQ.toString())) || (rOperation.toString().equals(op.EQ.toString()));
-                    assert rOperation.getOperand(0) instanceof IntVariable;
+//                    assert (rOperation.toString().equals(op.EQ.toString())) || (rOperation.toString().equals(op.EQ.toString()));
+//                    assert rOperation.getOperand(0) instanceof IntVariable;
 
                     if (l instanceof Integer) {
                         leftD = new Double((Integer) l);
@@ -615,7 +651,8 @@ class EvaluatorVisitor extends Visitor {
 
                     rightD = getVariableValue((IntVariable) rOperation.getOperand(0));
                     boolean rightD2 = (Boolean) r;
-                    SAT = (leftD == rightD) && rightD2;
+
+                    SAT = (leftD.equals(rightD)) && rightD2;
                     stack.push(SAT);
                 } else if ((l instanceof Boolean) && ((r instanceof Integer)||(r instanceof Double))) {
                     assert operation.getOperand(0) instanceof Operation;
@@ -623,8 +660,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation lOperation = (Operation) operation.getOperand(0);
                     Operation.Operator lOperator = lOperation.getOperator();
 
-                    assert (lOperation.toString().equals(op.EQ.toString())) || (lOperation.toString().equals(op.EQ.toString()));
-                    assert lOperation.getOperand(0) instanceof IntVariable;
+//                    assert (lOperation.toString().equals(op.EQ.toString())) || (lOperation.toString().equals(op.EQ.toString()));
+//                    assert lOperation.getOperand(0) instanceof IntVariable;
                     leftB = (Boolean) l;
                     leftD = getVariableValue((IntVariable) lOperation.getOperand(1));
                     Double rightD2;
@@ -633,7 +670,7 @@ class EvaluatorVisitor extends Visitor {
                     } else {
                         rightD2 = (Double) r;
                     }
-                    SAT = (leftD == rightD2) && leftB;
+                    SAT = (leftD.equals(rightD2)) && leftB;
                     stack.push(SAT);
                 } else {
                     throw new RuntimeException("case not expected");
@@ -661,8 +698,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation rOperation = (Operation) operation.getOperand(1);
                     Operation.Operator rOperator = rOperation.getOperator();
 
-                    assert (rOperation.toString().equals(op.GE.toString())) || (rOperation.toString().equals(op.GE.toString()));
-                    assert rOperation.getOperand(0) instanceof IntVariable;
+//                    assert (rOperation.toString().equals(op.GE.toString())) || (rOperation.toString().equals(op.GE.toString()));
+//                    assert rOperation.getOperand(0) instanceof IntVariable;
 
                     if (l instanceof Integer) {
                         leftD = new Double((Integer) l);
@@ -680,8 +717,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation lOperation = (Operation) operation.getOperand(0);
                     Operation.Operator lOperator = lOperation.getOperator();
 
-                    assert (lOperation.toString().equals(op.GE.toString())) || (lOperation.toString().equals(op.GE.toString()));
-                    assert lOperation.getOperand(0) instanceof IntVariable;
+//                    assert (lOperation.toString().equals(op.GE.toString())) || (lOperation.toString().equals(op.GE.toString()));
+//                    assert lOperation.getOperand(0) instanceof IntVariable;
 
                     leftB = (Boolean) l;
                     leftD = getVariableValue((IntVariable) lOperation.getOperand(1));
@@ -721,8 +758,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation rOperation = (Operation) operation.getOperand(1);
                     Operation.Operator rOperator = rOperation.getOperator();
 
-                    assert (rOperation.toString().equals(op.LT.toString())) || (rOperation.toString().equals(op.LT.toString()));
-                    assert rOperation.getOperand(0) instanceof IntVariable;
+//                    assert (rOperation.toString().equals(op.LT.toString())) || (rOperation.toString().equals(op.LT.toString()));
+//                    assert rOperation.getOperand(0) instanceof IntVariable;
 
                     if (l instanceof Integer) {
                         leftD = new Double((Integer) l);
@@ -740,8 +777,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation lOperation = (Operation) operation.getOperand(0);
                     Operation.Operator lOperator = lOperation.getOperator();
 
-                    assert (lOperation.toString().equals(op.LT.toString())) || (lOperation.toString().equals(op.LT.toString()));
-                    assert lOperation.getOperand(0) instanceof IntVariable;
+//                    assert (lOperation.toString().equals(op.LT.toString())) || (lOperation.toString().equals(op.LT.toString()));
+//                    assert lOperation.getOperand(0) instanceof IntVariable;
 
                     leftB = (Boolean) l;
                     leftD = getVariableValue((IntVariable) lOperation.getOperand(1));
@@ -771,8 +808,9 @@ class EvaluatorVisitor extends Visitor {
                 } else {
                     rightD = (Double) r;
                 }
+                assert (leftD != null && rightD != null);
 
-                SAT = (leftD != rightD);
+                SAT = (!leftD.equals(rightD));
                 stack.push(SAT);
                 break;
             case GT:
@@ -797,8 +835,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation rOperation = (Operation) operation.getOperand(1);
                     Operation.Operator rOperator = rOperation.getOperator();
 
-                    assert (rOperation.toString().equals(op.GT.toString())) || (rOperation.toString().equals(op.GT.toString()));
-                    assert rOperation.getOperand(0) instanceof IntVariable;
+//                    assert (rOperation.toString().equals(op.GT.toString())) || (rOperation.toString().equals(op.GT.toString()));
+//                    assert rOperation.getOperand(0) instanceof IntVariable;
 
                     if (l instanceof Integer) {
                         leftD = new Double((Integer) l);
@@ -816,8 +854,8 @@ class EvaluatorVisitor extends Visitor {
                     Operation lOperation = (Operation) operation.getOperand(0);
                     Operation.Operator lOperator = lOperation.getOperator();
 
-                    assert (lOperation.toString().equals(op.GT.toString())) || (lOperation.toString().equals(op.GT.toString()));
-                    assert lOperation.getOperand(0) instanceof IntVariable;
+//                    assert (lOperation.toString().equals(op.GT.toString())) || (lOperation.toString().equals(op.GT.toString()));
+//                    assert lOperation.getOperand(0) instanceof IntVariable;
 
                     leftB = (Boolean) l;
                     leftD = getVariableValue((IntVariable) lOperation.getOperand(1));
@@ -841,44 +879,46 @@ class EvaluatorVisitor extends Visitor {
     }
 
     private Double getVariableValue(IntVariable variable) {
-        int pos = BarvinokEnumerateService.bounds.indexOf((IntVariable) variable);
-        Double value = 0.0;
-
-        for (IntVariable key : BarvinokEnumerateService.MODEL_MAPPING.keySet()) {
-            if (variable.toString().equals(key.toString())) {
-                Integer x = (Integer) BarvinokEnumerateService.MODEL_MAPPING.get(key);
-                value = new Double(x);
-                break;
-            }
-        }
-
-        return value;
+        // changed from linear search to single map call.
+        return new Double((Integer) modelMapping.get(variable));
     }
 
 }
 
 class BoundsVisitor extends Visitor {
 
+    private HashMap<IntVariable,Boolean> vars;
+    private ArrayList<IntVariable> bounds;
+    private Map<IntVariable, Object> modelMapping;
+
+    public BoundsVisitor(HashMap<IntVariable,Boolean> vars, ArrayList<IntVariable> bounds, Map<IntVariable,Object> modelMapping) {
+        super();
+        this.vars = vars;
+        this.bounds = bounds;
+        this.modelMapping = modelMapping;
+    }
+
     @Override
     public void postVisit(Variable variable) throws VisitorException {
         super.postVisit(variable);
 
-        if (!BarvinokEnumerateService.vars.contains((IntVariable) variable)) {
+        if (vars.get((IntVariable) variable) == null) { // changed from linear search, to single map call.
+            // if variable has not been seen yet (i.e. not in map == null):
             // add the unique variables to the list
-            BarvinokEnumerateService.vars.add((IntVariable) variable);
+            vars.put((IntVariable) variable, true);
 
             // Extract bounds
-            int lower = ((IntVariable) variable).getLowerBound();
-            int upper = ((IntVariable) variable).getUpperBound();
+            Integer lower = ((IntVariable) variable).getLowerBound();
+            Integer upper = ((IntVariable) variable).getUpperBound();
 
             IntVariable lowerVar = new IntVariable(variable.toString() + "min", lower, lower);
             IntVariable upperVar = new IntVariable(variable.toString() + "max", upper, upper);
 
-            BarvinokEnumerateService.bounds.add(lowerVar);
-            BarvinokEnumerateService.bounds.add(upperVar);
+            bounds.add(lowerVar);
+            bounds.add(upperVar);
 
-            BarvinokEnumerateService.MODEL_MAPPING.put(lowerVar, lower);
-            BarvinokEnumerateService.MODEL_MAPPING.put(upperVar, upper);
+            modelMapping.put(lowerVar, lower);
+            modelMapping.put(upperVar, upper);
         }
     }
 }
