@@ -1,6 +1,8 @@
 package za.ac.sun.cs.green.store;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Set;
 
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.util.Reporter;
@@ -32,4 +34,19 @@ public class NullStore extends BasicStore {
 		putCount++;
 	}
 
+    @Override
+    public Set<String> keySet() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void flushAll() { }
+
+    @Override
+    public void clear() { }
+
+    @Override
+    public boolean isSet() {
+        return true;
+    }
 }

@@ -48,13 +48,14 @@ public class BounderService extends BasicService {
 	 * Total number of variables processed.
 	 */
 	private int totalVariableCount = 0;
-
+    private long timeConsumption = 0;
 	public BounderService(Green solver) {
 		super(solver);
 	}
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
+	    long start = System.currentTimeMillis();
 		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
@@ -68,6 +69,7 @@ public class BounderService extends BasicService {
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
+		timeConsumption += (System.currentTimeMillis() - start);
 		return result;
 	}
 
@@ -75,7 +77,8 @@ public class BounderService extends BasicService {
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
 		reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
-	}
+        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+    }
 
 	/**
 	 * Collect all of the variables that appear in an expression and construct
@@ -106,8 +109,8 @@ public class BounderService extends BasicService {
 					}
 				} else if (v instanceof IntegerVariable) {
 					IntegerVariable iv = (IntegerVariable) v;
-					Operation lower = new Operation(Operation.Operator.GE, iv, new IntegerConstant(iv.getLowerBound()));
-					Operation upper = new Operation(Operation.Operator.LE, iv, new IntegerConstant(iv.getUpperBound()));
+					Operation lower = new Operation(Operation.Operator.GE, iv, new IntegerConstant(iv.getLowerBound(), iv.getSize()));
+					Operation upper = new Operation(Operation.Operator.LE, iv, new IntegerConstant(iv.getUpperBound(), iv.getSize()));
 					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
 					if (e == null) {
 						e = bound;

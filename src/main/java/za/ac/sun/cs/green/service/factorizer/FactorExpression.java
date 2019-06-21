@@ -13,7 +13,7 @@ public class FactorExpression {
     private Collector collector = null;
     private UnionFind<Expression> uf = null;
     private Expression processedExpression = null;
-
+    private int conjunctCount = 0;
     protected final Logger log;
     // stat variables
     public long collectorTime = 0;
@@ -83,9 +83,10 @@ public class FactorExpression {
 
         Set<Expression> factors = new HashSet<>();
         for (Expression e : components.keySet()) {
-            Set<Expression> clauses = components.get(e);
+            Set<Expression> conjuncts = components.get(e);
             Expression factor = null;
-            for (Expression x : clauses) {
+            conjunctCount += conjuncts.size();
+            for (Expression x : conjuncts) {
                 if (factor == null) {
                     factor = x;
                 } else {
@@ -171,6 +172,7 @@ public class FactorExpression {
         Expression factor = null;
         for (Expression x : clauses) {
             dependentConjunctCount++;
+            conjunctCount++;
             if (factor == null) {
                 factor = x;
             } else {
@@ -179,6 +181,10 @@ public class FactorExpression {
         }
         factors.add(factor);
         return factors;
+    }
+
+    public int getConjunctCount() {
+        return conjunctCount;
     }
 
     private class Collector extends Visitor {

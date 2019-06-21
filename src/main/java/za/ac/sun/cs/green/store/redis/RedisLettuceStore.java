@@ -3,6 +3,7 @@ package za.ac.sun.cs.green.store.redis;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
+import java.util.Set;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -132,5 +133,22 @@ public class RedisLettuceStore extends BasicStore {
 		syncCommands.flushall();
     //    timeFlush += (System.currentTimeMillis()-start);
 }
+
+    @Override
+    public void clear() {
+        // TODO
+    }
+
+    @Override
+    public boolean isSet() {
+        // TODO
+        return redisConnection.isOpen();
+    }
+
+    @Override
+    public Set<String> keySet() {
+        // TODO
+        return null;
+    }
 
 }

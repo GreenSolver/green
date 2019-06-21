@@ -1,6 +1,8 @@
 package za.ac.sun.cs.green.service.grulia;
 
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
@@ -9,9 +11,8 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.util.Configuration;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import java.util.*;
+import java.util.Properties;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -24,7 +25,7 @@ import static org.junit.Assert.assertTrue;
  * Description:
  * JUnit test of Grulia
  */
-public class GruliaServiceTest {
+public class GruliaBVServiceTest {
 
     public static Green solver;
 
@@ -34,7 +35,7 @@ public class GruliaServiceTest {
         Properties props = new Properties();
         props.setProperty("green.services", "sat");
         props.setProperty("green.service.sat", "(grulia)");
-        props.setProperty("green.service.sat.grulia", "za.ac.sun.cs.green.service.grulia.GruliaService");
+        props.setProperty("green.service.sat.grulia", "za.ac.sun.cs.green.service.grulia.GruliaBVService");
         Configuration config = new Configuration(solver, props);
         config.configure();
     }
