@@ -29,19 +29,43 @@ import static org.junit.Assert.assertNotNull;
  */
 public class BarvinokEnumerateTest {
     public static Green solver = null;
-    private static final String DEFAULT_BARVENUM_PATH = "lib/barvinok-0.39/barviscc";
+    private static String DEFAULT_BARVENUM_PATH;
+    private static final String BARVENUM_PATH = "barvinokisccpath";
+    private static final String resourceName = "build.properties";
 
     @BeforeClass
     public static void initialize() {
         solver = new Green();
-        Properties props = new Properties();
+        Properties properties = new Properties();
 
-        props.setProperty("green.services", "count");
-        props.setProperty("green.service.count", "barvinok");
-        props.setProperty("green.service.count.barvinok", "za.ac.sun.cs.green.service.barvinok.BarvinokEnumerateService");
+        properties.setProperty("green.services", "count");
+        properties.setProperty("green.service.count", "barvinok");
+        properties.setProperty("green.service.count.barvinok", "za.ac.sun.cs.green.service.barvinok.BarvinokEnumerateService");
+//        props.setProperty("green.store", "za.ac.sun.cs.green.store.memstore.MemStore");
 
-        props.setProperty("green.barvinok.path", DEFAULT_BARVENUM_PATH);
-        Configuration config = new Configuration(solver, props);
+        String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barviscc";
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream resourceStream;
+        try {
+            resourceStream = loader.getResourceAsStream(resourceName);
+            if (resourceStream == null) {
+                // If properties are correct, override with that specified path.
+                resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
+
+            }
+            if (resourceStream != null) {
+                properties.load(resourceStream);
+                barvPath = properties.getProperty(BARVENUM_PATH);
+                resourceStream.close();
+            }
+        } catch (IOException x) {
+            // ignore
+        }
+
+        DEFAULT_BARVENUM_PATH = barvPath;
+
+        properties.setProperty("green.barvinok.path", DEFAULT_BARVENUM_PATH);
+        Configuration config = new Configuration(solver, properties);
         config.configure();
     }
 
