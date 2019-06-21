@@ -3,6 +3,7 @@ package za.ac.sun.cs.green.store.redis;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
+import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 import za.ac.sun.cs.green.Green;
@@ -26,7 +27,10 @@ public class RedisStore extends BasicStore {
 	 * Connection to the redis store.
 	 */
 	private Jedis db = null;
-
+    private long timeConsumption = 0;
+    private long getTime = 0;
+    private long putTime = 0;
+    private Boolean set = null;
 	/**
 	 * Number of times <code>get(...)</code> was called.
 	 */
@@ -47,9 +51,6 @@ public class RedisStore extends BasicStore {
 	 */
 	private final int DEFAULT_REDIS_PORT = 6379;
 	
-	private long timePut = 0;
-	private long timeGet = 0;
-	
 	/**
 	 * Constructor to create a default connection to a redis store running on the local computer.
 	 */
@@ -69,49 +70,84 @@ public class RedisStore extends BasicStore {
 	public RedisStore(Green solver, String host, int port) {
 		super(solver);
 		db = new Jedis(host, port, TIMEOUT);
-	}
+    }
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
+        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+        reporter.report(getClass().getSimpleName(), "get = " + getTime);
+        reporter.report(getClass().getSimpleName(), "put = " + putTime);
+        reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
 		reporter.report(getClass().getSimpleName(), "insertionCount = " + insertionCount);
-		reporter.report(getClass().getSimpleName(), "time for get = " + timeGet);
-		reporter.report(getClass().getSimpleName(), "iime for put = " + timePut);
 	}
-	
+
 	@Override
 	public synchronized Object get(String key) {
-		long start = System.currentTimeMillis();
-		retrievalCount++;
+        long startTime = System.currentTimeMillis();
+        retrievalCount++;
 		try {
 			String s = db.get(key);
-			timeGet += (System.currentTimeMillis()-start);
-			return (s == null) ? null : fromString(s);
+            getTime += (System.currentTimeMillis() - startTime);
+            timeConsumption += (System.currentTimeMillis() - startTime);
+            return (s == null) ? null : fromString(s);
 		} catch (IOException x) {
 			LOGGER.fatal("io problem", x);
 		} catch (ClassNotFoundException x) {
 			LOGGER.fatal("class not found problem", x);
 		}
-		timeGet += (System.currentTimeMillis()-start);
+        getTime += (System.currentTimeMillis() - startTime);
+        timeConsumption += (System.currentTimeMillis() - startTime);
 		return null;
 	}
 
 	@Override
 	public synchronized void put(String key, Serializable value) {
-		long start = System.currentTimeMillis();
-		insertionCount++;
+        long startTime = System.currentTimeMillis();
+        insertionCount++;
 		try {
 			db.set(key, toString(value));
 		} catch (IOException x) {
 			LOGGER.fatal("io problem", x);
 		}
-		timePut += (System.currentTimeMillis()-start);
+        putTime += (System.currentTimeMillis() - startTime);
+        timeConsumption += (System.currentTimeMillis() - startTime);
 	}
-	
-	public void flushAll() {
-  //      long start = System.currentTimeMillis();
-        db.flushAll();
-    //    timeFlush += (System.currentTimeMillis()-start);
-}
 
+    @Override
+    public Set<String> keySet() {
+        return db.keys("*");
+    }
+
+    private long satCacheHit = 0;
+    private long unsatCacheHit = 0;
+
+    @Override
+    public synchronized void flushAll() {
+        // do nothing
+    }
+
+    @Override
+    public void clear() {
+        long startTime = System.currentTimeMillis();
+        try {
+            unsatCacheHit = 0;
+            satCacheHit = 0;
+            db.flushAll();
+        } catch (Exception e) {}
+        timeConsumption += (System.currentTimeMillis() - startTime);
+    }
+
+    public boolean isSet() {
+        try {
+            if (set == null) {
+                db.get("foo");
+                return (set = true);
+            } else {
+                return set;
+            }
+        } catch (Exception e) {
+            set = false;
+            return false;
+        }
+    }
 }

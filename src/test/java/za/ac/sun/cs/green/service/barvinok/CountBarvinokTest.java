@@ -3,6 +3,7 @@ package za.ac.sun.cs.green.service.barvinok;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.*;
 import java.util.Properties;
 
 import org.apfloat.Apint;
@@ -21,11 +22,13 @@ import za.ac.sun.cs.green.util.Configuration;
 public class CountBarvinokTest {
 	
 	public static Green solver = null;
-    	private static String DEFAULT_BARVINOK_PATH;
-    	private static final String BARVINOK_PATH = "barvinoklattepath";
-    	private static final String resourceName = "build.properties";
 
-    	@BeforeClass
+	@BeforeClass
+	private static String DEFAULT_BARVINOK_PATH;
+	private static final String BARVINOK_PATH = "barvinoklattepath";
+	private static final String resourceName = "build.properties";
+
+	@BeforeClass
 	public static void initialize() {	
 		solver = new Green();
 		Properties properties = new Properties();
