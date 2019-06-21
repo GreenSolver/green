@@ -27,19 +27,28 @@ public abstract class SATSMTLIBService extends SATService {
 	public SATSMTLIBService(Green solver) {
 		super(solver);
 	}
+	protected long translationTimeConsumption = 0;
+	protected int conjunctCount = 0;
+	protected int varCount = 0;
 
 	@Override
 	protected Boolean solve(Instance instance) {
 		try {
+		    long start = System.currentTimeMillis();
 			Translator t = new Translator();
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models false)");
-			b.append("(set-logic AUFLIRA)"); // AUFLIA ???
+            // TODO : changed to QF_LIA
+			b.append("(set-logic QF_LIA)"); // AUFLIA ??? (the previous logic)
 			b.append(Misc.join(t.getVariables(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
-			return solve0(b.toString());
+			String a = b.toString();
+			translationTimeConsumption += (System.currentTimeMillis() - start);
+            conjunctCount += instance.getExpression().getString().split("&&").length;
+            varCount += t.getVariables().size();
+            return solve0(a);
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
 		} catch (VisitorException x) {
@@ -92,7 +101,7 @@ public abstract class SATSMTLIBService extends SATService {
 		private final List<String> domains;
 
 		public Translator() {
-			stack = new Stack<SATSMTLIBService.TranslatorPair>();
+			stack = new Stack<TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
 			domains = new LinkedList<String>();
@@ -149,7 +158,7 @@ public abstract class SATSMTLIBService extends SATService {
 			long val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
@@ -199,7 +208,7 @@ public abstract class SATSMTLIBService extends SATService {
 			}
 			stack.push(new TranslatorPair(n, IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealVariable variable) {
 			String v = varMap.get(variable);
@@ -215,6 +224,7 @@ public abstract class SATSMTLIBService extends SATService {
 				// upper bound
 				b.append(") (<= ").append(n).append(' ');
 				b.append(transformNegative(variable.getUpperBound()));
+				// end
 				b.append("))");
 				domains.add(b.toString());
 				varMap.put(variable, n);

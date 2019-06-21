@@ -15,10 +15,14 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 	public ModelCoreSMTLIBService(Green solver) {
 		super(solver);
 	}
+    protected long translationTimeConsumption = 0;
+    protected int conjunctCount = 0;
+    protected int varCount = 0;
 
 	@Override
 	public ModelCore modelCore(Instance instance) {
 		try {
+            long start = System.currentTimeMillis();
 			Translator t = new Translator();
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
@@ -27,12 +31,17 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 			b.append("(set-option :auto-config false)"); // get a smaller core
 //            b.append("(set-option :relevancy 0)"); // get a smaller core
 //            b.append("(set-option :solver false)"); // get a smaller core
+            // TODO : changed QF_LIA
 			b.append("(set-logic QF_LIA)"); // AUFLIRA ???
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append(Misc.join(t.getClauseDecls(), " "));
 			b.append(Misc.join(t.getAsserts(), " "));
 			b.append("(check-sat)");
-			return solve0(b.toString(), t.getVariables(), t.getCoreClauseMapping());
+            String a = b.toString();
+            translationTimeConsumption += (System.currentTimeMillis() - start);
+            conjunctCount += instance.getExpression().getString().split("&&").length;
+            varCount += t.getVariables().size();
+            return solve0(a, t.getVariables(), t.getCoreClauseMapping());
 		} catch (TranslatorUnsupportedOperation x) {
 			log.log(Level.WARN, x.getMessage(), x);
 		} catch (VisitorException x) {
@@ -120,7 +129,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 			TranslatorPair p = stack.pop();
 			b.append(' ').append(p.getString()).append(')');
 			assert stack.isEmpty();
-			return b.toString();
+            return b.toString();
 		}
 
 		private String transformNegative(long v) {
@@ -144,12 +153,13 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 			long val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(IntVariable variable) {
 			String v = varMap.get(variable);
 			String n = variable.getName();
 			if (v == null) {
+			    // Declare domains
 				StringBuilder b = new StringBuilder();
 				StringBuilder bn = new StringBuilder();
 				b.append("(declare-const ").append(n).append(" Int)");
@@ -166,7 +176,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				b.append(" Bool ").append(lbound).append(')');
 				coreClauseMapping.put(PREFIX + bn, lboundExpr);
 				asserts.add(buildAssert(bn.toString()));
-				domains.add(b.toString());
+                domains.add(b.toString());
 				// upper bound
                 b.setLength(0);
                 bn.setLength(0);
@@ -199,7 +209,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				bn.setLength(0);
 				b.append("(>= ").append(n).append(' ').append(transformNegative(variable.getLowerBound())).append(')');
 				String lbound = b.toString();
-				Expression lboundExpr = new Operation(Operator.GE, variable, new IntegerConstant(variable.getLowerBound()));
+				Expression lboundExpr = new Operation(Operator.GE, variable, new IntegerConstant(variable.getLowerBound(), variable.getSize()));
 				b.setLength(0);
 				bn.append(n).append("-lower");
 				b.append("(define-const ").append(bn);
@@ -212,7 +222,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				bn.setLength(0);
 				b.append("(<= ").append(n).append(' ').append(transformNegative(variable.getUpperBound())).append(')');
 				String ubound = b.toString();
-				Expression uboundExpr = new Operation(Operator.LE, variable, new IntegerConstant(variable.getUpperBound()));
+				Expression uboundExpr = new Operation(Operator.LE, variable, new IntegerConstant(variable.getUpperBound(), variable.getSize()));
 				b.setLength(0);
 				bn.append(n).append("-upper");
 				b.append("(define-const ").append(bn);
@@ -224,7 +234,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 			}
 			stack.push(new TranslatorPair(n, IntVariable.class));
 		}
-		
+
 		private Class<? extends Variable> superType(TranslatorPair left, TranslatorPair right) {
 			if ((left.getType() == RealVariable.class) || (right.getType() == RealVariable.class)) {
 				return RealVariable.class;
@@ -349,14 +359,20 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				case OR:
 					StringBuilder bb = new StringBuilder();
 					bb.setLength(0);
+					// Name the assertions to extract unsat-cores
 					String bn = "q" + counter++;
+					// define Bool constant
 					bb.append("(define-const ").append(bn);
+					// Add assertion
 					bb.append(" Bool ").append(b.toString());
 					bb.append(')');
+					// collect assertion name and green expression (for map)
 					coreClauseMapping.put(PREFIX + bn, operation);
 					if (ordepth == 0) {
+					    // create asserts
 						asserts.add(buildAssert(bn));
 					}
+					// collect domains
 					domains.add(bb.toString());
 					break;
 				default:

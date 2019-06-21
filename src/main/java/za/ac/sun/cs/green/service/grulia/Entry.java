@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @date: 2018/06/20
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018),
+ * Supervisor:  Willem Visser   (2018,2019),
  *              Jaco Geldenhuys (2017)
  *
  * Description:
@@ -20,7 +20,7 @@ public abstract class Entry implements Comparable<Entry>, Serializable {
     private Double SATDelta;
 
     /**
-     * The solution can be a map of the models or expression of the unsat-core
+     * The solution can be a Map of the models or set of Expression of the unsat-core
      */
     private Object solution;
 
@@ -32,8 +32,7 @@ public abstract class Entry implements Comparable<Entry>, Serializable {
     public abstract Object getSolution();
 
     /**
-     * Number of variables
-     * @return
+     * @return Number of variables (in sat case)
      */
     public abstract int getSize();
 

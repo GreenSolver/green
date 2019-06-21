@@ -31,8 +31,7 @@ public class SATCanonizerService extends BasicService {
 	 * Number of times the slicer has been invoked.
 	 */
 	private int invocations = 0;
-
-	private long timeTaken = 0;
+    private long timeConsumption = 0;
 
 	public SATCanonizerService(Green solver) {
 		super(solver);
@@ -40,8 +39,8 @@ public class SATCanonizerService extends BasicService {
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
-		long start = System.currentTimeMillis();
-		@SuppressWarnings("unchecked")
+        long startTime = System.currentTimeMillis();
+        @SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
 			final Map<Variable, Variable> map = new HashMap<Variable, Variable>();
@@ -50,15 +49,15 @@ public class SATCanonizerService extends BasicService {
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
-		timeTaken += (System.currentTimeMillis() - start);
+        timeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
 	@Override
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
-		reporter.report(getClass().getSimpleName(), "time = " + timeTaken);
-	}
+        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+    }
 
 	public Expression canonize(Expression expression, Map<Variable, Variable> map) {
 		try {
@@ -567,7 +566,7 @@ public class SATCanonizerService extends BasicService {
 			for (Map.Entry<Variable, Long> e : coefficients.entrySet()) {
 				long coef = e.getValue();
 				if (coef != 0) {
-					Operation term = new Operation(Operation.Operator.MUL, new IntegerConstant(coef), e.getKey());
+					Operation term = new Operation(Operation.Operator.MUL, new IntegerConstant(coef, ((IntegerVariable) e.getKey()).getSize()), e.getKey());
 					if (lr == null) {
 						lr = term;
 					} else {
@@ -576,11 +575,13 @@ public class SATCanonizerService extends BasicService {
 				}
 			}
 			if ((lr == null) || (lr instanceof IntConstant)) {
-				return new IntegerConstant(s);
+                return new IntConstant((int) s);
+            } else if (lr instanceof IntegerConstant) {
+			    return new IntegerConstant(s, ((IntegerConstant) lr).getSize());
 			} else if (s == 0) {
 				return lr;
 			} else {
-				return new Operation(Operation.Operator.ADD, lr, new IntegerConstant(s));
+				return new Operation(Operation.Operator.ADD, lr, new IntegerConstant(s, ((IntegerConstant) lr).getSize()));
 			}
 		}
 
@@ -623,7 +624,7 @@ public class SATCanonizerService extends BasicService {
 			} else if (expression instanceof IntVariable) {
 				return expression;
 			} else if (expression instanceof IntegerConstant) {
-				return new IntegerConstant(factor * ((IntegerConstant) expression).getValue());
+				return new IntegerConstant(factor * ((IntegerConstant) expression).getValue(), ((IntegerConstant) expression).getSize());
 			} else if (expression instanceof IntegerVariable) {
 				return expression;
 			} else {

@@ -305,6 +305,7 @@ public class Green {
 				ss.shutdown();
 			}
 		}
+		store.flushAll();
 		store.shutdown();
 		taskManager.shutdown();
 	}

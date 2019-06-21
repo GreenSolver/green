@@ -20,10 +20,11 @@ import java.util.*;
  * @date: 2017/07/26
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018),
+ * Supervisor:  Willem Visser   (2018, 2019),
  *              Jaco Geldenhuys (2017)
  *
  * Description:
+ * CNR -- Count and Recur
  * Get the recurring function from Barvinok.
  * Use the recurring function to calculate the SAT count value.
  * Stores the recurring function for reuse.
@@ -52,10 +53,10 @@ import java.util.*;
  * cat ${OUTFILE}.postiscc
  * ###########################################
  *
- * The DEFAULT_BARVENUM_PATH must be appropriately updated such that it points to
+ * The DEFAULT_CNR_PATH must be appropriately updated such that it points to
  * <isccpath> the script file.
  */
-public class BarvinokEnumerateService extends CountService {
+public class CNRService extends CountService {
 
     private static final Boolean DEBUG = false;
 
@@ -64,7 +65,15 @@ public class BarvinokEnumerateService extends CountService {
      */
     private static final String DRIVE = new File("").getAbsolutePath();
 
-    private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
+//    private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
+    private static final String DIRECTORY = DRIVE + "/out";
+
+    /*
+     * The location of the iscc executable file.
+     */
+    private final String DEFAULT_CNR_PATH;
+    private final String CNR_PATH = "barvinokisccpath";
+    private final String resourceName = "build.properties";
 
     /*
      * The location of the iscc executable file.
@@ -155,7 +164,7 @@ public class BarvinokEnumerateService extends CountService {
      */
     protected static ArrayList<IntVariable> bounds;
 
-    public BarvinokEnumerateService(Green solver, Properties properties) {
+    public CNRService(Green solver, Properties properties) {
         super(solver);
         log = solver.getLogger();
 
@@ -171,16 +180,16 @@ public class BarvinokEnumerateService extends CountService {
             }
             if (resourceStream != null) {
                 properties.load(resourceStream);
-                barvPath = properties.getProperty(BARVENUM_PATH);
+                barvPath = properties.getProperty(CNR_PATH);
                 resourceStream.close();
             }
         } catch (IOException x) {
             // ignore
         }
 
-        DEFAULT_BARVENUM_PATH = barvPath;
+        DEFAULT_CNR_PATH = barvPath;
 
-        String p = properties.getProperty("green.barvinok.path", BARVENUM_PATH);
+        String p = properties.getProperty("green.barvinok.path", CNR_PATH);
         String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
         barvinokCommand = p + ' ' + a + FILENAME;
 

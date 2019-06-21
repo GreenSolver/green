@@ -1,12 +1,14 @@
 package za.ac.sun.cs.green.service.grulia;
 
+import za.ac.sun.cs.green.Green;
+
 import java.util.*;
 
 /**
- * @date: 2018/06/20
+ * @date: 2018/08/23
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018),
+ * Supervisor:  Willem Visser   (2018,2019),
  *              Jaco Geldenhuys (2017)
  *
  * Description:
@@ -20,8 +22,8 @@ public class SatRepoB extends BinaryRepo {
     private TreeSet<Entry> entries;
     private boolean default_zero;
 
-    public SatRepoB(boolean default_zero) {
-        super(default_zero);
+    public SatRepoB(Green solver, boolean default_zero) {
+        super(solver, default_zero);
         this.entries = new TreeSet<>();
         this.default_zero = default_zero;
     }
