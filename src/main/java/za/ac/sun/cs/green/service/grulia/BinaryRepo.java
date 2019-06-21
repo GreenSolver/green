@@ -1,5 +1,6 @@
 package za.ac.sun.cs.green.service.grulia;
 
+import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.IntVariable;
 
 import java.io.Serializable;
@@ -9,7 +10,7 @@ import java.util.*;
  * @date: 2018/06/20
  * @author: JH Taljaard.
  * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018),
+ * Supervisor:  Willem Visser   (2018,2019),
  *              Jaco Geldenhuys (2017)
  *
  * Description:
@@ -21,11 +22,13 @@ public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializabl
      * Contains the entries in the repo.
      */
     private TreeSet<Entry> entries;
+    private Green solver;
     private boolean default_zero;
 
-    public BinaryRepo(boolean default_zero) {
+    public BinaryRepo(Green solver, boolean default_zero) {
         this.entries = new TreeSet<>();
         this.default_zero = default_zero;
+        this.solver = solver;
     }
 
     @Override
@@ -45,6 +48,9 @@ public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializabl
         this.entries.add(entry);
     }
 
+    /**
+     * @return all entries
+     */
     public Entry[] getEntries() {
         return (Entry[]) entries.toArray();
     }
@@ -56,8 +62,19 @@ public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializabl
         return this.entries.size();
     }
 
+    /**
+     * Get the next entry in the list, filtered by the numOfVars.
+     * @param list List of entries
+     * @param numOfVars integer specifying the filter
+     * @return the next Entry or null
+     */
     protected abstract Entry next(Iterator<Entry> list, int numOfVars);
 
+    /**
+     * Creates a copy of all the entries in sorted order.
+     * @param numOfVars number of variables in constraints to filter by
+     * @return copy of all entries
+     */
     private Entry[] allEntries(int numOfVars) {
         int n = this.size();
         Entry[] entriesCopy = new Entry[n];
@@ -74,6 +91,14 @@ public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializabl
         return entriesCopy;
     }
 
+    /**
+     * Search through repo to get k number of entries closest to the target sd.
+     *
+     * @param sd SATDelta value of target
+     * @param k number of entries to obtain
+     * @param numOfVars number of variables to filter by
+     * @return array of closest entries
+     */
     private Entry[] binarySearch(Double sd, int k, int numOfVars) {
         SatEntry dummy = new SatEntry(sd, null);
         NavigableSet<Entry> head = entries.headSet(dummy,true);
@@ -87,9 +112,12 @@ public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializabl
 
         double deltaU, deltaL;
         Entry[] closests = new Entry[k];
-
+        // Do not have to check if size is less than k, because it is already
+        // done before this method is called.
         for (int i = 0; i < k; i++) {
-
+            // This strategy searches one up and one down,
+            // from target and so on, taking the one with the smallest difference first,
+            // until k entries are chosen.
             if (u != null) {
                 deltaU = u.getSATDelta() - sd;
             } else {
@@ -147,5 +175,29 @@ public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializabl
         } else {
             return this.filterByProximity(SATDelta, variables, k);
         }
+    }
+
+    /**
+     * Flush all of the repo entries to the Green store
+     * (ideally when the store is Redis or some persistent storage.)
+     */
+    @Override
+    public void flushAll() {
+        for (Entry e : getEntries()) {
+            solver.getStore().put(String.valueOf(e.hashCode()), e);
+        }
+    }
+
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for (Entry e : entries) {
+            s.append(e.toString()).append(", ");
+        }
+        return s.toString();
+    }
+
+    @Override
+    public void clear() {
+        entries.clear();
     }
 }

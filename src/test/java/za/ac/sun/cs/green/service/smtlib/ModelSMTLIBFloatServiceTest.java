@@ -33,7 +33,7 @@ public class ModelSMTLIBFloatServiceTest {
     
 	@Test
 	public void test01() {
-		RealVariable v = new RealVariable("v", -99.0, 99.0);
+		RealVariable v = new RealVariable("v", -99.0, 99.0, 32);
 		RealConstant c = new RealConstant(-0.5);
 		Operation o = new Operation(Operation.Operator.LE, v, c);
 		
@@ -69,7 +69,7 @@ public class ModelSMTLIBFloatServiceTest {
 	public void test03() {
 		IntVariable v1 = new IntVariable("v1", 0, 50);
 		IntConstant c1 = new IntConstant(2);
-		RealVariable v2 = new RealVariable("v2", 0.0, 50.0);
+		RealVariable v2 = new RealVariable("v2", 0.0, 50.0, 32);
 		RealConstant c2 = new RealConstant(25.5);
 		
 		Operation t1 =  new Operation(Operator.GT, v2, c2);

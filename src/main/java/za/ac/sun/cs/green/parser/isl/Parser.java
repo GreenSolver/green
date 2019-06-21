@@ -4,10 +4,9 @@ import za.ac.sun.cs.green.expr.*;
 import java.util.HashMap;
 
 /**
- * @date: 2017/08/14
+ * @date: 2018/10/10
  * @author: JH Taljaard.
  * @contributor: Jaco Geldenhuys
- * Student Number: 18509193.
  *
  * Description:
  * Parser for the isl output of Barvinok.
@@ -34,7 +33,7 @@ public class Parser {
         cases = new HashMap<>();
     }
 
-    public HashMap getCases() {
+    public HashMap<Expression, Expression> getCases() {
         return cases;
     }
 

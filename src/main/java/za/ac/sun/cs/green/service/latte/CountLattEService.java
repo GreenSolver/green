@@ -1,11 +1,6 @@
 package za.ac.sun.cs.green.service.latte;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Collections;
@@ -80,7 +75,8 @@ public class CountLattEService extends CountService {
 	/**
 	 * The location of the LattE executable file.
 	 */
-	private final String DEFAULT_LATTE_PATH = "count";
+	private final String DEFAULT_LATTE_PATH;
+    private static final String LATTE_PATH = "lattepath";
 
 	/**
 	 * Options passed to the LattE executable.
@@ -101,6 +97,29 @@ public class CountLattEService extends CountService {
 	public CountLattEService(Green solver, Properties properties) {
 		super(solver);
 		log = solver.getLogger();
+
+        String lattePath = new File("").getAbsolutePath() + "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
+        InputStream is = null;
+        try {
+            is = new FileInputStream("build.properties");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (is != null) {
+            // If properties are correct, override with that specified path.
+            Properties p = new Properties();
+            try {
+                p.load(is);
+                lattePath = p.getProperty(LATTE_PATH);
+                is.close();
+            } catch (IOException e) {
+                // do nothing
+            }
+        }
+
+        DEFAULT_LATTE_PATH = lattePath;
+
 		String p = properties.getProperty("green.latte.path", DEFAULT_LATTE_PATH);
 		String a = properties.getProperty("green.latte.args", DEFAULT_LATTE_ARGS);
 		latteCommand = p + ' ' + a + ' ' + FILENAME;
