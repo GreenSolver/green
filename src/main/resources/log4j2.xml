@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" strict="true">
-    <Appenders>
-	    	<Console name="LOG" target="SYSTEM_OUT">
-	    		<PatternLayout pattern="%-6level %msg%n"/>
-	    	</Console>
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT" direct="true">
+			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+      		<PatternLayout pattern="%msg%n"/>
+  		</Console>
+		<File name="FILE" fileName="/tmp/green.log" append="false">
+      		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%T} %msg%n"/>
+		</File>
 	</Appenders>
 	<Loggers>
-    		<Root level="ALL">
-    			<AppenderRef ref="LOG"/>
-    		</Root>
-    </Loggers>
+		<Logger name="GREEN-TEST" level="ALL" additivity="false"/>
+		<Logger name="GREEN-QUIET" level="ALL" additivity="false">
+			<AppenderRef ref="CONSOLE"/>
+		</Logger>
+   		<Root level="ALL">
+			<AppenderRef ref="CONSOLE"/>
+			<AppenderRef ref="FILE"/>
+		</Root>
+	</Loggers>
 </Configuration>

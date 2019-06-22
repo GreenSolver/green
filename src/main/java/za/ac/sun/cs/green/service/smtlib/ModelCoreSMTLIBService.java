@@ -13,8 +13,6 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.IntegerConstant;
-import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.expr.RealVariable;
@@ -171,12 +169,6 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 		}
 
 		@Override
-		public void postVisit(IntegerConstant constant) {
-			long val = constant.getValue();
-			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
-		}
-
-		@Override
 		public void postVisit(IntVariable variable) {
 			String v = varMap.get(variable);
 			String n = variable.getName();
@@ -205,48 +197,6 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 				b.append("(<= ").append(n).append(' ').append(transformNegative(variable.getUpperBound())).append(')');
 				String ubound = b.toString();
 				Expression uboundExpr = new Operation(Operator.LE, variable, new IntConstant(variable.getUpperBound()));
-				b.setLength(0);
-				bn.append(n).append("-upper");
-				b.append("(define-const ").append(bn);
-				b.append(" Bool ").append(ubound).append(')');
-				coreClauseMapping.put(PREFIX + bn, uboundExpr);
-				asserts.add(buildAssert(bn.toString()));
-				domains.add(b.toString());
-				varMap.put(variable, n);
-			}
-			stack.push(new TranslatorPair(n, IntVariable.class));
-		}
-
-		@Override
-		public void postVisit(IntegerVariable variable) {
-			String v = varMap.get(variable);
-			String n = variable.getName();
-			if (v == null) {
-				StringBuilder b = new StringBuilder();
-				StringBuilder bn = new StringBuilder();
-				b.append("(declare-const ").append(n).append(" Int)");
-				defs.add(b.toString());
-				// lower bound
-				b.setLength(0);
-				bn.setLength(0);
-				b.append("(>= ").append(n).append(' ').append(transformNegative(variable.getLowerBound())).append(')');
-				String lbound = b.toString();
-				Expression lboundExpr = new Operation(Operator.GE, variable,
-						new IntegerConstant(variable.getLowerBound(), variable.getSize()));
-				b.setLength(0);
-				bn.append(n).append("-lower");
-				b.append("(define-const ").append(bn);
-				b.append(" Bool ").append(lbound).append(')');
-				coreClauseMapping.put(PREFIX + bn, lboundExpr);
-				asserts.add(buildAssert(bn.toString()));
-				domains.add(b.toString());
-				// upper bound
-				b.setLength(0);
-				bn.setLength(0);
-				b.append("(<= ").append(n).append(' ').append(transformNegative(variable.getUpperBound())).append(')');
-				String ubound = b.toString();
-				Expression uboundExpr = new Operation(Operator.LE, variable,
-						new IntegerConstant(variable.getUpperBound(), variable.getSize()));
 				b.setLength(0);
 				bn.append(n).append("-upper");
 				b.append("(define-const ").append(bn);

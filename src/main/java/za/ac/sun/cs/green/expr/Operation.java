@@ -270,22 +270,10 @@ public class Operation extends Expression {
 
 	private StringBuilder strRep() {
 		StringBuilder sb = new StringBuilder();
-		if ((operands[0] instanceof Constant) || (operands[0] instanceof Variable)) {
-			sb.append(operands[0].getString());
-		} else {
-//			sb.append('(');
-			sb.append(operands[0].getString());
-//			sb.append(')');
+		sb.append(operands[0].getString());
+		for (int i = 1, n = operands.length; i < n; i++) {
+			sb.append(' ').append(operands[i].getString());
 		}
-		sb.append(operator.toString());
-		if ((operands[1] instanceof Constant) || (operands[1] instanceof Variable)) {
-			sb.append(operands[1].getString());
-		} else {
-//		    sb.append('(');
-			sb.append(operands[1].getString());
-//			sb.append(')');
-		}
-
 		return sb;
 	}
 

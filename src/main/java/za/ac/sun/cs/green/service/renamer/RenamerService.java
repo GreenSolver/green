@@ -16,7 +16,6 @@ import java.util.TreeSet;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
@@ -105,8 +104,6 @@ public class RenamerService extends BasicService {
 			if (linearInteger && !unsatisfiable) {
 				if (variable instanceof IntVariable) {
 					variableSet.add(variable);
-				} else if (variable instanceof IntegerVariable) {
-					variableSet.add(variable);
 				} else {
 					linearInteger = false;
 				}
@@ -135,17 +132,6 @@ public class RenamerService extends BasicService {
 			Variable v = map.get(variable);
 			if (v == null) {
 				v = new IntVariable("v" + map.size(), variable.getLowerBound(), variable.getUpperBound());
-				map.put(variable, v);
-			}
-			stack.push(v);
-		}
-
-		@Override
-		public void postVisit(IntegerVariable variable) {
-			Variable v = map.get(variable);
-			if (v == null) {
-				v = new IntegerVariable("v" + map.size(), variable.getLowerBound(), variable.getUpperBound(),
-						variable.getSize());
 				map.put(variable, v);
 			}
 			stack.push(v);
