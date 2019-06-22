@@ -2,6 +2,8 @@ package za.ac.sun.cs.green.expr;
 
 public class IntConstant extends Constant {
 
+	private static final long serialVersionUID = 1218090840820645022L;
+
 	private final int value;
 
 	public IntConstant(final int value) {

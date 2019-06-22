@@ -17,11 +17,11 @@ public abstract class BasicStore implements Store {
 
 	protected final Green solver;
 
-	protected final Logger LOGGER;
+	protected final Logger log;
 
 	public BasicStore(Green solver) {
 		this.solver = solver;
-		LOGGER = solver.getLogger();
+		log = solver.getLogger();
 	}
 
 	@Override

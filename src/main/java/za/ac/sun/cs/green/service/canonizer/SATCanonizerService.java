@@ -31,7 +31,7 @@ public class SATCanonizerService extends BasicService {
 	 * Number of times the slicer has been invoked.
 	 */
 	private int invocations = 0;
-    private long timeConsumption = 0;
+	private long timeConsumption = 0;
 
 	public SATCanonizerService(Green solver) {
 		super(solver);
@@ -39,8 +39,8 @@ public class SATCanonizerService extends BasicService {
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
-        long startTime = System.currentTimeMillis();
-        @SuppressWarnings("unchecked")
+		long startTime = System.currentTimeMillis();
+		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
 			final Map<Variable, Variable> map = new HashMap<Variable, Variable>();
@@ -49,19 +49,19 @@ public class SATCanonizerService extends BasicService {
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
-        timeConsumption += (System.currentTimeMillis() - startTime);
+		timeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
 	@Override
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-    }
+		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+	}
 
 	public Expression canonize(Expression expression, Map<Variable, Variable> map) {
 		try {
-			//log.debug("Before Canonization: {}", expression);
+			// log.debug("Before Canonization: {}", expression);
 			invocations++;
 			OrderingVisitor orderingVisitor = new OrderingVisitor();
 			expression.accept(orderingVisitor);
@@ -72,7 +72,7 @@ public class SATCanonizerService extends BasicService {
 			if (canonized != null) {
 				canonized = new Renamer(map, canonizationVisitor.getVariableSet()).rename(canonized);
 			}
-			//log.debug("After Canonization: {}", canonized);
+			// log.debug("After Canonization: {}", canonized);
 			return canonized;
 		} catch (VisitorException x) {
 			log.fatal("encountered an exception -- this should not be happening!", x);
@@ -84,7 +84,7 @@ public class SATCanonizerService extends BasicService {
 
 		private Stack<Expression> stack;
 
-		public OrderingVisitor() {
+		OrderingVisitor() {
 			stack = new Stack<Expression>();
 		}
 
@@ -175,7 +175,7 @@ public class SATCanonizerService extends BasicService {
 
 		private boolean linearInteger;
 
-		public CanonizationVisitor() {
+		CanonizationVisitor() {
 			stack = new Stack<Expression>();
 			conjuncts = new TreeSet<Expression>();
 			variableSet = new TreeSet<IntVariable>();
@@ -202,7 +202,7 @@ public class SATCanonizerService extends BasicService {
 					}
 				}
 				SortedSet<Expression> newConjuncts = processBounds();
-				//				new TreeSet<Expression>();
+				// new TreeSet<Expression>();
 				Expression c = null;
 				for (Expression e : newConjuncts) {
 					if (e.equals(Operation.FALSE)) {
@@ -474,11 +474,11 @@ public class SATCanonizerService extends BasicService {
 						default:
 							break;
 						}
-					} else {
+						// } else {
 						// We just drop the NOT??
 					}
 					stack.push(e);
-				} else {
+					// } else {
 					// We just drop the NOT??
 				}
 				break;
@@ -566,7 +566,8 @@ public class SATCanonizerService extends BasicService {
 			for (Map.Entry<Variable, Long> e : coefficients.entrySet()) {
 				long coef = e.getValue();
 				if (coef != 0) {
-					Operation term = new Operation(Operation.Operator.MUL, new IntegerConstant(coef, ((IntegerVariable) e.getKey()).getSize()), e.getKey());
+					Operation term = new Operation(Operation.Operator.MUL,
+							new IntegerConstant(coef, ((IntegerVariable) e.getKey()).getSize()), e.getKey());
 					if (lr == null) {
 						lr = term;
 					} else {
@@ -575,13 +576,14 @@ public class SATCanonizerService extends BasicService {
 				}
 			}
 			if ((lr == null) || (lr instanceof IntConstant)) {
-                return new IntConstant((int) s);
-            } else if (lr instanceof IntegerConstant) {
-			    return new IntegerConstant(s, ((IntegerConstant) lr).getSize());
+				return new IntConstant((int) s);
+			} else if (lr instanceof IntegerConstant) {
+				return new IntegerConstant(s, ((IntegerConstant) lr).getSize());
 			} else if (s == 0) {
 				return lr;
 			} else {
-				return new Operation(Operation.Operator.ADD, lr, new IntegerConstant(s, ((IntegerConstant) lr).getSize()));
+				return new Operation(Operation.Operator.ADD, lr,
+						new IntegerConstant(s, ((IntegerConstant) lr).getSize()));
 			}
 		}
 
@@ -624,7 +626,8 @@ public class SATCanonizerService extends BasicService {
 			} else if (expression instanceof IntVariable) {
 				return expression;
 			} else if (expression instanceof IntegerConstant) {
-				return new IntegerConstant(factor * ((IntegerConstant) expression).getValue(), ((IntegerConstant) expression).getSize());
+				return new IntegerConstant(factor * ((IntegerConstant) expression).getValue(),
+						((IntegerConstant) expression).getSize());
 			} else if (expression instanceof IntegerVariable) {
 				return expression;
 			} else {
@@ -645,7 +648,7 @@ public class SATCanonizerService extends BasicService {
 
 		private Stack<Expression> stack;
 
-		public Renamer(Map<Variable, Variable> map, SortedSet<IntVariable> variableSet) {
+		Renamer(Map<Variable, Variable> map, SortedSet<IntVariable> variableSet) {
 			this.map = map;
 			stack = new Stack<Expression>();
 		}
@@ -673,7 +676,7 @@ public class SATCanonizerService extends BasicService {
 		@Override
 		public void postVisit(Operation operation) {
 			int arity = operation.getOperator().getArity();
-			Expression operands[] = new Expression[arity];
+			Expression[] operands = new Expression[arity];
 			for (int i = arity; i > 0; i--) {
 				operands[i - 1] = stack.pop();
 			}

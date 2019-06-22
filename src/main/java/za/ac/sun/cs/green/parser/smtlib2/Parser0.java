@@ -18,7 +18,7 @@ public class Parser0 {
 	public Parser0(Scanner0 scanner) {
 		this(scanner, new NullLogger());
 	}
-	
+
 	public void parse() throws ParseException {
 		log.entering("", "parse");
 		while (true) {
@@ -110,7 +110,7 @@ public class Parser0 {
 		parseOption();
 		log.exiting("", "parseSetOption");
 	}
-	
+
 	/**
 	 * Parse "set-info <attribute>".
 	 * 
@@ -322,7 +322,7 @@ public class Parser0 {
 		parseInfoFlag();
 		log.exiting("", "parseGetInfo");
 	}
-	
+
 	/**
 	 * Parse "exit".
 	 * 
@@ -399,7 +399,7 @@ public class Parser0 {
 		}
 		log.exiting("", "parseOption");
 	}
-	
+
 	/**
 	 * Parse an attribute.
 	 * 
@@ -417,7 +417,8 @@ public class Parser0 {
 		log.entering("", "parseAttribute");
 		scanner.expect(Token0.KEYWORD);
 		Token0 t = scanner.next();
-		if ((t == Token0.NUMERAL) || (t == Token0.DECIMAL) || (t == Token0.HEXADECIMAL) || (t == Token0.BINARY) || (t == Token0.STRING)) {
+		if ((t == Token0.NUMERAL) || (t == Token0.DECIMAL) || (t == Token0.HEXADECIMAL) || (t == Token0.BINARY)
+				|| (t == Token0.STRING)) {
 			parseSpecConstant();
 		} else if (t == Token0.SYMBOL) {
 			scanner.expect(Token0.SYMBOL);
@@ -430,7 +431,7 @@ public class Parser0 {
 		}
 		log.exiting("", "parseAttribute");
 	}
-	
+
 	/**
 	 * Parse an s-expression.
 	 * 
@@ -446,7 +447,8 @@ public class Parser0 {
 	private void parseSExpr() throws ParseException {
 		log.entering("", "parseSExpr");
 		Token0 t = scanner.next();
-		if ((t == Token0.NUMERAL) || (t == Token0.DECIMAL) || (t == Token0.HEXADECIMAL) || (t == Token0.BINARY) || (t == Token0.STRING)) {
+		if ((t == Token0.NUMERAL) || (t == Token0.DECIMAL) || (t == Token0.HEXADECIMAL) || (t == Token0.BINARY)
+				|| (t == Token0.STRING)) {
 			parseSpecConstant();
 		} else if (t == Token0.SYMBOL) {
 			scanner.expect(Token0.SYMBOL);
@@ -458,10 +460,10 @@ public class Parser0 {
 				parseSExpr();
 			}
 			scanner.expect(Token0.RPAREN);
-		}		
+		}
 		log.exiting("", "parseSExpr");
 	}
-	
+
 	/**
 	 * Parse a boolean value.
 	 * 
@@ -474,14 +476,12 @@ public class Parser0 {
 	 */
 	private void parseBValue() throws ParseException {
 		log.entering("", "parseBValue");
-		if (scanner.eat(Token0.TRUE)) {
-		} else if (scanner.eat(Token0.FALSE)) {
-		} else {
+		if (!scanner.eat(Token0.TRUE) && !scanner.eat(Token0.FALSE)) {
 			throw new ParseException("unexpected token " + scanner.next());
 		}
 		log.exiting("", "parseBValue");
 	}
-	
+
 	/**
 	 * Parse an identifier.
 	 * 
@@ -508,7 +508,7 @@ public class Parser0 {
 		}
 		log.exiting("", "parseIdentifier");
 	}
-	
+
 	/**
 	 * Parse a sort.
 	 * 
@@ -544,7 +544,7 @@ public class Parser0 {
 		}
 		log.exiting("", "parseSort");
 	}
-	
+
 	/**
 	 * Parse a sorted variable.
 	 * 
@@ -562,7 +562,7 @@ public class Parser0 {
 		scanner.expect(Token0.RPAREN);
 		log.exiting("", "parseSortedVar");
 	}
-	
+
 	/**
 	 * Parse a term.
 	 * 
@@ -576,8 +576,8 @@ public class Parser0 {
 	 *        | "(" "!" term attribute { attribute } ")".
 	 * </pre>
 	 * 
-	 * We have to inline the definition of <code>qual_identifier</code> because
-	 * it may start with a "(".
+	 * We have to inline the definition of <code>qual_identifier</code> because it
+	 * may start with a "(".
 	 * 
 	 * <pre>
 	 * qual_identifier ::= identifier
@@ -682,7 +682,7 @@ public class Parser0 {
 		}
 		log.exiting("", "parseQualIdentifier");
 	}
-	
+
 	/**
 	 * Parse a variable binding.
 	 * 
@@ -700,7 +700,7 @@ public class Parser0 {
 		scanner.expect(Token0.RPAREN);
 		log.exiting("", "parseVarBinding");
 	}
-	
+
 	/**
 	 * Parse a special constant.
 	 * 
@@ -736,7 +736,7 @@ public class Parser0 {
 		}
 		log.exiting("", "parseSpecConstant");
 	}
-	
+
 	/**
 	 * Parse an information flag.
 	 * 
@@ -757,23 +757,23 @@ public class Parser0 {
 		log.entering("", "parseInfoFlag");
 		Keyword0 k = scanner.expectKeyword();
 		if (k == Keyword0.ERROR_BEHAVIOR) {
-			// ???
+			log.info("INCOMPLETE");
 		} else if (k == Keyword0.NAME) {
-			// ???
+			log.info("INCOMPLETE");
 		} else if (k == Keyword0.AUTHORS) {
-			// ???
+			log.info("INCOMPLETE");
 		} else if (k == Keyword0.VERSION) {
-			// ???
+			log.info("INCOMPLETE");
 		} else if (k == Keyword0.STATUS) {
-			// ???
+			log.info("INCOMPLETE");
 		} else if (k == Keyword0.REASON_UNKNOWN) {
-			// ???
+			log.info("INCOMPLETE");
 		} else if (k == Keyword0.ALL_STATISTICS) {
-			// ???
+			log.info("INCOMPLETE");
 		} else {
 			scanner.expect(Token0.KEYWORD);
 		}
 		log.exiting("", "parseInfoFlag");
 	}
-	
+
 }

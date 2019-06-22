@@ -1,27 +1,29 @@
 package za.ac.sun.cs.green.service.bounder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.IntegerConstant;
-import za.ac.sun.cs.green.expr.IntegerVariable;
+//import za.ac.sun.cs.green.expr.IntegerConstant;
+//import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.util.Configuration;
 
 public class BounderServiceTest {
 
 	public static Green solver;
-    private final static int SIZE32 = 32;
-    private final static int SIZE64 = 64;
+//    private final static int SIZE32 = 32;
+//    private final static int SIZE64 = 64;
 
 	@BeforeClass
 	public static void initialize() {
@@ -29,10 +31,8 @@ public class BounderServiceTest {
 		Properties props = new Properties();
 		props.setProperty("green.services", "bound");
 		props.setProperty("green.service.bound", "(bounder sink)");
-		props.setProperty("green.service.bound.bounder",
-				"za.ac.sun.cs.green.service.bounder.BounderService");
-		props.setProperty("green.service.bound.sink",
-				"za.ac.sun.cs.green.service.sink.SinkService");
+		props.setProperty("green.service.bound.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
+		props.setProperty("green.service.bound.sink", "za.ac.sun.cs.green.service.sink.SinkService");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}
@@ -44,16 +44,14 @@ public class BounderServiceTest {
 			if (p == 0) {
 				observed = observed.substring(p + s.length());
 			} else if (p > 0) {
-				observed = observed.substring(0, p - 1)
-						+ observed.substring(p + s.length());
+				observed = observed.substring(0, p - 1) + observed.substring(p + s.length());
 			}
 		}
 		observed = observed.replaceAll("[()&]", "");
 		assertEquals("", observed);
 	}
 
-	private void check(Expression expression, String full,
-			String... expected) {
+	private void check(Expression expression, String full, String... expected) {
 		Instance i = new Instance(solver, null, expression);
 		Expression e = i.getExpression();
 		assertTrue(e.equals(expression));
@@ -84,142 +82,109 @@ public class BounderServiceTest {
 		Operation o = new Operation(Operation.Operator.AND, o1, o2);
 		check(o, "(v1==0)&&(v2==0)", "v1==0", "v1>=0", "v1<=99", "v2==0", "v2>=9", "v2<=19");
 	}
-	
-	@Test
-	public void test01b() {
-		IntegerVariable v = new IntegerVariable("v", 0, 999999999999L, SIZE64);
-		IntegerConstant c = new IntegerConstant(0, SIZE64);
-		Operation o = new Operation(Operation.Operator.EQ, v, c);
-		check(o, "v==0", "v==0", "v>=0", "v<=999999999999");
-	}
-	
-	@Test
-	public void test02b() {
-		IntegerVariable v1 = new IntegerVariable("v1", 0, 99, SIZE32);
-		IntegerVariable v2 = new IntegerVariable("v2", 9, 19, SIZE32);
-		IntegerConstant c = new IntegerConstant(0, SIZE32);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c);
-		Operation o2 = new Operation(Operation.Operator.EQ, v2, c);
-		Operation o = new Operation(Operation.Operator.AND, o1, o2);
-		check(o, "(v1==0)&&(v2==0)", "v1==0", "v1>=0", "v1<=99", "v2==0", "v2>=9", "v2<=19");
-	}
-	
+
+//	@Test
+//	public void test01b() {
+//		IntegerVariable v = new IntegerVariable("v", 0, 999999999999L, SIZE64);
+//		IntegerConstant c = new IntegerConstant(0, SIZE64);
+//		Operation o = new Operation(Operation.Operator.EQ, v, c);
+//		check(o, "v==0", "v==0", "v>=0", "v<=999999999999");
+//	}
+
+//	@Test
+//	public void test02b() {
+//		IntegerVariable v1 = new IntegerVariable("v1", 0, 99, SIZE32);
+//		IntegerVariable v2 = new IntegerVariable("v2", 9, 19, SIZE32);
+//		IntegerConstant c = new IntegerConstant(0, SIZE32);
+//		Operation o1 = new Operation(Operation.Operator.EQ, v1, c);
+//		Operation o2 = new Operation(Operation.Operator.EQ, v2, c);
+//		Operation o = new Operation(Operation.Operator.AND, o1, o2);
+//		check(o, "(v1==0)&&(v2==0)", "v1==0", "v1>=0", "v1<=99", "v2==0", "v2>=9", "v2<=19");
+//	}
+//	
 }
 
 /*
-
-	@Test
-	public void test02a() {
-		IntConstant c1 = new IntConstant(2);
-		IntConstant c2 = new IntConstant(2);
-		Operation o = new Operation(Operation.Operator.EQ, c1, c2);
-		check(o, "2==2", "2==2");
-	}
-	
-	@Test
-	public void test02b() {
-		IntConstant c1 = new IntConstant(2);
-		IntConstant c2 = new IntConstant(2);
-		Operation o = new Operation(Operation.Operator.LT, c1, c2);
-		check(o, "2<2", "2<2");
-	}
-	
-	@Test
-	public void test03() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntConstant c1 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		IntVariable v2 = new IntVariable("v2", 0, 99);
-		IntConstant c2 = new IntConstant(1);
-		Operation o2 = new Operation(Operation.Operator.NE, v2, c2);
-		check(o1, o2, "(v1==0)&&(v2!=1)", "v1==0");
-	}
-
-	@Test
-	public void test04() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntConstant c1 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		IntVariable v2 = new IntVariable("v2", 0, 99);
-		IntConstant c2 = new IntConstant(1);
-		Operation o2 = new Operation(Operation.Operator.NE, v2, c2);
-		check(o1, o2, "(v1==0)&&(v2!=1)", "v1==0");
-	}
-	
-	@Test
-	public void test05() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntConstant c1 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		IntConstant c2 = new IntConstant(1);
-		Operation o2 = new Operation(Operation.Operator.NE, v1, c2);
-		check(o1, o2, "(v1==0)&&(v1!=1)", "v1==0", "v1!=1");
-	}
-	
-	@Test
-	public void test06() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntVariable v2 = new IntVariable("v2", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, v2);
-		IntVariable v3 = new IntVariable("v3", 0, 99);
-		Operation o2 = new Operation(Operation.Operator.EQ, v2, v3);
-		IntVariable v4 = new IntVariable("v4", 0, 99);
-		Operation o3 = new Operation(Operation.Operator.EQ, v3, v4);
-		IntVariable v5 = new IntVariable("v5", 0, 99);
-		Operation o4 = new Operation(Operation.Operator.EQ, v4, v5);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		check(o1, o234, "(v1==v2)&&((v2==v3)&&((v3==v4)&&(v4==v5)))", "v1==v2", "v2==v3", "v3==v4", "v4==v5");
-	}
-	
-	@Test
-	public void test07() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntVariable v2 = new IntVariable("v2", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, v2);
-		IntVariable v3 = new IntVariable("v3", 0, 99);
-		Operation o2 = new Operation(Operation.Operator.EQ, v2, v3);
-		IntVariable v4 = new IntVariable("v4", 0, 99);
-		Operation o3 = new Operation(Operation.Operator.EQ, v3, v4);
-		IntVariable v5 = new IntVariable("v5", 0, 99);
-		IntVariable v6 = new IntVariable("v6", 0, 99);
-		Operation o4 = new Operation(Operation.Operator.EQ, v5, v6);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		check(o1, o234, "(v1==v2)&&((v2==v3)&&((v3==v4)&&(v5==v6)))", "v2==v3", "v3==v4", "v1==v2");
-	}
-	
-	@Test
-	public void test08() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntVariable v2 = new IntVariable("v2", 0, 99);
-		IntVariable v3 = new IntVariable("v3", 0, 99);
-		IntVariable v4 = new IntVariable("v4", 0, 99);
-		IntVariable v5 = new IntVariable("v5", 0, 99);
-		IntVariable v6 = new IntVariable("v6", 0, 99);
-		IntVariable v7 = new IntVariable("v7", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.LT, v1, new Operation(Operation.Operator.ADD, v2, v3));
-		Operation o2 = new Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD, v4, v5));
-		Operation o3 = new Operation(Operation.Operator.LT, v3, new Operation(Operation.Operator.ADD, v6, v7));
-		Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
-		check(o1, o23, "(v1<(v2+v3))&&((v2<(v4+v5))&&(v3<(v6+v7)))", "v1<(v2+v3)", "v3<(v6+v7)", "v2<(v4+v5)");
-	}
-	
-	@Test
-	public void test09() {
-		IntVariable v1 = new IntVariable("v1", 0, 99);
-		IntVariable v2 = new IntVariable("v2", 0, 99);
-		IntVariable v3 = new IntVariable("v3", 0, 99);
-		IntVariable v4 = new IntVariable("v4", 0, 99);
-		IntVariable v5 = new IntVariable("v5", 0, 99);
-		IntVariable v6 = new IntVariable("v6", 0, 99);
-		IntVariable v7 = new IntVariable("v7", 0, 99);
-		IntVariable v8 = new IntVariable("v8", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.LT, v1, new Operation(Operation.Operator.ADD, v2, v3));
-		Operation o2 = new Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD, v4, v5));
-		Operation o3 = new Operation(Operation.Operator.LT, v6, new Operation(Operation.Operator.ADD, v7, v8));
-		Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
-		check(o1, o23, "(v1<(v2+v3))&&((v2<(v4+v5))&&(v6<(v7+v8)))", "v1<(v2+v3)", "v2<(v4+v5)");
-	}
-	
-*/
+ * 
+ * @Test public void test02a() { IntConstant c1 = new IntConstant(2);
+ * IntConstant c2 = new IntConstant(2); Operation o = new
+ * Operation(Operation.Operator.EQ, c1, c2); check(o, "2==2", "2==2"); }
+ * 
+ * @Test public void test02b() { IntConstant c1 = new IntConstant(2);
+ * IntConstant c2 = new IntConstant(2); Operation o = new
+ * Operation(Operation.Operator.LT, c1, c2); check(o, "2<2", "2<2"); }
+ * 
+ * @Test public void test03() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntConstant c1 = new IntConstant(0); Operation o1 = new
+ * Operation(Operation.Operator.EQ, v1, c1); IntVariable v2 = new
+ * IntVariable("v2", 0, 99); IntConstant c2 = new IntConstant(1); Operation o2 =
+ * new Operation(Operation.Operator.NE, v2, c2); check(o1, o2,
+ * "(v1==0)&&(v2!=1)", "v1==0"); }
+ * 
+ * @Test public void test04() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntConstant c1 = new IntConstant(0); Operation o1 = new
+ * Operation(Operation.Operator.EQ, v1, c1); IntVariable v2 = new
+ * IntVariable("v2", 0, 99); IntConstant c2 = new IntConstant(1); Operation o2 =
+ * new Operation(Operation.Operator.NE, v2, c2); check(o1, o2,
+ * "(v1==0)&&(v2!=1)", "v1==0"); }
+ * 
+ * @Test public void test05() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntConstant c1 = new IntConstant(0); Operation o1 = new
+ * Operation(Operation.Operator.EQ, v1, c1); IntConstant c2 = new
+ * IntConstant(1); Operation o2 = new Operation(Operation.Operator.NE, v1, c2);
+ * check(o1, o2, "(v1==0)&&(v1!=1)", "v1==0", "v1!=1"); }
+ * 
+ * @Test public void test06() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntVariable v2 = new IntVariable("v2", 0, 99); Operation o1 = new
+ * Operation(Operation.Operator.EQ, v1, v2); IntVariable v3 = new
+ * IntVariable("v3", 0, 99); Operation o2 = new Operation(Operation.Operator.EQ,
+ * v2, v3); IntVariable v4 = new IntVariable("v4", 0, 99); Operation o3 = new
+ * Operation(Operation.Operator.EQ, v3, v4); IntVariable v5 = new
+ * IntVariable("v5", 0, 99); Operation o4 = new Operation(Operation.Operator.EQ,
+ * v4, v5); Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
+ * Operation o234 = new Operation(Operation.Operator.AND, o2, o34); check(o1,
+ * o234, "(v1==v2)&&((v2==v3)&&((v3==v4)&&(v4==v5)))", "v1==v2", "v2==v3",
+ * "v3==v4", "v4==v5"); }
+ * 
+ * @Test public void test07() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntVariable v2 = new IntVariable("v2", 0, 99); Operation o1 = new
+ * Operation(Operation.Operator.EQ, v1, v2); IntVariable v3 = new
+ * IntVariable("v3", 0, 99); Operation o2 = new Operation(Operation.Operator.EQ,
+ * v2, v3); IntVariable v4 = new IntVariable("v4", 0, 99); Operation o3 = new
+ * Operation(Operation.Operator.EQ, v3, v4); IntVariable v5 = new
+ * IntVariable("v5", 0, 99); IntVariable v6 = new IntVariable("v6", 0, 99);
+ * Operation o4 = new Operation(Operation.Operator.EQ, v5, v6); Operation o34 =
+ * new Operation(Operation.Operator.AND, o3, o4); Operation o234 = new
+ * Operation(Operation.Operator.AND, o2, o34); check(o1, o234,
+ * "(v1==v2)&&((v2==v3)&&((v3==v4)&&(v5==v6)))", "v2==v3", "v3==v4", "v1==v2");
+ * }
+ * 
+ * @Test public void test08() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntVariable v2 = new IntVariable("v2", 0, 99); IntVariable v3 = new
+ * IntVariable("v3", 0, 99); IntVariable v4 = new IntVariable("v4", 0, 99);
+ * IntVariable v5 = new IntVariable("v5", 0, 99); IntVariable v6 = new
+ * IntVariable("v6", 0, 99); IntVariable v7 = new IntVariable("v7", 0, 99);
+ * Operation o1 = new Operation(Operation.Operator.LT, v1, new
+ * Operation(Operation.Operator.ADD, v2, v3)); Operation o2 = new
+ * Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD,
+ * v4, v5)); Operation o3 = new Operation(Operation.Operator.LT, v3, new
+ * Operation(Operation.Operator.ADD, v6, v7)); Operation o23 = new
+ * Operation(Operation.Operator.AND, o2, o3); check(o1, o23,
+ * "(v1<(v2+v3))&&((v2<(v4+v5))&&(v3<(v6+v7)))", "v1<(v2+v3)", "v3<(v6+v7)",
+ * "v2<(v4+v5)"); }
+ * 
+ * @Test public void test09() { IntVariable v1 = new IntVariable("v1", 0, 99);
+ * IntVariable v2 = new IntVariable("v2", 0, 99); IntVariable v3 = new
+ * IntVariable("v3", 0, 99); IntVariable v4 = new IntVariable("v4", 0, 99);
+ * IntVariable v5 = new IntVariable("v5", 0, 99); IntVariable v6 = new
+ * IntVariable("v6", 0, 99); IntVariable v7 = new IntVariable("v7", 0, 99);
+ * IntVariable v8 = new IntVariable("v8", 0, 99); Operation o1 = new
+ * Operation(Operation.Operator.LT, v1, new Operation(Operation.Operator.ADD,
+ * v2, v3)); Operation o2 = new Operation(Operation.Operator.LT, v2, new
+ * Operation(Operation.Operator.ADD, v4, v5)); Operation o3 = new
+ * Operation(Operation.Operator.LT, v6, new Operation(Operation.Operator.ADD,
+ * v7, v8)); Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
+ * check(o1, o23, "(v1<(v2+v3))&&((v2<(v4+v5))&&(v6<(v7+v8)))", "v1<(v2+v3)",
+ * "v2<(v4+v5)"); }
+ * 
+ */

@@ -9,8 +9,6 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.IntegerConstant;
-import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.RealConstant;
 import za.ac.sun.cs.green.expr.RealVariable;
@@ -48,14 +46,15 @@ public class BounderService extends BasicService {
 	 * Total number of variables processed.
 	 */
 	private int totalVariableCount = 0;
-    private long timeConsumption = 0;
+	private long timeConsumption = 0;
+
 	public BounderService(Green solver) {
 		super(solver);
 	}
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
-	    long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
@@ -77,17 +76,15 @@ public class BounderService extends BasicService {
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
 		reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-    }
+		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+	}
 
 	/**
 	 * Collect all of the variables that appear in an expression and construct
-	 * conjuncts that encode the minimum and maximum bounds on the variables.
-	 * Then return a new expression which consists of the conjunction of the
-	 * bounds.
+	 * conjuncts that encode the minimum and maximum bounds on the variables. Then
+	 * return a new expression which consists of the conjunction of the bounds.
 	 * 
-	 * @param expression
-	 *            the input expression
+	 * @param expression the input expression
 	 * @return bound conjuncts for all of the variables in the input
 	 */
 	private Expression bound(Expression expression) {
@@ -107,16 +104,18 @@ public class BounderService extends BasicService {
 					} else {
 						e = new Operation(Operation.Operator.AND, e, bound);
 					}
-				} else if (v instanceof IntegerVariable) {
-					IntegerVariable iv = (IntegerVariable) v;
-					Operation lower = new Operation(Operation.Operator.GE, iv, new IntegerConstant(iv.getLowerBound(), iv.getSize()));
-					Operation upper = new Operation(Operation.Operator.LE, iv, new IntegerConstant(iv.getUpperBound(), iv.getSize()));
-					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
-					if (e == null) {
-						e = bound;
-					} else {
-						e = new Operation(Operation.Operator.AND, e, bound);
-					}
+//				} else if (v instanceof IntegerVariable) {
+//					IntegerVariable iv = (IntegerVariable) v;
+//					Operation lower = new Operation(Operation.Operator.GE, iv,
+//							new IntegerConstant(iv.getLowerBound(), iv.getSize()));
+//					Operation upper = new Operation(Operation.Operator.LE, iv,
+//							new IntegerConstant(iv.getUpperBound(), iv.getSize()));
+//					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
+//					if (e == null) {
+//						e = bound;
+//					} else {
+//						e = new Operation(Operation.Operator.AND, e, bound);
+//					}
 				} else if (v instanceof RealVariable) {
 					RealVariable iv = (RealVariable) v;
 					Operation lower = new Operation(Operation.Operator.GE, iv, new RealConstant(iv.getLowerBound()));
@@ -141,7 +140,7 @@ public class BounderService extends BasicService {
 
 		private final Set<Variable> variables;
 
-		public VariableCollector() {
+		VariableCollector() {
 			variables = new HashSet<Variable>();
 		}
 

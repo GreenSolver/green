@@ -7,7 +7,6 @@ import java.util.Properties;
 
 import org.apfloat.Apint;
 import org.junit.AfterClass;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,7 +21,7 @@ import za.ac.sun.cs.green.util.Configuration;
 public class CountLattETest {
 
 	public static Green solver = null;
-    private static final String DEFAULT_LATTE_PATH = "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
+	private static final String DEFAULT_LATTE_PATH = "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
 
 	@BeforeClass
 	public static void initialize() {
@@ -34,8 +33,7 @@ public class CountLattETest {
 		Properties props = new Properties();
 		props.setProperty("green.services", "count");
 		props.setProperty("green.service.count", "latte");
-		props.setProperty("green.service.count.latte",
-				"za.ac.sun.cs.green.service.latte.CountLattEService");
+		props.setProperty("green.service.count.latte", "za.ac.sun.cs.green.service.latte.CountLattEService");
 		props.setProperty("green.latte.path", DEFAULT_LATTE_PATH);
 		Configuration config = new Configuration(solver, props);
 		config.configure();
@@ -60,12 +58,9 @@ public class CountLattETest {
 	private void check(Expression expression, Apint expected) {
 		check(expression, null, expected);
 	}
-	
+
 	/**
-	 * Problem:
-	 *   1 * aa == 0
-	 * Count:
-	 *   1
+	 * Problem: 1 * aa == 0 Count: 1
 	 */
 	@Test
 	public void test01() {
@@ -78,35 +73,27 @@ public class CountLattETest {
 	}
 
 	/**
-	 * Problem:
-	 *   1 * aa > 0
-	 *   1 * aa + -10 < 0
-	 * Count:
-	 *   9
+	 * Problem: 1 * aa > 0 1 * aa + -10 < 0 Count: 9
 	 */
 	@Test
 	public void test02() {
 		IntConstant zz = new IntConstant(0);
 		IntConstant oo = new IntConstant(1);
 		IntVariable vv = new IntVariable("aa", 0, 99);
-		
+
 		Operation at = new Operation(Operation.Operator.MUL, oo, vv);
 		Operation ao = new Operation(Operation.Operator.GT, at, zz);
-		
+
 		Operation bt1 = new Operation(Operation.Operator.MUL, oo, vv);
 		Operation bt2 = new Operation(Operation.Operator.ADD, bt1, new IntConstant(-10));
 		Operation bo = new Operation(Operation.Operator.LT, bt2, zz);
-		
+
 		Operation o = new Operation(Operation.Operator.AND, ao, bo);
 		check(o, new Apint(9));
 	}
-	
+
 	/**
-	 * Problem:
-	 *   3 * aa + -6 > 0
-	 *   1 * aa + -10 < 0
-	 * Count:
-	 *   7
+	 * Problem: 3 * aa + -6 > 0 1 * aa + -10 < 0 Count: 7
 	 */
 	@Test
 	public void test03() {
@@ -114,28 +101,22 @@ public class CountLattETest {
 		IntConstant oo = new IntConstant(1);
 		IntConstant tt = new IntConstant(3);
 		IntVariable vv = new IntVariable("aa", 0, 99);
-		
+
 		Operation at1 = new Operation(Operation.Operator.MUL, tt, vv);
 		Operation at2 = new Operation(Operation.Operator.ADD, at1, new IntConstant(-6));
 		Operation ao = new Operation(Operation.Operator.GT, at2, zz);
-		
+
 		Operation bt1 = new Operation(Operation.Operator.MUL, oo, vv);
 		Operation bt2 = new Operation(Operation.Operator.ADD, bt1, new IntConstant(-10));
 		Operation bo = new Operation(Operation.Operator.LT, bt2, zz);
-		
+
 		Operation o = new Operation(Operation.Operator.AND, ao, bo);
 		check(o, new Apint(7));
 	}
 
 	/**
-	 * Problem:
-	 *   1 * aa + -1 * bb < 0
-	 *   1 * aa + 1 > 0
-	 *   1 * aa + -10 < 0
-	 *   1 * bb + 1 > 0
-	 *   1 * bb + -10 < 0
-	 * Count:
-	 *   45
+	 * Problem: 1 * aa + -1 * bb < 0 1 * aa + 1 > 0 1 * aa + -10 < 0 1 * bb + 1 > 0
+	 * 1 * bb + -10 < 0 Count: 45
 	 */
 	@Test
 	public void test04() {
@@ -153,9 +134,11 @@ public class CountLattETest {
 		Operation oab1 = new Operation(Operation.Operator.ADD, plusaa, minbb);
 		Operation oab = new Operation(Operation.Operator.LT, oab1, zero);
 		Operation oa1 = new Operation(Operation.Operator.GT, new Operation(Operation.Operator.ADD, plusaa, one), zero);
-		Operation oa2 = new Operation(Operation.Operator.LT, new Operation(Operation.Operator.ADD, plusaa, minten), zero);
+		Operation oa2 = new Operation(Operation.Operator.LT, new Operation(Operation.Operator.ADD, plusaa, minten),
+				zero);
 		Operation ob1 = new Operation(Operation.Operator.GT, new Operation(Operation.Operator.ADD, plusbb, one), zero);
-		Operation ob2 = new Operation(Operation.Operator.LT, new Operation(Operation.Operator.ADD, plusbb, minten), zero);
+		Operation ob2 = new Operation(Operation.Operator.LT, new Operation(Operation.Operator.ADD, plusbb, minten),
+				zero);
 
 		Operation o3 = new Operation(Operation.Operator.AND, oab, oa1);
 		Operation o2 = new Operation(Operation.Operator.AND, o3, oa2);
@@ -164,5 +147,5 @@ public class CountLattETest {
 
 		check(o, new Apint(45));
 	}
-	
+
 }

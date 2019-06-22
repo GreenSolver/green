@@ -28,17 +28,18 @@ public class Scanner0 {
 	 * If the next token is a real literal, this field contains its value.
 	 */
 	private double realValue = -1;
-	
+
 	/**
-	 * If the next token is a string literal or a keyword, this field contains its value.
+	 * If the next token is a string literal or a keyword, this field contains its
+	 * value.
 	 */
 	private String stringValue = null;
-	
+
 	/**
 	 * If the next token is a predefined keyword, this fields contains its value.
 	 */
 	private Keyword0 keyword = Keyword0.UNPREDEFINED;
-	
+
 	/**
 	 * The reader where characters are read from.
 	 */
@@ -60,7 +61,7 @@ public class Scanner0 {
 	public Scanner0(Reader reader) throws ParseException {
 		this(reader, new NullLogger());
 	}
-	
+
 	public Scanner0(String query, Logger log) throws ParseException {
 		this.log = log;
 		reader = new StringReader(query);
@@ -68,7 +69,7 @@ public class Scanner0 {
 		nextCh = ' ';
 		scanNextToken();
 	}
-	
+
 	public Scanner0(String query) throws ParseException {
 		this(query, new NullLogger());
 	}
@@ -100,29 +101,29 @@ public class Scanner0 {
 		expect(Token0.HEXADECIMAL);
 		return value;
 	}
-	
+
 	public int expectBinary() throws ParseException {
 		int value = intValue;
 		expect(Token0.BINARY);
 		return value;
 	}
-	
+
 	public double expectDecimal() throws ParseException {
 		double value = realValue;
 		expect(Token0.DECIMAL);
 		return value;
 	}
-	
+
 	public Keyword0 expectKeyword() throws ParseException {
 		Keyword0 value = keyword;
 		expect(Token0.KEYWORD);
 		return value;
 	}
-	
+
 	public Keyword0 nextKeyword() throws ParseException {
 		return keyword;
 	}
-	
+
 	public boolean eat(Token0 token) throws ParseException {
 		if (next() != token) {
 			return false;
@@ -153,7 +154,8 @@ public class Scanner0 {
 					intValue = 0;
 					token = Token0.HEXADECIMAL;
 					readNextCh();
-					while (Character.isDigit(nextCh) || ((nextCh >= 'a') && (nextCh <= 'f')) || ((nextCh >= 'A') && (nextCh <= 'F')) || (nextCh == '_')) {
+					while (Character.isDigit(nextCh) || ((nextCh >= 'a') && (nextCh <= 'f'))
+							|| ((nextCh >= 'A') && (nextCh <= 'F')) || (nextCh == '_')) {
 						if (Character.isDigit(nextCh)) {
 							intValue = intValue * 16 + nextCh - '0';
 						} else if ((nextCh >= 'a') && (nextCh <= 'f')) {
@@ -276,7 +278,7 @@ public class Scanner0 {
 					s.append((char) nextCh);
 					readNextCh();
 				}
-				token = Token0.SYMBOL; 
+				token = Token0.SYMBOL;
 				readNextCh();
 			} else if (isIdentifierChar(nextCh)) {
 				StringBuilder s = new StringBuilder();
@@ -344,13 +346,14 @@ public class Scanner0 {
 				throw new ParseException("unrecognized character \"" + ((char) nextCh) + "\"");
 			}
 		}
-		log.finest("token==[" + token + "] nextCh=='" + ((char) nextCh) + "' intValue==" + intValue + " realValue==" + realValue + " stringValue==\"" + stringValue + "\" keyword==[" + keyword + "]");
+		log.finest("token==[" + token + "] nextCh=='" + ((char) nextCh) + "' intValue==" + intValue + " realValue=="
+				+ realValue + " stringValue==\"" + stringValue + "\" keyword==[" + keyword + "]");
 	}
 
 	private boolean isIdentifierChar(int ch) {
-		return Character.isLetterOrDigit(ch) || (ch == '+') || (ch == '-') || (ch == '/') || (ch == '*') || (ch == '=') || (ch == '%')
-				 || (ch == '?') || (ch == '!') || (ch == '.') || (ch == '$') || (ch == '_') || (ch == '~') || (ch == '&') || (ch == '^')
-				  || (ch == '<') || (ch == '>') || (ch == '@');
+		return Character.isLetterOrDigit(ch) || (ch == '+') || (ch == '-') || (ch == '/') || (ch == '*') || (ch == '=')
+				|| (ch == '%') || (ch == '?') || (ch == '!') || (ch == '.') || (ch == '$') || (ch == '_') || (ch == '~')
+				|| (ch == '&') || (ch == '^') || (ch == '<') || (ch == '>') || (ch == '@');
 	}
 
 	private void readNextCh() throws ParseException {
@@ -362,12 +365,11 @@ public class Scanner0 {
 		} catch (IOException e) {
 			throw new ParseException("IO problem: " + e.getMessage());
 		}
-		if (nextCh == 10) {
-			// chLoc.advanceLine();
-		} else {
-			// chLoc.advancePos();
-		}
+//		if (nextCh == 10) {
+//			// chLoc.advanceLine();
+//		} else {
+//			// chLoc.advancePos();
+//		}
 	}
 
 }
-

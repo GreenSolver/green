@@ -5,48 +5,39 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * @date: 2018/08/23
- * @author: JH Taljaard.
- * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018,2019),
- *              Jaco Geldenhuys (2017)
+ * Description: UnsatEntry stored in the UnsatRepo.
  *
- * Description:
- * UnsatEntry stored in the UnsatRepo.
+ * @date: 2018/08/23
+ * @author: JH Taljaard (USnr 18509193)
+ * @author: Willem Visser (2018) (supervisor)
+ * @author: Jaco Geldenhuys (2017) (supervisor)
  */
+@SuppressWarnings("serial")
 public class UnsatEntry extends Entry implements Comparable<Entry>, Serializable {
 
-    /**
-     * The SAT-Delta value
-     */
-    private Double SATDelta;
+	public UnsatEntry(Double satDelta, Set<Expression> solution) {
+		super(satDelta, solution);
+	}
 
-    /**
-     * The list of unsat cores.
-     */
-    private Set<Expression> solution;
+	/**
+	 * Get the unsat core
+	 * 
+	 * @return expression of unsat-core
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Set<Expression> getSolution() {
+		return (Set<Expression>) this.solution;
+	}
 
-    public UnsatEntry(Double SATDelta, Set<Expression> solution) {
-        super(SATDelta, solution);
-        this.SATDelta = SATDelta;
-        this.solution = solution;
-    }
+	/**
+	 * Unable to calculate number of variables.
+	 * 
+	 * @return specific garbage value
+	 */
+	@Override
+	public int getSize() {
+		return -1;
+	}
 
-    /**
-     * Get the unsat core
-     * @return expression of unsat-core
-     */
-    @Override
-    public Set<Expression> getSolution() {
-        return this.solution;
-    }
-
-    /**
-     * Unable to calculate number of variables.
-     * @return specific garbage value
-     */
-    @Override
-    public int getSize() {
-        return -1;
-    }
 }

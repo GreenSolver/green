@@ -2,6 +2,8 @@ package za.ac.sun.cs.green.expr;
 
 public class StringConstant extends Constant {
 
+	private static final long serialVersionUID = -5850463337832601650L;
+
 	private final String value;
 
 	public StringConstant(final String value) {

@@ -13,7 +13,7 @@ import za.ac.sun.cs.green.expr.Operation;
 public class FactoredConstraintOldTest {
 	private void checkForSubstrings(String wholeString, String... partialStrings) {
 		for (String s : partialStrings) {
-			//System.out.println("Looking for "+s+" in "+factorString);
+			// System.out.println("Looking for "+s+" in "+factorString);
 			int p = wholeString.indexOf(s);
 			assertTrue(p >= 0);
 			if (p == 0) {
@@ -25,97 +25,97 @@ public class FactoredConstraintOldTest {
 		wholeString = wholeString.replaceAll("[()&]", "");
 		assertEquals("", wholeString);
 	}
-	
+
 	@Test
 	public void test01() {
 		IntVariable v1 = new IntVariable("v1", 0, 100);
 		IntConstant c1 = new IntConstant(5);
 		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
 		assertTrue(fc1.getNumFactors() == 1);
 		checkForSubstrings(fc1.getDependentFactor(o1).toString(), "v1==5");
 		assertTrue(fc1.getDependentVariableCount(o1) == 1);
 		assertTrue(fc1.getDependentConjunctCount(o1) == 1);
 	}
-		
+
 	@Test
 	public void test02() {
-		
-		IntVariable v1 = new IntVariable("v1", 0, 100);		
+
+		IntVariable v1 = new IntVariable("v1", 0, 100);
 		IntConstant c1 = new IntConstant(5);
 		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
 		assertTrue(fc1.getNumFactors() == 1);
 		checkForSubstrings(fc1.getDependentFactor(o1).toString(), "v1==5");
-		
+
 		IntVariable v2 = new IntVariable("v2", 0, 100);
 		IntConstant c2 = new IntConstant(4);
 		Operation o2 = new Operation(Operation.Operator.EQ, v2, c2);
-        FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
+		FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
 		assertTrue(fc2.getNumFactors() == 2);
 		checkForSubstrings(fc1.getDependentFactor(o1).toString(), "v1==5");
 		checkForSubstrings(fc2.getDependentFactor(o2).toString(), "v2==4");
 		assertTrue(fc2.getDependentVariableCount(o2) == 1);
 		assertTrue(fc2.getDependentConjunctCount(o2) == 1);
 	}
-	
+
 	@Test
-	public void test03() {		
-		IntVariable v1 = new IntVariable("v1", 0, 100);	
+	public void test03() {
+		IntVariable v1 = new IntVariable("v1", 0, 100);
 		IntConstant c1 = new IntConstant(5);
 		Operation o1 = new Operation(Operation.Operator.EQ, c1, v1);
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
 		assertTrue(fc1.getNumFactors() == 1);
 		checkForSubstrings(fc1.getDependentFactor(o1).toString(), "5==v1");
-		
+
 		IntVariable v2 = new IntVariable("v2", 0, 100);
 		IntConstant c2 = new IntConstant(4);
 		Operation o2 = new Operation(Operation.Operator.EQ, v2, c2);
-        FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
+		FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
 		assertTrue(fc2.getNumFactors() == 2);
 		checkForSubstrings(fc1.getDependentFactor(v1).toString(), "5==v1");
 		checkForSubstrings(fc2.getDependentFactor(v2).toString(), "v2==4");
-		
+
 		Operation o3 = new Operation(Operation.Operator.EQ, v2, v1);
-        FactorExpressionOld fc3 = new FactorExpressionOld(fc2, o3);
+		FactorExpressionOld fc3 = new FactorExpressionOld(fc2, o3);
 		assertTrue(fc3.getNumFactors() == 1);
 		checkForSubstrings(fc3.getDependentFactor(o1).toString(), "5==v1", "v2==4", "v2==v1");
 		checkForSubstrings(fc3.getDependentFactor(o2).toString(), "5==v1", "v2==4", "v2==v1");
-		checkForSubstrings(fc3.getDependentFactor(o3).toString(), "5==v1", "v2==4", "v2==v1");	
+		checkForSubstrings(fc3.getDependentFactor(o3).toString(), "5==v1", "v2==4", "v2==v1");
 		assertTrue(fc3.getDependentVariableCount(o2) == 2);
 		assertTrue(fc3.getDependentConjunctCount(o2) == 3);
 	}
-	
+
 	@Test
-	public void test04() {		
-		IntVariable v1 = new IntVariable("v1", 0, 100);	
+	public void test04() {
+		IntVariable v1 = new IntVariable("v1", 0, 100);
 		IntConstant c1 = new IntConstant(5);
 		Operation o1 = new Operation(Operation.Operator.EQ, c1, v1);
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
 		assertTrue(fc1.getNumFactors() == 1);
 		checkForSubstrings(fc1.getDependentFactor(o1).toString(), "5==v1");
-		
+
 		IntVariable v2 = new IntVariable("v2", 0, 100);
 		IntConstant c2 = new IntConstant(4);
 		Operation o2 = new Operation(Operation.Operator.EQ, v2, c2);
-        FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
+		FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
 		assertTrue(fc2.getNumFactors() == 2);
 		checkForSubstrings(fc1.getDependentFactor(o1).toString(), "5==v1");
 		checkForSubstrings(fc2.getDependentFactor(o2).toString(), "v2==4");
-		
+
 		Operation o3 = new Operation(Operation.Operator.EQ, v2, c1);
-        FactorExpressionOld fc3 = new FactorExpressionOld(fc2, o3);
+		FactorExpressionOld fc3 = new FactorExpressionOld(fc2, o3);
 		assertTrue(fc3.getNumFactors() == 2);
 		checkForSubstrings(fc3.getDependentFactor(v1).toString(), "5==v1");
-		checkForSubstrings(fc3.getDependentFactor(v2).toString(), "v2==4", "v2==5");			
+		checkForSubstrings(fc3.getDependentFactor(v2).toString(), "v2==4", "v2==5");
 		checkForSubstrings(fc3.getDependentFactor(o2).toString(), "v2==4", "v2==5");
-		
-		System.out.println("Factors of "+fc3+" are:");
+
+		System.out.println("Factors of " + fc3 + " are:");
 		for (Expression e : fc3.getFactors()) {
-			System.out.println("   "+e);
+			System.out.println("   " + e);
 		}
 	}
-	
+
 	@Test
 	public void test05() {
 		IntVariable v1 = new IntVariable("v1", 0, 100);
@@ -127,18 +127,18 @@ public class FactoredConstraintOldTest {
 		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
 		Operation o4 = new Operation(Operation.Operator.AND, v1, v2);
 
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o3);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o3);
 		assertTrue(fc1.getNumFactors() == 2);
 		checkForSubstrings(fc1.getDependentFactor(v1).toString(), "v1==5");
 		checkForSubstrings(fc1.getDependentFactor(v2).toString(), "v2==4");
 		checkForSubstrings(fc1.getDependentFactor(o4).toString(), "v1==5", "v2==4");
-		
-		System.out.println("Factors of "+fc1+" are:");
+
+		System.out.println("Factors of " + fc1 + " are:");
 		for (Expression e : fc1.getFactors()) {
-			System.out.println("   "+e);
+			System.out.println("   " + e);
 		}
 	}
-	
+
 	@Test
 	public void test06() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -147,17 +147,17 @@ public class FactoredConstraintOldTest {
 		IntConstant c2 = new IntConstant(1);
 		Operation o2 = new Operation(Operation.Operator.NE, v1, c2);
 
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
-        FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
+		FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o2);
 
 		checkForSubstrings(fc2.getDependentFactor(o2).toString(), "v1==0", "v1!=1");
-		
-		System.out.println("Factors of "+fc2+" are:");
+
+		System.out.println("Factors of " + fc2 + " are:");
 		for (Expression e : fc2.getFactors()) {
-			System.out.println("   "+e);
+			System.out.println("   " + e);
 		}
 	}
-	
+
 	@Test
 	public void test07() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -172,14 +172,14 @@ public class FactoredConstraintOldTest {
 		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
 		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
 
-        FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
-        FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o234);
+		FactorExpressionOld fc1 = new FactorExpressionOld(null, o1);
+		FactorExpressionOld fc2 = new FactorExpressionOld(fc1, o234);
 
 		checkForSubstrings(fc2.getDependentFactor(o234).toString(), "v1==v2", "v2==v3", "v3==v4", "v4==v5");
-		
-		System.out.println("Factors of "+fc2+" are:");
+
+		System.out.println("Factors of " + fc2 + " are:");
 		for (Expression e : fc2.getFactors()) {
-			System.out.println("   "+e);
+			System.out.println("   " + e);
 		}
 	}
 

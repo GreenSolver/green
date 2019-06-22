@@ -16,7 +16,7 @@ public interface Service {
 	 * 
 	 * @return the instance of the Green solver associated with this service
 	 */
-	public Green getSolver();
+	Green getSolver();
 
 	/**
 	 * Process an instance by (possibly) transforming it and (possibly) breaking
@@ -32,7 +32,7 @@ public interface Service {
 	 *            the instance to solve
 	 * @return a set of sub-instances passed to sub-services
 	 */
-	public Set<Instance> processRequest(Instance instance);
+	Set<Instance> processRequest(Instance instance);
 
 	/**
 	 * Perform an update computation based on a new subresult computed by a
@@ -48,7 +48,7 @@ public interface Service {
 	 *            the result return by the sub-service
 	 * @return a new (intermediary) result
 	 */
-	public Object childDone(Instance instance, Service subService,
+	Object childDone(Instance instance, Service subService,
 			Instance subInstance, Object result);
 
 	/**
@@ -61,12 +61,12 @@ public interface Service {
 	 *            the result computed so far by this service
 	 * @return the final result
 	 */
-	public Object allChildrenDone(Instance instance, Object result);
+	Object allChildrenDone(Instance instance, Object result);
 
 	/**
 	 * Shut down the service.
 	 */
-	public void shutdown();
+	void shutdown();
 
 	/**
 	 * Report on the performance or state of the service.
@@ -74,6 +74,6 @@ public interface Service {
 	 * @param reporter
 	 *            the mechanism through which reporting is done
 	 */
-	public void report(Reporter reporter);
+	void report(Reporter reporter);
 
 }

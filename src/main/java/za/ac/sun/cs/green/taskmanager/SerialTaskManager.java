@@ -14,13 +14,13 @@ public class SerialTaskManager implements TaskManager {
 
 	private final Green solver;
 
-	private final Logger LOGGER;
+	private final Logger log;
 
 	private int processedCount = 0;
 
 	public SerialTaskManager(final Green solver) {
 		this.solver = solver;
-		LOGGER = solver.getLogger();
+		log = solver.getLogger();
 	}
 
 	public Object execute(Service parent, Instance parentInstance, Set<Service> services, Set<Instance> instances) {
@@ -60,7 +60,7 @@ public class SerialTaskManager implements TaskManager {
 	
 	@Override
 	public Object process(final String serviceName, final Instance instance) {
-		LOGGER.info("processing serviceName=\"" + serviceName + "\"");
+		log.info("processing serviceName=\"" + serviceName + "\"");
 		processedCount++;
 		final Set<Service> services = solver.getService(serviceName);
 		return execute(null, null, services, Collections.singleton(instance));

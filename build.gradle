@@ -3,6 +3,7 @@ plugins {
 	id 'java'
 	id 'jacoco'
 	id 'eclipse'
+	id 'checkstyle'
 	id 'com.palantir.git-version' version '0.12.0-rc2'
 	id 'com.jfrog.artifactory' version '4.8.1'
 	id 'maven-publish'
@@ -37,6 +38,10 @@ publishing {
 			version gitVersion() + '-SNAPSHOT'
 		}
 	}
+}
+
+checkstyle {
+	toolVersion '8.1'
 }
 
 jacocoTestReport {

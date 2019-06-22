@@ -17,7 +17,7 @@ import za.ac.sun.cs.green.expr.VisitorException;
 
 public class Slicer {
 
-	protected final Logger LOGGER;
+	protected final Logger log;
 
 	/**
 	 * Number of times the slicer has been invoked.
@@ -45,29 +45,29 @@ public class Slicer {
 	private int minimalVariableCount = 0;
 
 	public Slicer(final Logger log) {
-		this.LOGGER = log;
+		this.log = log;
 	}
 
 	public int getInvocationCount() {
 		return invocationCount;
 	}
-	
+
 	public int getTotalConjunctCount() {
 		return totalConjunctCount;
 	}
-	
+
 	public int getMinimalConjunctCount() {
 		return minimalConjunctCount;
 	}
-	
+
 	public int getTotalVariableCount() {
 		return totalVariableCount;
 	}
-	
+
 	public int getMinimalVariableCount() {
 		return minimalVariableCount;
 	}
-	
+
 	public Expression slice(Expression fresh, Expression rest) {
 		// First update our statistics
 		invocationCount++;
@@ -81,7 +81,7 @@ public class Slicer {
 		try {
 			collector.explore(fresh);
 		} catch (VisitorException x) {
-			LOGGER.fatal("encountered an exception -- this should not be happening!", x);
+			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
 
 		// If there are no variables in the fresh conjunct, we do not modify the
@@ -95,7 +95,7 @@ public class Slicer {
 			try {
 				collector.explore(rest);
 			} catch (VisitorException x) {
-				LOGGER.fatal("encountered an exception -- this should not be happening!", x);
+				log.fatal("encountered an exception -- this should not be happening!", x);
 			}
 		}
 
@@ -112,7 +112,7 @@ public class Slicer {
 		try {
 			fresh.accept(new Enqueuer(minimalConjuncts, workset));
 		} catch (VisitorException x) {
-			LOGGER.fatal("encountered an exception -- this should not be happening!", x);
+			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
 		while (!workset.isEmpty()) {
 			Expression e = workset.remove();
@@ -150,8 +150,8 @@ public class Slicer {
 	}
 
 	/**
-	 * Visitor that builds the maps from conjuncts to variables and from
-	 * variables to conjuncts.
+	 * Visitor that builds the maps from conjuncts to variables and from variables
+	 * to conjuncts.
 	 * 
 	 * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
 	 */
@@ -175,26 +175,21 @@ public class Slicer {
 		/**
 		 * Constructor that sets the two mappings that the collector builds.
 		 * 
-		 * @param conjunct2Vars
-		 *            a map from conjuncts to the variables they contain
-		 * @param var2Conjuncts
-		 *            a map from the variables to the conjuncts in which they
-		 *            appear
+		 * @param conjunct2Vars a map from conjuncts to the variables they contain
+		 * @param var2Conjuncts a map from the variables to the conjuncts in which they
+		 *                      appear
 		 */
-		public Collector(Map<Expression, Set<Variable>> conjunct2Vars,
-				Map<Variable, Set<Expression>> var2Conjuncts) {
+		Collector(Map<Expression, Set<Variable>> conjunct2Vars, Map<Variable, Set<Expression>> var2Conjuncts) {
 			this.conjunct2Vars = conjunct2Vars;
 			this.var2Conjuncts = var2Conjuncts;
 		}
 
 		/**
-		 * Explores the expression by setting the default conjunct and then
-		 * visiting the expression.
+		 * Explores the expression by setting the default conjunct and then visiting the
+		 * expression.
 		 * 
-		 * @param expression
-		 *            the expression to explore
-		 * @throws VisitorException
-		 *             should never happen
+		 * @param expression the expression to explore
+		 * @throws VisitorException should never happen
 		 */
 		public void explore(Expression expression) throws VisitorException {
 			currentConjunct = expression;
@@ -204,8 +199,7 @@ public class Slicer {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * za.ac.sun.cs.solver.expr.Visitor#postVisit(za.ac.sun.cs.solver.expr
+		 * @see za.ac.sun.cs.solver.expr.Visitor#postVisit(za.ac.sun.cs.solver.expr
 		 * .Variable)
 		 */
 		@Override
@@ -231,21 +225,16 @@ public class Slicer {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * za.ac.sun.cs.solver.expr.Visitor#preVisit(za.ac.sun.cs.solver.expr
+		 * @see za.ac.sun.cs.solver.expr.Visitor#preVisit(za.ac.sun.cs.solver.expr
 		 * .Expression)
 		 */
 		@Override
 		public void preVisit(Expression expression) {
 			if (expression instanceof Operation) {
 				Operation.Operator op = ((Operation) expression).getOperator();
-				if ((op == Operation.Operator.NOT)
-						|| (op == Operation.Operator.EQ)
-						|| (op == Operation.Operator.NE)
-						|| (op == Operation.Operator.LT)
-						|| (op == Operation.Operator.LE)
-						|| (op == Operation.Operator.GT)
-						|| (op == Operation.Operator.GE)) {
+				if ((op == Operation.Operator.NOT) || (op == Operation.Operator.EQ) || (op == Operation.Operator.NE)
+						|| (op == Operation.Operator.LT) || (op == Operation.Operator.LE)
+						|| (op == Operation.Operator.GT) || (op == Operation.Operator.GE)) {
 					currentConjunct = expression;
 				}
 			}
@@ -264,22 +253,20 @@ public class Slicer {
 		private Set<Expression> minimalConjuncts = null;
 
 		/**
-		 * The set of minimal conjuncts to start the transitive closure
-		 * computation from.
+		 * The set of minimal conjuncts to start the transitive closure computation
+		 * from.
 		 */
 		private Queue<Expression> workset = null;
 
 		/**
-		 * Constructor for the visitor that builds the set of minimal conjuncts
-		 * and the initial working set.
+		 * Constructor for the visitor that builds the set of minimal conjuncts and the
+		 * initial working set.
 		 * 
-		 * @param minimalConjuncts
-		 *            a set of minimal conjuncts that appear in the expression
-		 * @param workset
-		 *            the initial working set of fresh conjuncts
+		 * @param minimalConjuncts a set of minimal conjuncts that appear in the
+		 *                         expression
+		 * @param workset          the initial working set of fresh conjuncts
 		 */
-		public Enqueuer(Set<Expression> minimalConjuncts,
-				Queue<Expression> workset) {
+		Enqueuer(Set<Expression> minimalConjuncts, Queue<Expression> workset) {
 			this.minimalConjuncts = minimalConjuncts;
 			this.workset = workset;
 		}
@@ -287,21 +274,16 @@ public class Slicer {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * za.ac.sun.cs.solver.expr.Visitor#preVisit(za.ac.sun.cs.solver.expr
+		 * @see za.ac.sun.cs.solver.expr.Visitor#preVisit(za.ac.sun.cs.solver.expr
 		 * .Expression)
 		 */
 		@Override
 		public void preVisit(Expression expression) {
 			if (expression instanceof Operation) {
 				Operation.Operator op = ((Operation) expression).getOperator();
-				if ((op == Operation.Operator.NOT)
-						|| (op == Operation.Operator.EQ)
-						|| (op == Operation.Operator.NE)
-						|| (op == Operation.Operator.LT)
-						|| (op == Operation.Operator.LE)
-						|| (op == Operation.Operator.GT)
-						|| (op == Operation.Operator.GE)) {
+				if ((op == Operation.Operator.NOT) || (op == Operation.Operator.EQ) || (op == Operation.Operator.NE)
+						|| (op == Operation.Operator.LT) || (op == Operation.Operator.LE)
+						|| (op == Operation.Operator.GT) || (op == Operation.Operator.GE)) {
 					minimalConjuncts.add(expression);
 					workset.add(expression);
 				}

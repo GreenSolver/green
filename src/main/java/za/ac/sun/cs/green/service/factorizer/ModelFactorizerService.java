@@ -62,7 +62,7 @@ public class ModelFactorizerService extends BasicService {
 			result = Collections.unmodifiableSet(result);
 			instance.setData(FACTORS, result);
 			instance.setData(FACTORS_UNSOLVED, new HashSet<Instance>(result));
-			instance.setData(MODELS, new HashMap<Variable,Object>());
+			instance.setData(MODELS, new HashMap<Variable, Object>());
 
 			log.debug("Factorizer exiting with " + result.size() + " results");
 
@@ -73,11 +73,12 @@ public class ModelFactorizerService extends BasicService {
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean isUnsat(Object result) {
 		if (result == null) {
 			return true;
 		} else if (result instanceof HashMap) {
-			HashMap<Variable,Object> issat = (HashMap<Variable,Object>) result;
+			HashMap<Variable, Object> issat = (HashMap<Variable, Object>) result;
 			return issat.isEmpty();
 		} else if (result instanceof Boolean) {
 			Boolean issat = (Boolean) result;
@@ -96,16 +97,18 @@ public class ModelFactorizerService extends BasicService {
 
 		if (unsolved.contains(subinstance)) {
 			// new child finished
-			HashMap<Variable,Object> parent_solutions = (HashMap<Variable,Object>) instance.getData(MODELS);
-			parent_solutions.putAll((HashMap<Variable,Object>) result);
-			instance.setData(MODELS, parent_solutions);
+			HashMap<Variable, Object> parentSolutions = (HashMap<Variable, Object>) instance.getData(MODELS);
+			parentSolutions.putAll((HashMap<Variable, Object>) result);
+			instance.setData(MODELS, parentSolutions);
 			// Remove the subinstance now that it is solved
 			unsolved.remove(subinstance);
 			instance.setData(FACTORS_UNSOLVED, unsolved);
-			// Return true of no more unsolved factors; else return null to carry on the computation
-			return (unsolved.isEmpty()) ? parent_solutions : null;
+			// Return true of no more unsolved factors; else return null to carry on the
+			// computation
+			return (unsolved.isEmpty()) ? parentSolutions : null;
 		} else {
-			// We have already solved this subinstance; return null to carry on the computation
+			// We have already solved this subinstance; return null to carry on the
+			// computation
 			return null;
 		}
 	}

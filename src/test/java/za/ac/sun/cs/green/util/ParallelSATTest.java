@@ -1,6 +1,7 @@
 package za.ac.sun.cs.green.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Properties;
 
@@ -8,8 +9,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
@@ -27,14 +28,10 @@ public class ParallelSATTest {
 		props.setProperty("green.taskmanager", ParallelTaskManager.class.getCanonicalName());
 		props.setProperty("green.services", "sat");
 		props.setProperty("green.service.sat", "(slice (canonize choco cvc3))");
-		props.setProperty("green.service.sat.slice",
-				"za.ac.sun.cs.green.service.slicer.SATSlicerService");
-		props.setProperty("green.service.sat.canonize",
-				"za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
-		props.setProperty("green.service.sat.choco",
-				"za.ac.sun.cs.green.service.choco.SATChocoService");
-		props.setProperty("green.service.sat.cvc3",
-				"za.ac.sun.cs.green.service.cvc3.SATCVC3Service");
+		props.setProperty("green.service.sat.slice", "za.ac.sun.cs.green.service.slicer.SATSlicerService");
+		props.setProperty("green.service.sat.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
+		props.setProperty("green.service.sat.choco", "za.ac.sun.cs.green.service.choco.SATChocoService");
+		props.setProperty("green.service.sat.cvc3", "za.ac.sun.cs.green.service.cvc3.SATCVC3Service");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}
@@ -62,15 +59,15 @@ public class ParallelSATTest {
 	private void checkUnsat(Expression expression) {
 		check(expression, null, false);
 	}
-	
+
 	private void checkSat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, true);
 	}
-	
+
 	private void checkUnsat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, false);
 	}
-	
+
 	@Test
 	public void test01() {
 		IntVariable v = new IntVariable("aa", 0, 99);

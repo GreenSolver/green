@@ -18,13 +18,13 @@ public interface Store {
 	 * Shuts down the store. For example, in the case of an SQL database, this
 	 * routine might close the connection.
 	 */
-	public void shutdown();
+	void shutdown();
 
 	/**
 	 * Shuts down the store. For example, in the case of an SQL database, this
 	 * routine might close the connection.
 	 */
-	public void report(Reporter reporter);
+	void report(Reporter reporter);
 	
 	/**
 	 * Returns an arbitrary object that is associated with the given key. If
@@ -36,7 +36,7 @@ public interface Store {
 	 * @return the object that is stored with the key or <code>null</code> if no
 	 *         association is found
 	 */
-	public Object get(String key);
+	Object get(String key);
 
 	/**
 	 * Returns the string that is associated with the given key. If there is
@@ -47,7 +47,7 @@ public interface Store {
 	 * @return the string that is stored with the key or <code>null</code> if no
 	 *         association is found
 	 */
-	public String getString(String key);
+	String getString(String key);
 
 	/**
 	 * Returns the boolean that is associated with the given key. If there is
@@ -58,7 +58,7 @@ public interface Store {
 	 * @return the boolean that is stored with the key or <code>null</code> if
 	 *         no association is found
 	 */
-	public Boolean getBoolean(String key);
+	Boolean getBoolean(String key);
 
 	/**
 	 * Returns the integer that is associated with the given key. If there is
@@ -69,7 +69,7 @@ public interface Store {
 	 * @return the integer that is stored with the key or <code>null</code> if
 	 *         no association is found
 	 */
-	public Integer getInteger(String key);
+	Integer getInteger(String key);
 
 	/**
 	 * Returns the <code>long</code> value that is associated with the given
@@ -81,7 +81,7 @@ public interface Store {
 	 * @return the <code>long</code> value that is stored with the key or
 	 *         <code>null</code> if no association is found
 	 */
-	public Long getLong(String key);
+	Long getLong(String key);
 
 	/**
 	 * Returns the <code>float</code> value that is associated with the given
@@ -93,7 +93,7 @@ public interface Store {
 	 * @return the <code>float</code> value that is stored with the key or
 	 *         <code>null</code> if no association is found
 	 */
-	public Float getFloat(String key);
+	Float getFloat(String key);
 
 	/**
 	 * Returns the <code>double</code> value that is associated with the given
@@ -105,7 +105,7 @@ public interface Store {
 	 * @return the <code>double</code> value that is stored with the key or
 	 *         <code>null</code> if no association is found
 	 */
-	public Double getDouble(String key);
+	Double getDouble(String key);
 
 	/**
 	 * Returns the Apfloat integer that is associated with the given key. If there is
@@ -116,7 +116,7 @@ public interface Store {
 	 * @return the integer that is stored with the key or <code>null</code> if
 	 *         no association is found
 	 */
-	public Apint getApfloatInteger(String key);
+	Apint getApfloatInteger(String key);
 
 	/**
 	 * Associates the given serializable value with the given key.
@@ -126,27 +126,27 @@ public interface Store {
 	 * @param value
 	 *            the serializable value for the association
 	 */
-	public void put(String key, Serializable value);
+	void put(String key, Serializable value);
 
     /**
      * Flush all to redis
      */
-    public void flushAll();
+    void flushAll();
 
     /**
      * Clear the cache.
      */
-    public void clear();
+    void clear();
 
     /**
      * Test if the store is set.
      */
-    public boolean isSet();
+    boolean isSet();
 
     /**
      * Returns the key of all entries in the cache
      * @return Set of keys
      */
-    public Set<String> keySet();
+    Set<String> keySet();
 
 }

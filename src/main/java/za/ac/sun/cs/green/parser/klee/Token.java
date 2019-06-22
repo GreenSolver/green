@@ -2,12 +2,13 @@ package za.ac.sun.cs.green.parser.klee;
 
 public enum Token {
 
+	// @formatter:off
 	UNKNOWN("an unknown token"),
 	EOF("the end of file"),
 	ID("an identifier"),
 	INT("an integer literal"),
 	TYPE("a type"),
-
+	
 	ADD("\"Add\""),
 	AND("\"And\""),
 	ARRAY("\"array\""),
@@ -58,6 +59,7 @@ public enum Token {
 	PLUS("\"+\""),
 	RBRACKET("\"]\""),
 	RPAREN("\")\"");
+	// @formatter:on
 
 	/**
 	 * A description string for the token.
@@ -69,11 +71,13 @@ public enum Token {
 	 * 
 	 * @param string the description string
 	 */
-	private Token(String string) {
+	Token(String string) {
 		this.string = string;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Enum#toString()
 	 */
 	@Override
