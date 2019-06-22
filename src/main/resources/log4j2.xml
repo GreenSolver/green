@@ -6,7 +6,7 @@
       		<PatternLayout pattern="%msg%n"/>
   		</Console>
 		<File name="FILE" fileName="/tmp/green.log" append="false">
-      		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%T} %msg%n"/>
+      		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%C{2}::%M} %msg%n"/>
 		</File>
 	</Appenders>
 	<Loggers>

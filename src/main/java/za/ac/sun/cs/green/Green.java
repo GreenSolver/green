@@ -112,7 +112,7 @@ public class Green {
 	/**
 	 * Returns the {@link Logger} associated with this Green instance.
 	 * 
-	 * @return
+	 * @return the logger of this Green instances
 	 */
 	public Logger getLogger() {
 		return log;
