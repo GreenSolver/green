@@ -10,8 +10,6 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.IntegerConstant;
-import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.expr.RealConstant;
@@ -140,12 +138,6 @@ public abstract class ModelSMTLIBService extends ModelService {
 		}
 
 		@Override
-		public void postVisit(IntegerConstant constant) {
-			long val = constant.getValue();
-			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
-		}
-
-		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), RealVariable.class));
@@ -171,28 +163,6 @@ public abstract class ModelSMTLIBService extends ModelService {
 				varMap.put(variable, n);
 			}
 			stack.push(new TranslatorPair(n, IntVariable.class));
-		}
-
-		@Override
-		public void postVisit(IntegerVariable variable) {
-			String v = varMap.get(variable);
-			String n = variable.getName();
-			if (v == null) {
-				StringBuilder b = new StringBuilder();
-				b.append("(declare-fun ").append(n).append(" () Int)");
-				defs.add(b.toString());
-				b.setLength(0);
-				// lower bound
-				b.append("(and (>= ").append(n).append(' ');
-				b.append(transformNegative(variable.getLowerBound()));
-				// upper bound
-				b.append(") (<= ").append(n).append(' ');
-				b.append(transformNegative(variable.getUpperBound()));
-				b.append("))");
-				domains.add(b.toString());
-				varMap.put(variable, n);
-			}
-			stack.push(new TranslatorPair(n, IntegerVariable.class));
 		}
 
 		@Override
@@ -223,7 +193,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 			if ((left.getType() == RealVariable.class) || (right.getType() == RealVariable.class)) {
 				return RealVariable.class;
 			} else {
-				return IntegerVariable.class;
+				return IntVariable.class;
 			}
 		}
 
@@ -323,7 +293,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 				if (!stack.isEmpty()) {
 					l = stack.pop();
 				}
-				Class<? extends Variable> v = IntegerVariable.class;
+				Class<? extends Variable> v = IntVariable.class;
 				StringBuilder b = new StringBuilder();
 				b.append('(').append(setOperator(op)).append(' ');
 				b.append(adjust(l, v)).append(')');

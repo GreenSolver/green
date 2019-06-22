@@ -26,7 +26,7 @@ public class SATCanonizerServiceTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver1 = new Green();
+		solver1 = new Green("GREEN");
 		Properties props1 = new Properties();
 		props1.setProperty("green.services", "sat");
 		props1.setProperty("green.service.sat", "(canonize sink)");
@@ -34,7 +34,7 @@ public class SATCanonizerServiceTest {
 		props1.setProperty("green.service.sat.sink", "za.ac.sun.cs.green.service.sink.SinkService");
 		Configuration config1 = new Configuration(solver1, props1);
 		config1.configure();
-		solver2 = new Green();
+		solver2 = new Green("GREEN");
 		Properties props2 = new Properties();
 		props2.setProperty("green.services", "sat");
 		props2.setProperty("green.service.sat", "(slice (canonize sink))");

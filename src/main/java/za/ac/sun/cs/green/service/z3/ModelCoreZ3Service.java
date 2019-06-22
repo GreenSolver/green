@@ -21,8 +21,6 @@ import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.expr.IntegerConstant;
-import za.ac.sun.cs.green.expr.IntegerVariable;
 import za.ac.sun.cs.green.expr.RealConstant;
 import za.ac.sun.cs.green.expr.RealVariable;
 import za.ac.sun.cs.green.expr.Variable;
@@ -141,10 +139,6 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 					String val = assignment.get(name);
 					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
 					value = new IntConstant(Integer.parseInt(val));
-				} else if (var instanceof IntegerVariable) {
-					String val = assignment.get(name);
-					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
-					value = new IntegerConstant(Long.parseLong(val), ((IntegerVariable) var).getSize());
 				} else if (var instanceof RealVariable) {
 					value = new RealConstant(Double.parseDouble(assignment.get(name)));
 				}

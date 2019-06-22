@@ -21,7 +21,6 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
-import za.ac.sun.cs.green.expr.IntegerConstant;
 import za.ac.sun.cs.green.expr.RealConstant;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
@@ -129,7 +128,7 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
 					} else if (z3Val.isRatNum()) {
 						val = new RealConstant(Double.parseDouble(z3Val.toString()));
 					} else if (z3Val.isBV()) {
-						val = new IntegerConstant(Long.parseLong(z3Val.toString()), Long.SIZE);
+						val = new IntConstant((int) Long.parseLong(z3Val.toString()));
 					} else {
 						log.log(Level.WARN, "Error unsupported type for variable " + z3Val);
 						return null;
