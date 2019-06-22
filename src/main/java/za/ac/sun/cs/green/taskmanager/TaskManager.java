@@ -5,10 +5,10 @@ import za.ac.sun.cs.green.util.Reporter;
 
 public interface TaskManager {
 
-	public Object process(String serviceName, Instance instance);
+	Object process(String serviceName, Instance instance);
 
-	public void report(Reporter reporter);
+	void report(Reporter reporter);
 
-	public void shutdown();
+	void shutdown();
 	
 }

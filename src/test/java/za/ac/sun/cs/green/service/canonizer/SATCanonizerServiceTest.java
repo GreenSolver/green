@@ -1,6 +1,8 @@
 package za.ac.sun.cs.green.service.canonizer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -10,8 +12,8 @@ import java.util.TreeSet;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
@@ -64,7 +66,8 @@ public class SATCanonizerServiceTest {
 		finalCheck(j.getExpression().toString(), expected);
 	}
 
-	private void check(Green solver, Expression expression, Expression parentExpression, String full, String... expected) {
+	private void check(Green solver, Expression expression, Expression parentExpression, String full,
+			String... expected) {
 		Instance i1 = new Instance(solver, null, parentExpression);
 		Instance i2 = new Instance(solver, i1, expression);
 		Expression e = i2.getExpression();
@@ -142,8 +145,8 @@ public class SATCanonizerServiceTest {
 		Operation o4 = new Operation(Operation.Operator.EQ, v4, v5);
 		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
 		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		check(solver2, o1, o234, "(aa==bb)&&((bb==cc)&&((cc==dd)&&(dd==ee)))", "1*v+-1*v==0", "1*v+-1*v==0", "1*v+-1*v==0",
-				"1*v+-1*v==0");
+		check(solver2, o1, o234, "(aa==bb)&&((bb==cc)&&((cc==dd)&&(dd==ee)))", "1*v+-1*v==0", "1*v+-1*v==0",
+				"1*v+-1*v==0", "1*v+-1*v==0");
 	}
 
 	@Test
@@ -160,7 +163,8 @@ public class SATCanonizerServiceTest {
 		Operation o4 = new Operation(Operation.Operator.EQ, v5, v6);
 		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
 		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		check(solver2, o1, o234, "(aa==bb)&&((bb==cc)&&((cc==dd)&&(ee==ff)))", "1*v+-1*v==0", "1*v+-1*v==0", "1*v+-1*v==0");
+		check(solver2, o1, o234, "(aa==bb)&&((bb==cc)&&((cc==dd)&&(ee==ff)))", "1*v+-1*v==0", "1*v+-1*v==0",
+				"1*v+-1*v==0");
 	}
 
 	@Test
@@ -176,8 +180,8 @@ public class SATCanonizerServiceTest {
 		Operation o2 = new Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD, v4, v5));
 		Operation o3 = new Operation(Operation.Operator.LT, v3, new Operation(Operation.Operator.ADD, v6, v7));
 		Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
-		check(solver2, o1, o23, "(aa<(bb+cc))&&((bb<(dd+ee))&&(cc<(ff+gg)))", "1*v+-1*v+-1*v+1<=0", "1*v+-1*v+-1*v+1<=0",
-				"1*v+-1*v+-1*v+1<=0");
+		check(solver2, o1, o23, "(aa<(bb+cc))&&((bb<(dd+ee))&&(cc<(ff+gg)))", "1*v+-1*v+-1*v+1<=0",
+				"1*v+-1*v+-1*v+1<=0", "1*v+-1*v+-1*v+1<=0");
 	}
 
 	@Test
@@ -194,7 +198,8 @@ public class SATCanonizerServiceTest {
 		Operation o2 = new Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD, v4, v5));
 		Operation o3 = new Operation(Operation.Operator.LT, v6, new Operation(Operation.Operator.ADD, v7, v8));
 		Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
-		check(solver2, o1, o23, "(aa<(bb+cc))&&((bb<(dd+ee))&&(ff<(gg+hh)))", "1*v+-1*v+-1*v+1<=0", "1*v+-1*v+-1*v+1<=0");
+		check(solver2, o1, o23, "(aa<(bb+cc))&&((bb<(dd+ee))&&(ff<(gg+hh)))", "1*v+-1*v+-1*v+1<=0",
+				"1*v+-1*v+-1*v+1<=0");
 	}
 
 	@Test
@@ -322,7 +327,7 @@ public class SATCanonizerServiceTest {
 		check(solver2, o3, "(2<=2)&&(aa<2)", "1*v+-1<=0");
 	}
 
-	//@Test
+	// @Test
 	public void test2_21() {
 		IntVariable x1 = new IntVariable("x1", 0, 99);
 		IntVariable x2 = new IntVariable("x2", 0, 99);

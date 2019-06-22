@@ -1,8 +1,11 @@
 package za.ac.sun.cs.green.expr;
 
+@Deprecated
 public class IntegerConstant extends Constant {
 
-    public static final Constant ZERO32 = new IntegerConstant(0, 32);
+	private static final long serialVersionUID = -188232380713969220L;
+
+	public static final Constant ZERO32 = new IntegerConstant(0, 32);
     public static final Constant ZERO64 = new IntegerConstant(0, 64);
     public static final Constant ONE32 = new IntegerConstant(1, 32);
     public static final Constant ONE64 = new IntegerConstant(1, 64);

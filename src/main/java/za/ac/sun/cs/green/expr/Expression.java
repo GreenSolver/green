@@ -4,7 +4,9 @@ import java.io.Serializable;
 
 public abstract class Expression implements Comparable<Expression>, Serializable {
 
-    private String stringRep = null;
+	private static final long serialVersionUID = -6176524656345471317L;
+
+	private String stringRep = null;
     public abstract void accept(Visitor visitor) throws VisitorException;
 
     public String getString() {

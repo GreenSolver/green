@@ -39,7 +39,7 @@ public class SATOldFactorizerTest {
 
 	private boolean finalCheck(String[] expected, Instance factor) {
 		String[] expectedReplaced = new String[expected.length];
-		for (int i=0; i<expected.length; i++) {
+		for (int i = 0; i < expected.length; i++) {
 			expectedReplaced[i] = expected[i].replaceAll("[()]", "");
 		}
 		String s0 = factor.getExpression().toString().replaceAll("[()]", "");
@@ -47,7 +47,7 @@ public class SATOldFactorizerTest {
 		SortedSet<String> s3 = new TreeSet<String>(Arrays.asList(expectedReplaced));
 		return s2.equals(s3);
 	}
-	
+
 	private void finalCheck(String[][] expected, Set<Instance> factors) {
 		assertEquals(expected.length, factors.size());
 		for (Instance i : factors) {
@@ -98,7 +98,7 @@ public class SATOldFactorizerTest {
 		Operation o3 = new Operation(Operation.Operator.AND, o2, o1);
 		check(o3, new String[] { "v2!=1" }, new String[] { "v1==42" });
 	}
-		
+
 	@Test
 	public void test03() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -109,7 +109,7 @@ public class SATOldFactorizerTest {
 		Operation o3 = new Operation(Operation.Operator.AND, o2, o1);
 		check(o3, new String[] { "v1!=1", "v1==0" });
 	}
-	
+
 	@Test
 	public void test04() {
 //		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -123,9 +123,9 @@ public class SATOldFactorizerTest {
 		Operation o4 = new Operation(Operation.Operator.EQ, v4, v5);
 		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
 		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		check(o234, new String[] { "v2==v3", "v3==v4", "v4==v5"});
+		check(o234, new String[] { "v2==v3", "v3==v4", "v4==v5" });
 	}
-	
+
 	@Test
 	public void test05() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -141,9 +141,9 @@ public class SATOldFactorizerTest {
 		Operation o34 = new Operation(Operation.Operator.AND, o4, o2);
 		Operation o234 = new Operation(Operation.Operator.AND, o3, o34);
 		Operation o1234 = new Operation(Operation.Operator.AND, o1, o234);
-		check(o1234, new String[] {"v1==v2", "v2==v3"}, new String[] {"v6==v4", "v5==v6"});
+		check(o1234, new String[] { "v1==v2", "v2==v3" }, new String[] { "v6==v4", "v5==v6" });
 	}
-	
+
 	@Test
 	public void test06() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -156,13 +156,12 @@ public class SATOldFactorizerTest {
 		Operation o1 = new Operation(Operation.Operator.LT, v1, new Operation(Operation.Operator.ADD, v2, v3));
 		Operation o2 = new Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD, v4, v5));
 		Operation o3 = new Operation(Operation.Operator.LT, v3, new Operation(Operation.Operator.ADD, v6, v7));
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);		
+		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
 		Operation o123 = new Operation(Operation.Operator.AND, o12, o3);
 
-
-		check(o123, new String[] {"v1<(v2+v3)", "v2<(v4+v5)", "v3<(v6+v7)"});
+		check(o123, new String[] { "v1<(v2+v3)", "v2<(v4+v5)", "v3<(v6+v7)" });
 	}
-	
+
 	@Test
 	public void test07() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -176,9 +175,9 @@ public class SATOldFactorizerTest {
 		Operation o1 = new Operation(Operation.Operator.LT, v1, new Operation(Operation.Operator.ADD, v2, v3));
 		Operation o2 = new Operation(Operation.Operator.LT, v2, new Operation(Operation.Operator.ADD, v4, v5));
 		Operation o3 = new Operation(Operation.Operator.LT, v6, new Operation(Operation.Operator.ADD, v7, v8));
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);		
+		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
 		Operation o123 = new Operation(Operation.Operator.AND, o12, o3);
-		check(o123, new String[] {"v1<(v2+v3)", "v2<(v4+v5)"}, new String[] {"v6<(v7+v8)"});
+		check(o123, new String[] { "v1<(v2+v3)", "v2<(v4+v5)" }, new String[] { "v6<(v7+v8)" });
 	}
 
 }

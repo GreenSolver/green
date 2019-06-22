@@ -2,6 +2,6 @@ package za.ac.sun.cs.green.util;
 
 public interface Reporter {
 
-	public void report(String context, String message);
+	void report(String context, String message);
 
 }

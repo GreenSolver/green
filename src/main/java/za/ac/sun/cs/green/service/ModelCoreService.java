@@ -24,44 +24,44 @@ public abstract class ModelCoreService extends BasicService {
 
 	private int invocationCount = 0;
 
-    protected int cacheHitCount = 0;
-    protected int satHitCount = 0;
-    protected int unsatHitCount = 0;
+	protected int cacheHitCount = 0;
+	protected int satHitCount = 0;
+	protected int unsatHitCount = 0;
 
-    protected int cacheMissCount = 0;
-    protected int satMissCount = 0;
-    protected int unsatMissCount = 0;
+	protected int cacheMissCount = 0;
+	protected int satMissCount = 0;
+	protected int unsatMissCount = 0;
 
-    private long timeConsumption = 0;
-    protected long storageTimeConsumption = 0;
+	private long timeConsumption = 0;
+	protected long storageTimeConsumption = 0;
 
-    protected int satCount = 0;
-    protected int unsatCount = 0;
+	protected int satCount = 0;
+	protected int unsatCount = 0;
 
 	public ModelCoreService(Green solver) {
 		super(solver);
 	}
 
 	@Override
-    public void report(Reporter reporter) {
-        reporter.report(getClass().getSimpleName(), "invocationCount = " + invocationCount);
-        reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
-        reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
-        reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
-        reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
-        reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
-        reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-        reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
-        reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
-        reporter.report(getClass().getSimpleName(), "unssatQueries = " + unsatCount);
-    }
+	public void report(Reporter reporter) {
+		reporter.report(getClass().getSimpleName(), "invocationCount = " + invocationCount);
+		reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
+		reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
+		reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
+		reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
+		reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
+		reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
+		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
+		reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
+		reporter.report(getClass().getSimpleName(), "unssatQueries = " + unsatCount);
+	}
 
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
 		return instance;
 	}
-	
+
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
 		if (instance.getData(SAT_KEY) == null) {
@@ -70,7 +70,6 @@ public abstract class ModelCoreService extends BasicService {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void solve0(Instance instance) {
 		invocationCount++;
 		/*--- NO CACHING: ---*
@@ -84,44 +83,44 @@ public abstract class ModelCoreService extends BasicService {
 			instance.setData(CORE_KEY, modelCore.getCore());
 		}
 		/*------*/
-		
+
 		/*--- EXPERIMENTAL CACHING: ---*/
 		Map<Variable, Constant> model = null;
 		Set<Expression> core = null;
 		SatEntry se = null;
 		UnsatEntry ue = null;
 		String key = SERVICE_KEY + instance.getFullExpression().getString();
-        long tmpConsumption = 0L;
-        long start = System.currentTimeMillis();
+		long tmpConsumption = 0L;
+		long start = System.currentTimeMillis();
 		Boolean isSat = (Boolean) store.get(key + "-SAT");
 		if (isSat == null) {
 			cacheMissCount++;
-            long startTime = System.currentTimeMillis();
+			long startTime = System.currentTimeMillis();
 			ModelCore modelCore = solve1(instance);
-            timeConsumption += (System.currentTimeMillis() - startTime);
-            tmpConsumption = System.currentTimeMillis() - startTime;
+			timeConsumption += (System.currentTimeMillis() - startTime);
+			tmpConsumption = System.currentTimeMillis() - startTime;
 			isSat = modelCore.getIsSat();
 			store.put(key + "-SAT", isSat);
 			if (isSat) {
-			    satMissCount++;
+				satMissCount++;
 				model = modelCore.getModel();
-                se = new SatEntry(instance.getExpression().satDelta, model);
+				se = new SatEntry(instance.getExpression().satDelta, model);
 //				store.put(key + "-MODEL", (HashMap<Variable, Constant>) model);
 				store.put(key + "-MODEL", se);
 			} else {
-			    unsatMissCount++;
+				unsatMissCount++;
 				core = modelCore.getCore();
-                ue = new UnsatEntry(instance.getExpression().satDelta, core);
+				ue = new UnsatEntry(instance.getExpression().satDelta, core);
 //                store.put(key + "-CORE", (HashSet<Expression>) core);
-                store.put(key + "-CORE", ue);
+				store.put(key + "-CORE", ue);
 			}
 		} else {
 			if (isSat) {
-			    satHitCount++;
+				satHitCount++;
 //				model = (HashMap<Variable, Constant>) store.get(key + "-MODEL");
 				se = (SatEntry) store.get(key + "-MODEL");
 			} else {
-			    unsatHitCount++;
+				unsatHitCount++;
 //				core = (HashSet<Expression>) store.get(key + "-CORE");
 				ue = (UnsatEntry) store.get(key + "-CORE");
 			}
@@ -136,7 +135,7 @@ public abstract class ModelCoreService extends BasicService {
 			instance.setData(CORE_KEY, ue);
 		}
 		/*------*/
-        storageTimeConsumption += ((System.currentTimeMillis() - start) - tmpConsumption);
+		storageTimeConsumption += ((System.currentTimeMillis() - start) - tmpConsumption);
 	}
 
 	private ModelCore solve1(Instance instance) {
@@ -152,12 +151,10 @@ public abstract class ModelCoreService extends BasicService {
 		return (Boolean) instance.getData(SAT_KEY);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static final Map<Variable, Constant> getModel(Instance instance) {
 		return ((SatEntry) instance.getData(MODEL_KEY)).getSolution();
 	}
 
-	@SuppressWarnings("unchecked")
 	public static final Set<Expression> getCore(Instance instance) {
 		return ((UnsatEntry) instance.getData(CORE_KEY)).getSolution();
 	}
@@ -166,13 +163,23 @@ public abstract class ModelCoreService extends BasicService {
 		private final Boolean isSat;
 		private final Map<Variable, Constant> model;
 		private final Set<Expression> core;
+
 		public ModelCore(final Boolean isSat, final Map<Variable, Constant> model, final Set<Expression> core) {
 			this.isSat = isSat;
 			this.model = model;
 			this.core = core;
 		}
-		public Boolean getIsSat() { return isSat; }
-		public Map<Variable, Constant> getModel() { return model; }
-		public Set<Expression> getCore() { return core; }
+
+		public Boolean getIsSat() {
+			return isSat;
+		}
+
+		public Map<Variable, Constant> getModel() {
+			return model;
+		}
+
+		public Set<Expression> getCore() {
+			return core;
+		}
 	}
 }

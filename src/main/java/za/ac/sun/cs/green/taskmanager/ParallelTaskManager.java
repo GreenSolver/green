@@ -23,23 +23,24 @@ public class ParallelTaskManager implements TaskManager {
 
 	private final Green solver;
 
-	private final Logger LOGGER;
+	private final Logger log;
 
 	private final ExecutorService executor;
 
 	private int processedCount = 0;
 
 	private int threadsCreated = 0;
-	
+
 	private int maxSimultaneousThreads = 0;
-	
+
 	public ParallelTaskManager(final Green solver) {
 		this.solver = solver;
-		LOGGER = solver.getLogger();
+		log = solver.getLogger();
 		executor = Executors.newCachedThreadPool();
 	}
 
-	public Object execute(Service parent, Instance parentInstance, Set<Service> services, Set<Instance> instances) throws InterruptedException, ExecutionException {
+	public Object execute(Service parent, Instance parentInstance, Set<Service> services, Set<Instance> instances)
+			throws InterruptedException, ExecutionException {
 		CompletionService<Object> cs = new ExecutorCompletionService<Object>(executor);
 		int n = services.size() * instances.size();
 		if (n > maxSimultaneousThreads) {
@@ -64,8 +65,9 @@ public class ParallelTaskManager implements TaskManager {
 		}
 		if (parent != null) {
 			result = parent.allChildrenDone(parentInstance, result);
-			if (result == null)
-				LOGGER.fatal("Should never happen! Got AllChildrenDone in PTM with NULL result");
+			if (result == null) {
+				log.fatal("Should never happen! Got AllChildrenDone in PTM with NULL result");
+			}
 		}
 		return result;
 	}
@@ -73,14 +75,14 @@ public class ParallelTaskManager implements TaskManager {
 	@Override
 	public Object process(final String serviceName, final Instance instance) {
 		processedCount++;
-		LOGGER.info("processing serviceName=\"" + serviceName + "\"");
+		log.info("processing serviceName=\"" + serviceName + "\"");
 		final Set<Service> services = solver.getService(serviceName);
 		try {
 			return execute(null, null, services, Collections.singleton(instance));
 		} catch (InterruptedException x) {
-			LOGGER.fatal("interrupted", x);
+			log.fatal("interrupted", x);
 		} catch (ExecutionException x) {
-			LOGGER.fatal("thread execution error", x);
+			log.fatal("thread execution error", x);
 		}
 		return null;
 	}
@@ -102,12 +104,12 @@ public class ParallelTaskManager implements TaskManager {
 		private final Service parent;
 
 		private final Instance parentInstance;
-		
+
 		private final Service service;
-		
+
 		private final Instance instance;
 
-		public Task(final Service parent, final Instance parentInstance, final Service service, final Instance instance) {
+		Task(final Service parent, final Instance parentInstance, final Service service, final Instance instance) {
 			this.parent = parent;
 			this.parentInstance = parentInstance;
 			this.service = service;
@@ -129,11 +131,11 @@ public class ParallelTaskManager implements TaskManager {
 				result = service.allChildrenDone(instance, result);
 			}
 			if (parent != null) {
-				result = parent.childDone(parentInstance, service, instance, result); 
+				result = parent.childDone(parentInstance, service, instance, result);
 			}
 			return result;
 		}
-			
+
 	}
 
 }

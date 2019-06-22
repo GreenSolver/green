@@ -1,21 +1,33 @@
 package za.ac.sun.cs.green.service.z3;
 
-import za.ac.sun.cs.green.Green;
-import za.ac.sun.cs.green.expr.*;
-import za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService;
-import za.ac.sun.cs.green.util.Reporter;
-
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 
+import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.expr.Constant;
+import za.ac.sun.cs.green.expr.IntConstant;
+import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.expr.IntegerConstant;
+import za.ac.sun.cs.green.expr.IntegerVariable;
+import za.ac.sun.cs.green.expr.RealConstant;
+import za.ac.sun.cs.green.expr.RealVariable;
+import za.ac.sun.cs.green.expr.Variable;
+import za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService;
+import za.ac.sun.cs.green.util.Reporter;
+
 public class ModelZ3Service extends ModelSMTLIBService {
 
-	private final String DEFAULT_Z3_PATH;
-
-	private final String DEFAULT_Z3_ARGS = "-smt2 -in";
+	private static final String DEFAULT_Z3_ARGS = "-smt2 -in";
 
 	private final String z3Command;
 
@@ -28,9 +40,9 @@ public class ModelZ3Service extends ModelSMTLIBService {
 
 	public ModelZ3Service(Green solver, Properties properties) {
 		super(solver);
-		String DRIVE = new File("").getAbsolutePath() + "/";
+		String drive = new File("").getAbsolutePath() + "/";
 		String sub = "lib/z3/build/z3";
-		String z3Path = DRIVE + sub;
+		String z3Path = drive + sub;
 		InputStream is = SATZ3Service.class.getClassLoader().getResourceAsStream("green/build.properties");
 		if (is != null) {
 			Properties p = new Properties();
@@ -42,8 +54,7 @@ public class ModelZ3Service extends ModelSMTLIBService {
 			}
 		}
 
-		DEFAULT_Z3_PATH = z3Path;
-		String p = properties.getProperty("green.z3.path", DEFAULT_Z3_PATH);
+		String p = properties.getProperty("green.z3.path", z3Path);
 		String a = properties.getProperty("green.z3.args", DEFAULT_Z3_ARGS);
 		z3Command = p + ' ' + a;
 	}

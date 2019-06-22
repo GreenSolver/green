@@ -27,6 +27,7 @@ public abstract class SATSMTLIBService extends SATService {
 	public SATSMTLIBService(Green solver) {
 		super(solver);
 	}
+
 	protected long translationTimeConsumption = 0;
 	protected int conjunctCount = 0;
 	protected int varCount = 0;
@@ -34,21 +35,21 @@ public abstract class SATSMTLIBService extends SATService {
 	@Override
 	protected Boolean solve(Instance instance) {
 		try {
-		    long start = System.currentTimeMillis();
+			long start = System.currentTimeMillis();
 			Translator t = new Translator();
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models false)");
-            // TODO : changed to QF_LIA
+			// TODO : changed to QF_LIA
 			b.append("(set-logic QF_LIA)"); // AUFLIA ??? (the previous logic)
 			b.append(Misc.join(t.getVariables(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
 			String a = b.toString();
 			translationTimeConsumption += (System.currentTimeMillis() - start);
-            conjunctCount += instance.getExpression().getString().split("&&").length;
-            varCount += t.getVariables().size();
-            return solve0(a);
+			conjunctCount += instance.getExpression().getString().split("&&").length;
+			varCount += t.getVariables().size();
+			return solve0(a);
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
 		} catch (VisitorException x) {
@@ -60,22 +61,21 @@ public abstract class SATSMTLIBService extends SATService {
 	protected abstract Boolean solve0(String smtQuery);
 
 	@SuppressWarnings("serial")
-	private static class TranslatorUnsupportedOperation extends
-			VisitorException {
+	private static class TranslatorUnsupportedOperation extends VisitorException {
 
-		public TranslatorUnsupportedOperation(String message) {
+		TranslatorUnsupportedOperation(String message) {
 			super(message);
 		}
 
 	}
 
 	private static class TranslatorPair {
-		
+
 		private final String string;
-		
+
 		private final Class<? extends Variable> type;
-		
-		public TranslatorPair(final String string, final Class<? extends Variable> type) {
+
+		TranslatorPair(final String string, final Class<? extends Variable> type) {
 			this.string = string;
 			this.type = type;
 		}
@@ -83,13 +83,13 @@ public abstract class SATSMTLIBService extends SATService {
 		public String getString() {
 			return string;
 		}
-		
+
 		public Class<? extends Variable> getType() {
 			return type;
 		}
 
 	}
-	
+
 	private static class Translator extends Visitor {
 
 		private final Stack<TranslatorPair> stack;
@@ -100,7 +100,7 @@ public abstract class SATSMTLIBService extends SATService {
 
 		private final List<String> domains;
 
-		public Translator() {
+		Translator() {
 			stack = new Stack<TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
@@ -251,9 +251,8 @@ public abstract class SATSMTLIBService extends SATService {
 				return b.toString();
 			}
 		}
-		
-		private String setOperator(Operator op)
-				throws TranslatorUnsupportedOperation {
+
+		private String setOperator(Operator op) throws TranslatorUnsupportedOperation {
 			switch (op) {
 			case EQ:
 				return "=";
@@ -300,13 +299,11 @@ public abstract class SATSMTLIBService extends SATService {
 			case POWER:
 			case SQRT:
 			default:
-				throw new TranslatorUnsupportedOperation(
-						"unsupported operation " + op);
+				throw new TranslatorUnsupportedOperation("unsupported operation " + op);
 			}
 		}
 
-		public void postVisit(Operation operation)
-				throws TranslatorUnsupportedOperation {
+		public void postVisit(Operation operation) throws TranslatorUnsupportedOperation {
 			TranslatorPair l = null;
 			TranslatorPair r = null;
 			Operator op = operation.getOperator();

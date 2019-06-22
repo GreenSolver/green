@@ -1,6 +1,14 @@
 package za.ac.sun.cs.green.service.latte;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Collections;
@@ -33,8 +41,8 @@ import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.service.CountService;
 
 /**
- * [Dependencies]
- * -    LattE library installation: https://www.math.ucdavis.edu/~latte/software.php
+ * [Dependencies] - LattE library installation:
+ * https://www.math.ucdavis.edu/~latte/software.php
  */
 public class CountLattEService extends CountService {
 
@@ -44,7 +52,7 @@ public class CountLattEService extends CountService {
 	private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
 
 	private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
-	
+
 	private static final int RANDOM = new Random().nextInt(9);
 
 	private static final String DIRNAME = String.format("%s/%s%s", DIRECTORY, DATE, RANDOM);
@@ -75,17 +83,17 @@ public class CountLattEService extends CountService {
 	/**
 	 * The location of the LattE executable file.
 	 */
-	private final String DEFAULT_LATTE_PATH;
-    private static final String LATTE_PATH = "lattepath";
+	private final String defaultLattePath;
+	private static final String LATTE_PATH = "lattepath";
 
 	/**
 	 * Options passed to the LattE executable.
 	 */
-	private final String DEFAULT_LATTE_ARGS = "--triangulation=cddlib";
-	
+	private static final String DEFAULT_LATTE_ARGS = "--triangulation=cddlib";
+
 	/**
-	 * Combination of the LattE executable, options, and the filename, all
-	 * separated by spaces.
+	 * Combination of the LattE executable, options, and the filename, all separated
+	 * by spaces.
 	 */
 	private final String latteCommand;
 
@@ -98,29 +106,30 @@ public class CountLattEService extends CountService {
 		super(solver);
 		log = solver.getLogger();
 
-        String lattePath = new File("").getAbsolutePath() + "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
-        InputStream is = null;
-        try {
-            is = new FileInputStream("build.properties");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+		String lattePath = new File("").getAbsolutePath()
+				+ "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
+		InputStream is = null;
+		try {
+			is = new FileInputStream("build.properties");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 
-        if (is != null) {
-            // If properties are correct, override with that specified path.
-            Properties p = new Properties();
-            try {
-                p.load(is);
-                lattePath = p.getProperty(LATTE_PATH);
-                is.close();
-            } catch (IOException e) {
-                // do nothing
-            }
-        }
+		if (is != null) {
+			// If properties are correct, override with that specified path.
+			Properties p = new Properties();
+			try {
+				p.load(is);
+				lattePath = p.getProperty(LATTE_PATH);
+				is.close();
+			} catch (IOException e) {
+				// do nothing
+			}
+		}
 
-        DEFAULT_LATTE_PATH = lattePath;
+		defaultLattePath = lattePath;
 
-		String p = properties.getProperty("green.latte.path", DEFAULT_LATTE_PATH);
+		String p = properties.getProperty("green.latte.path", defaultLattePath);
 		String a = properties.getProperty("green.latte.args", DEFAULT_LATTE_ARGS);
 		latteCommand = p + ' ' + a + ' ' + FILENAME;
 		log.debug("latteCommand=" + latteCommand);
@@ -135,14 +144,13 @@ public class CountLattEService extends CountService {
 	/**
 	 * A row that may appear in a matrix. It stores a mapping from variables to
 	 * coefficients (and an additional, implicit mapping from the "
-	 * <code>null</code>" variable to the constant coefficient that must appear
-	 * in each row).
+	 * <code>null</code>" variable to the constant coefficient that must appear in
+	 * each row).
 	 * 
-	 * Each row has a type, which is a integer comparison (equal-to,
-	 * not-equal-to, less-than, less-than-or-equal-to, greater-than, or
-	 * greater-then-or-equal-to). Once all the coefficients have been entered,
-	 * it is "fixed". This means that no new coefficients may be added, and some
-	 * internal flags are set.
+	 * Each row has a type, which is a integer comparison (equal-to, not-equal-to,
+	 * less-than, less-than-or-equal-to, greater-than, or greater-then-or-equal-to).
+	 * Once all the coefficients have been entered, it is "fixed". This means that
+	 * no new coefficients may be added, and some internal flags are set.
 	 * 
 	 */
 	private static class HRow {
@@ -175,15 +183,11 @@ public class CountLattEService extends CountService {
 		/**
 		 * Constructor for the row.
 		 * 
-		 * @param type
-		 *            the type of the row
+		 * @param type the type of the row
 		 */
-		public HRow(Operation.Operator type) {
-			assert (type == Operation.Operator.EQ)
-					|| (type == Operation.Operator.NE)
-					|| (type == Operation.Operator.LT)
-					|| (type == Operation.Operator.LE)
-					|| (type == Operation.Operator.GT)
+		HRow(Operation.Operator type) {
+			assert (type == Operation.Operator.EQ) || (type == Operation.Operator.NE) || (type == Operation.Operator.LT)
+					|| (type == Operation.Operator.LE) || (type == Operation.Operator.GT)
 					|| (type == Operation.Operator.GE);
 			fixed = false;
 			flip = 1;
@@ -193,15 +197,13 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Adds a coefficient for the given variable. This overwrites any
-		 * previous coefficient that might have been associated with a variable.
-		 * If the given variable is <code>null</code>, the coefficient is taken
-		 * to be the constant coefficient.
+		 * Adds a coefficient for the given variable. This overwrites any previous
+		 * coefficient that might have been associated with a variable. If the given
+		 * variable is <code>null</code>, the coefficient is taken to be the constant
+		 * coefficient.
 		 * 
-		 * @param variable
-		 *            the variable
-		 * @param coefficient
-		 *            the coefficient for the variable
+		 * @param variable    the variable
+		 * @param coefficient the coefficient for the variable
 		 */
 		public void put(IntVariable variable, int coefficient) {
 			assert !fixed;
@@ -213,30 +215,26 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Adds a coefficient for the given variable. This overwrites any
-		 * previous coefficient that might have been associated with a variable.
-		 * If the given variable is <code>null</code>, the coefficient is taken
-		 * to be the constant coefficient.
+		 * Adds a coefficient for the given variable. This overwrites any previous
+		 * coefficient that might have been associated with a variable. If the given
+		 * variable is <code>null</code>, the coefficient is taken to be the constant
+		 * coefficient.
 		 * 
-		 * @param variable
-		 *            the variable
-		 * @param coefficient
-		 *            the coefficient for the variable
+		 * @param variable    the variable
+		 * @param coefficient the coefficient for the variable
 		 */
 		public void put(IntVariable variable, IntConstant coefficient) {
 			put(variable, coefficient.getValue());
 		}
 
 		/**
-		 * Adds a value to the coefficient for a variable. If the variable has
-		 * not yet been assigned a coefficient, the given value is taken to be
-		 * the new coefficient. If the given variable is <code>null</code>, the
-		 * coefficient is taken to be the constant coefficient.
+		 * Adds a value to the coefficient for a variable. If the variable has not yet
+		 * been assigned a coefficient, the given value is taken to be the new
+		 * coefficient. If the given variable is <code>null</code>, the coefficient is
+		 * taken to be the constant coefficient.
 		 * 
-		 * @param variable
-		 *            the variable
-		 * @param delta
-		 *            the value to add to the variable's coefficient
+		 * @param variable the variable
+		 * @param delta    the value to add to the variable's coefficient
 		 */
 		public void add(IntVariable variable, int delta) {
 			assert !fixed;
@@ -253,15 +251,13 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Adds a value to the coefficient for a variable. If the variable has
-		 * not yet been assigned a coefficient, the given value is taken to be
-		 * the new coefficient. If the given variable is <code>null</code>, the
-		 * coefficient is taken to be the constant coefficient.
+		 * Adds a value to the coefficient for a variable. If the variable has not yet
+		 * been assigned a coefficient, the given value is taken to be the new
+		 * coefficient. If the given variable is <code>null</code>, the coefficient is
+		 * taken to be the constant coefficient.
 		 * 
-		 * @param variable
-		 *            the variable
-		 * @param delta
-		 *            the value to add to the variable's coefficient
+		 * @param variable the variable
+		 * @param delta    the value to add to the variable's coefficient
 		 */
 		@SuppressWarnings("unused")
 		// Not used at the moment
@@ -271,11 +267,10 @@ public class CountLattEService extends CountService {
 
 		/**
 		 * Finds the coefficient of the given variable. If the variable is
-		 * <code>null</code>, the constant coefficient is returned. If the
-		 * variable has no associated coefficient, the value 0 is returned.
+		 * <code>null</code>, the constant coefficient is returned. If the variable has
+		 * no associated coefficient, the value 0 is returned.
 		 * 
-		 * @param variable
-		 *            the given variable
+		 * @param variable the given variable
 		 * @return the coefficient associated with the variable (or 0)
 		 */
 		public int get(IntVariable variable) {
@@ -288,9 +283,9 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Fixes the row by adjusting the coefficients for rows of type
-		 * greater-than, greater-than-or-equal, and less-than-or-equal, and
-		 * changing their types to less-than.
+		 * Fixes the row by adjusting the coefficients for rows of type greater-than,
+		 * greater-than-or-equal, and less-than-or-equal, and changing their types to
+		 * less-than.
 		 */
 		public void fix() {
 			if (!fixed) {
@@ -315,9 +310,8 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Returns the set of variables that appear with non-zero coefficients
-		 * in the row. The "<code>null</code>" constant coefficient variable is
-		 * not returned.
+		 * Returns the set of variables that appear with non-zero coefficients in the
+		 * row. The "<code>null</code>" constant coefficient variable is not returned.
 		 * 
 		 * @return the set of variables with non-zero coefficients
 		 */
@@ -335,8 +329,7 @@ public class CountLattEService extends CountService {
 		public boolean equals(Object object) {
 			assert fixed;
 			HRow row = (HRow) object;
-			return (type == row.type) && (flip == row.flip)
-					&& (constantCoefficient == row.constantCoefficient)
+			return (type == row.type) && (flip == row.flip) && (constantCoefficient == row.constantCoefficient)
 					&& (coefficients.equals(row.coefficients));
 		}
 
@@ -347,18 +340,17 @@ public class CountLattEService extends CountService {
 		 */
 		@Override
 		public int hashCode() {
-			return type.hashCode() ^ constantCoefficient
-					^ coefficients.hashCode();
+			return type.hashCode() ^ constantCoefficient ^ coefficients.hashCode();
 		}
 
 	}
 
 	/**
 	 * A representation of a conjunction of constraints. Each constraint is
-	 * represented by an instance of an {@link HRow}. The rows are placed into
-	 * sets based on their type. Once the sets have been populated, further
-	 * internal calculation is used to take care of the inequality constraints
-	 * which LattE cannot handle directly.
+	 * represented by an instance of an {@link HRow}. The rows are placed into sets
+	 * based on their type. Once the sets have been populated, further internal
+	 * calculation is used to take care of the inequality constraints which LattE
+	 * cannot handle directly.
 	 */
 	private class HMatrix {
 
@@ -388,8 +380,8 @@ public class CountLattEService extends CountService {
 		private Set<IntVariable> commonVariables;
 
 		/**
-		 * The number of times each variable occurs in the constraints that are
-		 * present in every call to LattE.
+		 * The number of times each variable occurs in the constraints that are present
+		 * in every call to LattE.
 		 */
 		private Map<IntVariable, Integer> commonOccurences;
 
@@ -403,7 +395,7 @@ public class CountLattEService extends CountService {
 		/**
 		 * Constructor for an H-matrix.
 		 */
-		public HMatrix() {
+		HMatrix() {
 			eqRows = new HashSet<HRow>();
 			neRows = new HashSet<HRow>();
 			ltRows = new HashSet<HRow>();
@@ -414,9 +406,8 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Constructs the rows of the matrix by recursively exploring the
-		 * expression. It is assumed that the expression has a very specific
-		 * form.
+		 * Constructs the rows of the matrix by recursively exploring the expression. It
+		 * is assumed that the expression has a very specific form.
 		 * 
 		 * <pre>
 		 * expr ::= constraint | expr && expr
@@ -425,8 +416,7 @@ public class CountLattEService extends CountService {
 		 * term ::= integer_constant | integer_constant * variable
 		 * </pre>
 		 * 
-		 * @param operation
-		 *            the expression to explore
+		 * @param operation the expression to explore
 		 */
 		private void explore(Operation operation) {
 			Operation.Operator op = operation.getOperator();
@@ -434,18 +424,14 @@ public class CountLattEService extends CountService {
 				explore((Operation) operation.getOperand(0));
 				explore((Operation) operation.getOperand(1));
 			} else {
-				assert (op == Operation.Operator.EQ)
-						|| (op == Operation.Operator.NE)
-						|| (op == Operation.Operator.LT)
-						|| (op == Operation.Operator.LE)
-						|| (op == Operation.Operator.GT)
+				assert (op == Operation.Operator.EQ) || (op == Operation.Operator.NE) || (op == Operation.Operator.LT)
+						|| (op == Operation.Operator.LE) || (op == Operation.Operator.GT)
 						|| (op == Operation.Operator.GE);
 				HRow row = new HRow(op);
 				int c = ((IntConstant) operation.getOperand(1)).getValue();
 				assert (c == 0);
 				Expression e = operation.getOperand(0);
-				while ((e instanceof Operation)
-						&& (((Operation) e).getOperator() == Operation.Operator.ADD)) {
+				while ((e instanceof Operation) && (((Operation) e).getOperator() == Operation.Operator.ADD)) {
 					explore0(row, ((Operation) e).getOperand(1));
 					e = ((Operation) e).getOperand(0);
 				}
@@ -455,17 +441,15 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Processes one term of an expression and adding it to the given row.
-		 * The term is assumed to have a very specific form.
+		 * Processes one term of an expression and adding it to the given row. The term
+		 * is assumed to have a very specific form.
 		 * 
 		 * <pre>
 		 * term ::= integer_constant | integer_constant * variable
 		 * </pre>
 		 * 
-		 * @param row
-		 *            the row to which the term information is added
-		 * @param expression
-		 *            the term to process
+		 * @param row        the row to which the term information is added
+		 * @param expression the term to process
 		 */
 		private void explore0(HRow row, Expression expression) {
 			if (expression instanceof IntConstant) {
@@ -474,19 +458,16 @@ public class CountLattEService extends CountService {
 			} else {
 				Operation o = (Operation) expression;
 				assert o.getOperator() == Operation.Operator.MUL;
-				row.put((IntVariable) o.getOperand(1),
-						(IntConstant) o.getOperand(0));
+				row.put((IntVariable) o.getOperand(1), (IntConstant) o.getOperand(0));
 			}
 		}
 
 		/**
-		 * Register a row with the matrix by "fixing" it (by calling
-		 * {@link HRow#fix()}) and then adding it to the appropriate set, based
-		 * on its type. The variables of the row is added to the set of
-		 * variables.
+		 * Register a row with the matrix by "fixing" it (by calling {@link HRow#fix()})
+		 * and then adding it to the appropriate set, based on its type. The variables
+		 * of the row is added to the set of variables.
 		 * 
-		 * @param row
-		 *            the row to add to the matrix
+		 * @param row the row to add to the matrix
 		 */
 		private void register(HRow row) {
 			row.fix();
@@ -516,8 +497,7 @@ public class CountLattEService extends CountService {
 		/**
 		 * Counts the number solutions that satisfy the expression.
 		 * 
-		 * @param expression
-		 *            the expression to satisfy
+		 * @param expression the expression to satisfy
 		 * @return the number of satisfying solutions
 		 */
 		public Apint count(Expression expression) {
@@ -528,8 +508,7 @@ public class CountLattEService extends CountService {
 			}
 			Apint n = Apint.ZERO;
 			Subsetter<HRow> s = new Subsetter<HRow>(neRows);
-			for (Set<HRow> ne = new HashSet<HRow>(); ne != null; ne = s
-					.advance()) {
+			for (Set<HRow> ne = new HashSet<HRow>(); ne != null; ne = s.advance()) {
 				if (ne.size() % 2 == 0) {
 					n = n.add(processInput(generateConstraints(ne)));
 				} else {
@@ -544,11 +523,9 @@ public class CountLattEService extends CountService {
 			SortedSet<String> constraints = new TreeSet<String>();
 			Set<String> eqConstraints = new HashSet<String>();
 			// Construct the set of variables and list of columns
-			Set<IntVariable> variables = new HashSet<IntVariable>(
-					commonVariables);
+			Set<IntVariable> variables = new HashSet<IntVariable>(commonVariables);
 			List<IntVariable> columns = new LinkedList<IntVariable>(variables);
-			final Map<IntVariable, Integer> occurences = new HashMap<IntVariable, Integer>(
-					commonOccurences);
+			final Map<IntVariable, Integer> occurences = new HashMap<IntVariable, Integer>(commonOccurences);
 			for (HRow r : neRows) {
 				for (IntVariable v : r.getVariables()) {
 					Integer o = occurences.get(v);
@@ -635,11 +612,10 @@ public class CountLattEService extends CountService {
 
 		/**
 		 * Processes the input to produce the number of satisfying solutions. If
-		 * present, the store is checked first. If the answer is not already
-		 * present, it is calculated and added to the store.
+		 * present, the store is checked first. If the answer is not already present, it
+		 * is calculated and added to the store.
 		 * 
-		 * @param input
-		 *            the LattE input as an H-matrix
+		 * @param input the LattE input as an H-matrix
 		 * @return the number of satisfying solutions as an {@link Apint}
 		 */
 		private Apint processInput(String input) {
@@ -656,12 +632,10 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Stores the input in a file, invokes LattE on the file, captures and
-		 * processes the output, and returns the number of satisfying solutions
-		 * as a string.
+		 * Stores the input in a file, invokes LattE on the file, captures and processes
+		 * the output, and returns the number of satisfying solutions as a string.
 		 * 
-		 * @param input
-		 *            the LattE input as an H-matrix
+		 * @param input the LattE input as an H-matrix
 		 * @return the number of satisfying solutions as a string
 		 */
 		private String invokeLattE(String input) {
@@ -687,29 +661,25 @@ public class CountLattEService extends CountService {
 				executor.execute(CommandLine.parse(latteCommand));
 				result = outputStream.toString();
 			} catch (ExecuteException e) {
-				System.out.println("LattECounter : caught " + e.getClass()
-						+ " while executing " + FILENAME);
+				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
 				e.printStackTrace();
 				throw new RuntimeException();
 			} catch (IOException e) {
-				System.out.println("LattECounter : caught " + e.getClass()
-						+ " while executing " + FILENAME);
+				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
 				e.printStackTrace();
 				throw new RuntimeException();
 			}
 			// Process LattE's output from the file
-			final String RESULTS_FILENAME = directory + "/numOfLatticePoints";
+			final String resultFilename = directory + "/numOfLatticePoints";
 			String resultFromFile = null;
 			try {
-				BufferedReader inputFile = new BufferedReader(new FileReader(
-						RESULTS_FILENAME));
+				BufferedReader inputFile = new BufferedReader(new FileReader(resultFilename));
 				resultFromFile = inputFile.readLine();
 				inputFile.close();
 				// System.out.println(" in file = " + resultFromFile);
 			} catch (IOException ioe) {
-				System.out
-						.println("LattECounter : unexpected result from count output, "
-								+ RESULTS_FILENAME + " not found");
+				System.out.println(
+						"LattECounter : unexpected result from count output, " + resultFilename + " not found");
 				throw new RuntimeException();
 			}
 			int i = result.indexOf(ANSWER_PATTERN);
@@ -724,8 +694,7 @@ public class CountLattEService extends CountService {
 				return resultFromFile;
 			} else {
 				System.out.println(result);
-				System.out
-						.println("LattECounter : unexpected result from count output");
+				System.out.println("LattECounter : unexpected result from count output");
 				throw new RuntimeException();
 			}
 		}
@@ -733,9 +702,8 @@ public class CountLattEService extends CountService {
 	}
 
 	/**
-	 * Generic class to iterate over all subsets of a given set. Note that the
-	 * empty set is never returned. The correct way to use this class is as
-	 * follows:
+	 * Generic class to iterate over all subsets of a given set. Note that the empty
+	 * set is never returned. The correct way to use this class is as follows:
 	 * 
 	 * <pre>
 	 * Subsetter<X> z = new Subsetter<X>(...some set of X elements...);
@@ -744,14 +712,13 @@ public class CountLattEService extends CountService {
 	 * }
 	 * </pre>
 	 * 
-	 * @param <T>
-	 *            the base type of element
+	 * @param <T> the base type of element
 	 */
 	private static class Subsetter<T> {
 
 		/**
-		 * A list version of the whole set. This is needed to access the
-		 * individual elements by number.
+		 * A list version of the whole set. This is needed to access the individual
+		 * elements by number.
 		 */
 		private List<T> list;
 
@@ -766,19 +733,18 @@ public class CountLattEService extends CountService {
 		private int size;
 
 		/**
-		 * A bitset to record the elements of the whole set ({@link #list}) that
-		 * are currently included in the result set ({@link #set}).
+		 * A bitset to record the elements of the whole set ({@link #list}) that are
+		 * currently included in the result set ({@link #set}).
 		 */
 		private BitSet elements;
 
 		/**
-		 * Constructor for the subsetter. Class fields are initialized but no
-		 * heavy computation is performed.
+		 * Constructor for the subsetter. Class fields are initialized but no heavy
+		 * computation is performed.
 		 * 
-		 * @param wholeSet
-		 *            the whole set over which subsets are taken
+		 * @param wholeSet the whole set over which subsets are taken
 		 */
-		public Subsetter(Set<T> wholeSet) {
+		Subsetter(Set<T> wholeSet) {
 			list = new LinkedList<T>(wholeSet);
 			set = new HashSet<T>();
 			size = list.size();
@@ -786,11 +752,11 @@ public class CountLattEService extends CountService {
 		}
 
 		/**
-		 * Calculates and returns the next subset. Once there are no more
-		 * subsets, the method returns <code>null</code>.
+		 * Calculates and returns the next subset. Once there are no more subsets, the
+		 * method returns <code>null</code>.
 		 * 
-		 * @return the next subset of the whole set, or <code>null</code> if all
-		 *         subsets have been returned
+		 * @return the next subset of the whole set, or <code>null</code> if all subsets
+		 *         have been returned
 		 */
 		public final Set<T> advance() {
 			int i = 0;

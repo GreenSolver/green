@@ -47,18 +47,19 @@ public class SATFactorSlicerService extends BasicService {
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
 			final Instance p = instance.getParent();
-			
-			// Handle two initial conditions: no parent and no FactoredConstraint for the parent
+
+			// Handle two initial conditions: no parent and no FactoredConstraint for the
+			// parent
 			FactorExpressionOld fc0 = null;
-			if (p!=null) {
+			if (p != null) {
 				fc0 = (FactorExpressionOld) p.getData(FactorExpressionOld.class);
-				if (fc0==null) {
-					// Construct the parent's factor and store it 
+				if (fc0 == null) {
+					// Construct the parent's factor and store it
 					fc0 = new FactorExpressionOld(null, p.getFullExpression());
 					p.setData(FactorExpressionOld.class, fc0);
 				}
 			}
-			
+
 			final FactorExpressionOld fc = new FactorExpressionOld(fc0, instance.getExpression());
 			instance.setData(FactorExpressionOld.class, fc);
 
@@ -67,7 +68,7 @@ public class SATFactorSlicerService extends BasicService {
 			final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
-			
+
 			// First update our statistics
 			invocationCount++;
 			minimalVariableCount += fc.getDependentVariableCount(instance.getExpression());
@@ -83,10 +84,12 @@ public class SATFactorSlicerService extends BasicService {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
 		reporter.report(getClass().getSimpleName(), "totalConjuncts = " + totalConjunctCount);
 		reporter.report(getClass().getSimpleName(), "minimalConjuncts = " + minimalConjunctCount);
-		reporter.report(getClass().getSimpleName(), "conjunctReduction = " + ((totalConjunctCount - minimalConjunctCount) * 100.0D / totalConjunctCount));
+		double conjunctReduction = (totalConjunctCount - minimalConjunctCount) * 100.0D / totalConjunctCount;
+		reporter.report(getClass().getSimpleName(), "conjunctReduction = " + conjunctReduction);
 		reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
 		reporter.report(getClass().getSimpleName(), "minimalVariables = " + minimalVariableCount);
-		reporter.report(getClass().getSimpleName(), "variableReduction = " + ((totalVariableCount - minimalVariableCount) * 100.0D / totalVariableCount));
+		double variableReduction = (totalVariableCount - minimalVariableCount) * 100.0D / totalVariableCount;
+		reporter.report(getClass().getSimpleName(), "variableReduction = " + variableReduction);
 	}
 
 }

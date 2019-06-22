@@ -20,8 +20,8 @@ import za.ac.sun.cs.green.util.Configuration;
 public class ComplexSATFactorizerTest {
 
 	public static Green solver;
-    private static final String DRIVE = new File("").getAbsolutePath() + "/";
-    private static final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
+	private static final String DRIVE = new File("").getAbsolutePath() + "/";
+	private static final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
 
 	@BeforeClass
 	public static void initialize() {
@@ -37,10 +37,8 @@ public class ComplexSATFactorizerTest {
 		config.configure();
 	}
 
-	private void check(Expression expression, Expression parentExpression,
-			boolean expected) {
-		Instance p = (parentExpression == null) ? null : new Instance(solver,
-				null, parentExpression);
+	private void check(Expression expression, Expression parentExpression, boolean expected) {
+		Instance p = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
 		Instance i = new Instance(solver, p, expression);
 		Object result = i.request("sat");
 		assertNotNull(result);
@@ -63,7 +61,7 @@ public class ComplexSATFactorizerTest {
 	private void checkUnsat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, false);
 	}
-	
+
 	/**
 	 * Check the following system of equations:
 	 * 
@@ -75,22 +73,22 @@ public class ComplexSATFactorizerTest {
 	 */
 	@Test
 	public void test01() {
-		final int N = 10;
-		IntVariable[] v = new IntVariable[N + 1];
-		for (int i = 0; i < N + 1; i++) {
+		final int n = 10;
+		IntVariable[] v = new IntVariable[n + 1];
+		for (int i = 0; i < n + 1; i++) {
 			v[i] = new IntVariable("v" + i, 0, 99);
 		}
-		Operation[] o = new Operation[N + 1];
-		for (int i = 0; i < N; i++) {
-			o[i] = new Operation(Operation.Operator.LE, v[i], v[(i + 1) % N]);
+		Operation[] o = new Operation[n + 1];
+		for (int i = 0; i < n; i++) {
+			o[i] = new Operation(Operation.Operator.LE, v[i], v[(i + 1) % n]);
 		}
 		IntConstant c10 = new IntConstant(10);
-		o[N] = new Operation(Operation.Operator.LT, v[N], c10);
+		o[n] = new Operation(Operation.Operator.LT, v[n], c10);
 		Operation oo = o[0];
-		for (int i = 1; i <= N; i++) {
+		for (int i = 1; i <= n; i++) {
 			oo = new Operation(Operation.Operator.AND, oo, o[i]);
 		}
-		checkSat(o[N], oo);
+		checkSat(o[n], oo);
 	}
 
 	/**
@@ -104,24 +102,24 @@ public class ComplexSATFactorizerTest {
 	 */
 	@Test
 	public void test02() {
-		final int N = 10;
-		IntVariable[] v = new IntVariable[N + 1];
-		for (int i = 0; i < N + 1; i++) {
+		final int n = 10;
+		IntVariable[] v = new IntVariable[n + 1];
+		for (int i = 0; i < n + 1; i++) {
 			v[i] = new IntVariable("v" + i, 0, 99);
 		}
-		Operation[] o = new Operation[N + 1];
-		for (int i = 0; i < N; i++) {
-			o[i] = new Operation(Operation.Operator.LT, v[i], v[(i + 1) % N]);
+		Operation[] o = new Operation[n + 1];
+		for (int i = 0; i < n; i++) {
+			o[i] = new Operation(Operation.Operator.LT, v[i], v[(i + 1) % n]);
 		}
 		IntConstant c10 = new IntConstant(10);
-		o[N] = new Operation(Operation.Operator.LT, v[N], c10);
+		o[n] = new Operation(Operation.Operator.LT, v[n], c10);
 		Operation oo = o[0];
-		for (int i = 1; i <= N; i++) {
+		for (int i = 1; i <= n; i++) {
 			oo = new Operation(Operation.Operator.AND, oo, o[i]);
 		}
-		checkUnsat(o[N], oo);
+		checkUnsat(o[n], oo);
 	}
-	
+
 	/**
 	 * Check the following system of equations:
 	 * 
@@ -129,103 +127,93 @@ public class ComplexSATFactorizerTest {
 	 * 
 	 * vi = 0..10
 	 * 
-	 * Should be unsatisfiable because the only possible values are:
-	 *   v0 = 0
-	 *   v1 = 1
-	 *   v2 = 2
-	 *   ...
-	 *   vN = N
-	 *   
+	 * Should be unsatisfiable because the only possible values are: v0 = 0 v1 = 1
+	 * v2 = 2 ... vN = N
+	 * 
 	 * but last conjunct claims vN < N.
 	 */
 	@Test
 	public void test03() {
-		final int N = 10;
-		IntVariable[] v = new IntVariable[N + 1];
-		for (int i = 0; i < N + 1; i++) {
-			v[i] = new IntVariable("v" + i, 0, N);
+		final int n = 10;
+		IntVariable[] v = new IntVariable[n + 1];
+		for (int i = 0; i < n + 1; i++) {
+			v[i] = new IntVariable("v" + i, 0, n);
 		}
-		Operation[] o = new Operation[N + 1];
-		for (int i = 0; i < N; i++) {
+		Operation[] o = new Operation[n + 1];
+		for (int i = 0; i < n; i++) {
 			o[i] = new Operation(Operation.Operator.LT, v[i], v[i + 1]);
 		}
-		IntConstant cN = new IntConstant(N);
-		o[N] = new Operation(Operation.Operator.LT, v[N], cN);
+		IntConstant cN = new IntConstant(n);
+		o[n] = new Operation(Operation.Operator.LT, v[n], cN);
 		Operation oo = o[0];
-		for (int i = 1; i <= N; i++) {
+		for (int i = 1; i <= n; i++) {
 			oo = new Operation(Operation.Operator.AND, oo, o[i]);
 		}
-		checkUnsat(o[N], oo);
+		checkUnsat(o[n], oo);
 	}
-	
+
 	/**
 	 * Check the following system of equations:
 	 * 
-	 *    (v0 <= w0) && (w0 <= v0)
-	 * && (v1 <= w1) && (w1 <= v1)
-	 * && ...
-	 * && (vN-1 <= wN-1) && (wN-1 <= vN-1)
+	 * (v0 <= w0) && (w0 <= v0) && (v1 <= w1) && (w1 <= v1) && ... && (vN-1 <= wN-1)
+	 * && (wN-1 <= vN-1)
 	 * 
-	 * vi = 0..99
-	 * wi = 0..99
+	 * vi = 0..99 wi = 0..99
 	 * 
 	 * Should be satisfiable.
 	 */
 	@Test
 	public void test04() {
-		final int N = 10;
-		IntVariable[] v = new IntVariable[N];
-		IntVariable[] w = new IntVariable[N];
-		for (int i = 0; i < N; i++) {
+		final int n = 10;
+		IntVariable[] v = new IntVariable[n];
+		IntVariable[] w = new IntVariable[n];
+		for (int i = 0; i < n; i++) {
 			v[i] = new IntVariable("v" + i, 0, 99);
 			w[i] = new IntVariable("w" + i, 0, 99);
 		}
-		Operation[] o = new Operation[N + 1];
-		for (int i = 0; i < N; i++) {
+		Operation[] o = new Operation[n + 1];
+		for (int i = 0; i < n; i++) {
 			Operation o0 = new Operation(Operation.Operator.LE, v[i], w[i]);
 			Operation o1 = new Operation(Operation.Operator.LE, w[i], v[i]);
 			o[i] = new Operation(Operation.Operator.AND, o0, o1);
 		}
 		Operation oo = o[0];
-		for (int i = 1; i < N; i++) {
+		for (int i = 1; i < n; i++) {
 			oo = new Operation(Operation.Operator.AND, oo, o[i]);
 		}
 		checkSat(oo);
 	}
-	
+
 	/**
 	 * Check the following system of equations:
 	 * 
-	 *    (v0 < w0) && (w0 < v0)
-	 * && (v1 < w1) && (w1 < v1)
-	 * && ...
-	 * && (vN-1 < wN-1) && (wN-1 < vN-1)
+	 * (v0 < w0) && (w0 < v0) && (v1 < w1) && (w1 < v1) && ... && (vN-1 < wN-1) &&
+	 * (wN-1 < vN-1)
 	 * 
-	 * vi = 0..99
-	 * wi = 0..99
+	 * vi = 0..99 wi = 0..99
 	 * 
 	 * Should be unsatisfiable.
 	 */
 	@Test
 	public void test05() {
-		final int N = 10;
-		IntVariable[] v = new IntVariable[N];
-		IntVariable[] w = new IntVariable[N];
-		for (int i = 0; i < N; i++) {
+		final int n = 10;
+		IntVariable[] v = new IntVariable[n];
+		IntVariable[] w = new IntVariable[n];
+		for (int i = 0; i < n; i++) {
 			v[i] = new IntVariable("v" + i, 0, 99);
 			w[i] = new IntVariable("w" + i, 0, 99);
 		}
-		Operation[] o = new Operation[N + 1];
-		for (int i = 0; i < N; i++) {
+		Operation[] o = new Operation[n + 1];
+		for (int i = 0; i < n; i++) {
 			Operation o0 = new Operation(Operation.Operator.LT, v[i], w[i]);
 			Operation o1 = new Operation(Operation.Operator.LT, w[i], v[i]);
 			o[i] = new Operation(Operation.Operator.AND, o0, o1);
 		}
 		Operation oo = o[0];
-		for (int i = 1; i < N; i++) {
+		for (int i = 1; i < n; i++) {
 			oo = new Operation(Operation.Operator.AND, oo, o[i]);
 		}
 		checkUnsat(oo);
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 package za.ac.sun.cs.green.parser.smtlib2;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -393,8 +393,8 @@ public class SMTLIB2Parser0Test {
 				+ "(let ((?x120 (= true ?x119)))"
 				+ "?x120))))"
 				+ "(check-sat)"
-				+ "(pop 1)"
-				, log);
+				+ "(pop 1)",
+				log);
 		Parser0 p = new Parser0(s, log);
 		p.parse();
 		assertTrue(true);

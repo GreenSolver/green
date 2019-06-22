@@ -2,6 +2,7 @@ package za.ac.sun.cs.green.parser.smtlib2;
 
 public enum Token0 {
 
+	// @formatter:off
 	UNKNOWN("an unknown token"),
 	EOF("the end of file"),
 	NUMERAL("a numeral"),
@@ -42,6 +43,7 @@ public enum Token0 {
 	NOT("\"!\""),
 	RPAREN("\")\""),
 	UNDERSCORE("\"_\"");
+	// @formatter:on
 
 	/**
 	 * A description string for the token.
@@ -53,11 +55,13 @@ public enum Token0 {
 	 * 
 	 * @param string the description string
 	 */
-	private Token0(String string) {
+	Token0(String string) {
 		this.string = string;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Enum#toString()
 	 */
 	@Override

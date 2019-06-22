@@ -3,45 +3,42 @@ package za.ac.sun.cs.green.util;
 public class Base64 {
 
 	// The line separator string of the operating system.
-	private static final String systemLineSeparator = System
-			.getProperty("line.separator");
+	private static final String SYSTEM_LINE_SEPARATOR = System.getProperty("line.separator");
 
 	// Mapping table from 6-bit nibbles to Base64 characters.
-	private static final char[] map1 = new char[64];
+	private static final char[] MAP1 = new char[64];
 
 	static {
 		int i = 0;
 		for (char c = 'A'; c <= 'Z'; c++) {
-			map1[i++] = c;
+			MAP1[i++] = c;
 		}
 		for (char c = 'a'; c <= 'z'; c++) {
-			map1[i++] = c;
+			MAP1[i++] = c;
 		}
 		for (char c = '0'; c <= '9'; c++) {
-			map1[i++] = c;
+			MAP1[i++] = c;
 		}
-		map1[i++] = '+';
-		map1[i++] = '/';
+		MAP1[i++] = '+';
+		MAP1[i++] = '/';
 	}
 
 	// Mapping table from Base64 characters to 6-bit nibbles.
-	private static final byte[] map2 = new byte[128];
+	private static final byte[] MAP2 = new byte[128];
 
 	static {
-		for (int i = 0; i < map2.length; i++) {
-			map2[i] = -1;
+		for (int i = 0; i < MAP2.length; i++) {
+			MAP2[i] = -1;
 		}
 		for (int i = 0; i < 64; i++) {
-			map2[map1[i]] = (byte) i;
+			MAP2[MAP1[i]] = (byte) i;
 		}
 	}
 
 	/**
-	 * Encodes a string into Base64 format. No blanks or line breaks are
-	 * inserted.
+	 * Encodes a string into Base64 format. No blanks or line breaks are inserted.
 	 * 
-	 * @param s
-	 *            A String to be encoded.
+	 * @param s A String to be encoded.
 	 * @return A String containing the Base64 encoded data.
 	 */
 	public static String encodeString(String s) {
@@ -49,37 +46,32 @@ public class Base64 {
 	}
 
 	/**
-	 * Encodes a byte array into Base 64 format and breaks the output into lines
-	 * of 76 characters. This method is compatible with
+	 * Encodes a byte array into Base 64 format and breaks the output into lines of
+	 * 76 characters. This method is compatible with
 	 * <code>sun.misc.BASE64Encoder.encodeBuffer(byte[])</code>.
 	 * 
-	 * @param in
-	 *            An array containing the data bytes to be encoded.
+	 * @param in An array containing the data bytes to be encoded.
 	 * @return A String containing the Base64 encoded data, broken into lines.
 	 */
 	public static String encodeLines(byte[] in) {
-		return encodeLines(in, 0, in.length, 76, systemLineSeparator);
+		return encodeLines(in, 0, in.length, 76, SYSTEM_LINE_SEPARATOR);
 	}
 
 	/**
-	 * Encodes a byte array into Base 64 format and breaks the output into
-	 * lines.
+	 * Encodes a byte array into Base 64 format and breaks the output into lines.
 	 * 
-	 * @param in
-	 *            An array containing the data bytes to be encoded.
-	 * @param iOff
-	 *            Offset of the first byte in <code>in</code> to be processed.
-	 * @param iLen
-	 *            Number of bytes to be processed in <code>in</code>, starting
-	 *            at <code>iOff</code>.
-	 * @param lineLen
-	 *            Line length for the output data. Should be a multiple of 4.
-	 * @param lineSeparator
-	 *            The line separator to be used to separate the output lines.
+	 * @param in            An array containing the data bytes to be encoded.
+	 * @param iOff          Offset of the first byte in <code>in</code> to be
+	 *                      processed.
+	 * @param iLen          Number of bytes to be processed in <code>in</code>,
+	 *                      starting at <code>iOff</code>.
+	 * @param lineLen       Line length for the output data. Should be a multiple of
+	 *                      4.
+	 * @param lineSeparator The line separator to be used to separate the output
+	 *                      lines.
 	 * @return A String containing the Base64 encoded data, broken into lines.
 	 */
-	public static String encodeLines(byte[] in, int iOff, int iLen,
-			int lineLen, String lineSeparator) {
+	public static String encodeLines(byte[] in, int iOff, int iLen, int lineLen, String lineSeparator) {
 		int blockLen = (lineLen * 3) / 4;
 		if (blockLen <= 0) {
 			throw new IllegalArgumentException();
@@ -101,8 +93,7 @@ public class Base64 {
 	 * Encodes a byte array into Base64 format. No blanks or line breaks are
 	 * inserted in the output.
 	 * 
-	 * @param in
-	 *            An array containing the data bytes to be encoded.
+	 * @param in An array containing the data bytes to be encoded.
 	 * @return A character array containing the Base64 encoded data.
 	 */
 	public static char[] encode(byte[] in) {
@@ -113,10 +104,8 @@ public class Base64 {
 	 * Encodes a byte array into Base64 format. No blanks or line breaks are
 	 * inserted in the output.
 	 * 
-	 * @param in
-	 *            An array containing the data bytes to be encoded.
-	 * @param iLen
-	 *            Number of bytes to process in <code>in</code>.
+	 * @param in   An array containing the data bytes to be encoded.
+	 * @param iLen Number of bytes to process in <code>in</code>.
 	 * @return A character array containing the Base64 encoded data.
 	 */
 	public static char[] encode(byte[] in, int iLen) {
@@ -127,13 +116,10 @@ public class Base64 {
 	 * Encodes a byte array into Base64 format. No blanks or line breaks are
 	 * inserted in the output.
 	 * 
-	 * @param in
-	 *            An array containing the data bytes to be encoded.
-	 * @param iOff
-	 *            Offset of the first byte in <code>in</code> to be processed.
-	 * @param iLen
-	 *            Number of bytes to process in <code>in</code>, starting at
-	 *            <code>iOff</code>.
+	 * @param in   An array containing the data bytes to be encoded.
+	 * @param iOff Offset of the first byte in <code>in</code> to be processed.
+	 * @param iLen Number of bytes to process in <code>in</code>, starting at
+	 *             <code>iOff</code>.
 	 * @return A character array containing the Base64 encoded data.
 	 */
 	public static char[] encode(byte[] in, int iOff, int iLen) {
@@ -151,11 +137,11 @@ public class Base64 {
 			int o1 = ((i0 & 3) << 4) | (i1 >>> 4);
 			int o2 = ((i1 & 0xf) << 2) | (i2 >>> 6);
 			int o3 = i2 & 0x3F;
-			out[op++] = map1[o0];
-			out[op++] = map1[o1];
-			out[op] = op < oDataLen ? map1[o2] : '=';
+			out[op++] = MAP1[o0];
+			out[op++] = MAP1[o1];
+			out[op] = op < oDataLen ? MAP1[o2] : '=';
 			op++;
-			out[op] = op < oDataLen ? map1[o3] : '=';
+			out[op] = op < oDataLen ? MAP1[o3] : '=';
 			op++;
 		}
 		return out;
@@ -165,27 +151,25 @@ public class Base64 {
 	 * Decodes a string from Base64 format. No blanks or line breaks are allowed
 	 * within the Base64 encoded input data.
 	 * 
-	 * @param s
-	 *            A Base64 String to be decoded.
+	 * @param s A Base64 String to be decoded.
 	 * @return A String containing the decoded data.
-	 * @throws IllegalArgumentException
-	 *             If the input is not valid Base64 encoded data.
+	 * @throws IllegalArgumentException If the input is not valid Base64 encoded
+	 *                                  data.
 	 */
 	public static String decodeString(String s) {
 		return new String(decode(s));
 	}
 
 	/**
-	 * Decodes a byte array from Base64 format and ignores line separators, tabs
-	 * and blanks. CR, LF, Tab and Space characters are ignored in the input
-	 * data. This method is compatible with
+	 * Decodes a byte array from Base64 format and ignores line separators, tabs and
+	 * blanks. CR, LF, Tab and Space characters are ignored in the input data. This
+	 * method is compatible with
 	 * <code>sun.misc.BASE64Decoder.decodeBuffer(String)</code>.
 	 * 
-	 * @param s
-	 *            A Base64 String to be decoded.
+	 * @param s A Base64 String to be decoded.
 	 * @return An array containing the decoded data bytes.
-	 * @throws IllegalArgumentException
-	 *             If the input is not valid Base64 encoded data.
+	 * @throws IllegalArgumentException If the input is not valid Base64 encoded
+	 *                                  data.
 	 */
 	public static byte[] decodeLines(String s) {
 		char[] buf = new char[s.length()];
@@ -200,53 +184,47 @@ public class Base64 {
 	}
 
 	/**
-	 * Decodes a byte array from Base64 format. No blanks or line breaks are
-	 * allowed within the Base64 encoded input data.
+	 * Decodes a byte array from Base64 format. No blanks or line breaks are allowed
+	 * within the Base64 encoded input data.
 	 * 
-	 * @param s
-	 *            A Base64 String to be decoded.
+	 * @param s A Base64 String to be decoded.
 	 * @return An array containing the decoded data bytes.
-	 * @throws IllegalArgumentException
-	 *             If the input is not valid Base64 encoded data.
+	 * @throws IllegalArgumentException If the input is not valid Base64 encoded
+	 *                                  data.
 	 */
 	public static byte[] decode(String s) {
 		return decode(s.toCharArray());
 	}
 
 	/**
-	 * Decodes a byte array from Base64 format. No blanks or line breaks are
-	 * allowed within the Base64 encoded input data.
+	 * Decodes a byte array from Base64 format. No blanks or line breaks are allowed
+	 * within the Base64 encoded input data.
 	 * 
-	 * @param in
-	 *            A character array containing the Base64 encoded data.
+	 * @param in A character array containing the Base64 encoded data.
 	 * @return An array containing the decoded data bytes.
-	 * @throws IllegalArgumentException
-	 *             If the input is not valid Base64 encoded data.
+	 * @throws IllegalArgumentException If the input is not valid Base64 encoded
+	 *                                  data.
 	 */
 	public static byte[] decode(char[] in) {
 		return decode(in, 0, in.length);
 	}
 
 	/**
-	 * Decodes a byte array from Base64 format. No blanks or line breaks are
-	 * allowed within the Base64 encoded input data.
+	 * Decodes a byte array from Base64 format. No blanks or line breaks are allowed
+	 * within the Base64 encoded input data.
 	 * 
-	 * @param in
-	 *            A character array containing the Base64 encoded data.
-	 * @param iOff
-	 *            Offset of the first character in <code>in</code> to be
-	 *            processed.
-	 * @param iLen
-	 *            Number of characters to process in <code>in</code>, starting
-	 *            at <code>iOff</code>.
+	 * @param in   A character array containing the Base64 encoded data.
+	 * @param iOff Offset of the first character in <code>in</code> to be processed.
+	 * @param iLen Number of characters to process in <code>in</code>, starting at
+	 *             <code>iOff</code>.
 	 * @return An array containing the decoded data bytes.
-	 * @throws IllegalArgumentException
-	 *             If the input is not valid Base64 encoded data.
+	 * @throws IllegalArgumentException If the input is not valid Base64 encoded
+	 *                                  data.
 	 */
 	public static byte[] decode(char[] in, int iOff, int iLen) {
-		if (iLen % 4 != 0)
-			throw new IllegalArgumentException(
-					"Length of Base64 encoded input string is not a multiple of 4.");
+		if (iLen % 4 != 0) {
+			throw new IllegalArgumentException("Length of Base64 encoded input string is not a multiple of 4.");
+		}
 		while (iLen > 0 && in[iOff + iLen - 1] == '=') {
 			iLen--;
 		}
@@ -261,16 +239,14 @@ public class Base64 {
 			int i2 = ip < iEnd ? in[ip++] : 'A';
 			int i3 = ip < iEnd ? in[ip++] : 'A';
 			if (i0 > 127 || i1 > 127 || i2 > 127 || i3 > 127) {
-				throw new IllegalArgumentException(
-						"Illegal character in Base64 encoded data.");
+				throw new IllegalArgumentException("Illegal character in Base64 encoded data.");
 			}
-			int b0 = map2[i0];
-			int b1 = map2[i1];
-			int b2 = map2[i2];
-			int b3 = map2[i3];
+			int b0 = MAP2[i0];
+			int b1 = MAP2[i1];
+			int b2 = MAP2[i2];
+			int b3 = MAP2[i3];
 			if (b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0) {
-				throw new IllegalArgumentException(
-						"Illegal character in Base64 encoded data.");
+				throw new IllegalArgumentException("Illegal character in Base64 encoded data.");
 			}
 			int o0 = (b0 << 2) | (b1 >>> 4);
 			int o1 = ((b1 & 0xf) << 4) | (b2 >>> 2);

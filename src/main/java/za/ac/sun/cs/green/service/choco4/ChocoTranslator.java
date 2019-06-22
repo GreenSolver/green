@@ -21,7 +21,7 @@ import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.IntVar;
 
-class ChocoTranslator extends Visitor {
+public class ChocoTranslator extends Visitor {
 
 	private Model chocoModel = null;
 

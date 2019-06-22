@@ -1,14 +1,16 @@
 package za.ac.sun.cs.green.service.slicer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
+import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
@@ -25,10 +27,8 @@ public class SATFactorSlicerServiceTest {
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
 		props.setProperty("green.service.sat", "(slice sink)");
-		props.setProperty("green.service.sat.slice",
-				"za.ac.sun.cs.green.service.slicer.SATFactorSlicerService");
-		props.setProperty("green.service.sat.sink",
-				"za.ac.sun.cs.green.service.sink.SinkService");
+		props.setProperty("green.service.sat.slice", "za.ac.sun.cs.green.service.slicer.SATFactorSlicerService");
+		props.setProperty("green.service.sat.sink", "za.ac.sun.cs.green.service.sink.SinkService");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}
@@ -40,16 +40,14 @@ public class SATFactorSlicerServiceTest {
 			if (p == 0) {
 				observed = observed.substring(p + s.length());
 			} else if (p > 0) {
-				observed = observed.substring(0, p - 1)
-						+ observed.substring(p + s.length());
+				observed = observed.substring(0, p - 1) + observed.substring(p + s.length());
 			}
 		}
 		observed = observed.replaceAll("[()&]", "");
 		assertEquals("", observed);
 	}
 
-	private void check(Expression expression, String full,
-			String... expected) {
+	private void check(Expression expression, String full, String... expected) {
 		Instance i = new Instance(solver, null, expression);
 		Expression e = i.getExpression();
 		assertTrue(e.equals(expression));
@@ -62,8 +60,7 @@ public class SATFactorSlicerServiceTest {
 		finalCheck(j.getExpression().toString(), expected);
 	}
 
-	private void check(Expression expression, Expression parentExpression,
-			String full, String... expected) {
+	private void check(Expression expression, Expression parentExpression, String full, String... expected) {
 		Instance i1 = new Instance(solver, null, parentExpression);
 		Instance i2 = new Instance(solver, i1, expression);
 		Expression e = i2.getExpression();
@@ -92,7 +89,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o = new Operation(Operation.Operator.EQ, c1, c2);
 		check(o, "2==2", "2==2");
 	}
-	
+
 	@Test
 	public void test02b() {
 		IntConstant c1 = new IntConstant(2);
@@ -100,7 +97,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o = new Operation(Operation.Operator.LT, c1, c2);
 		check(o, "2<2", "2<2");
 	}
-	
+
 	@Test
 	public void test03() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -122,7 +119,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o2 = new Operation(Operation.Operator.NE, v2, c2);
 		check(o1, o2, "(v1==0)&&(v2!=1)", "v1==0");
 	}
-	
+
 	@Test
 	public void test05() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -132,7 +129,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o2 = new Operation(Operation.Operator.NE, v1, c2);
 		check(o1, o2, "(v1==0)&&(v1!=1)", "v1==0", "v1!=1");
 	}
-	
+
 	@Test
 	public void test06() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -148,7 +145,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
 		check(o1, o234, "(v1==v2)&&((v2==v3)&&((v3==v4)&&(v4==v5)))", "v1==v2", "v2==v3", "v3==v4", "v4==v5");
 	}
-	
+
 	@Test
 	public void test07() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -165,7 +162,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
 		check(o1, o234, "(v1==v2)&&((v2==v3)&&((v3==v4)&&(v5==v6)))", "v2==v3", "v3==v4", "v1==v2");
 	}
-	
+
 	@Test
 	public void test08() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -181,7 +178,7 @@ public class SATFactorSlicerServiceTest {
 		Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
 		check(o1, o23, "(v1<(v2+v3))&&((v2<(v4+v5))&&(v3<(v6+v7)))", "v1<(v2+v3)", "v3<(v6+v7)", "v2<(v4+v5)");
 	}
-	
+
 	@Test
 	public void test09() {
 		IntVariable v1 = new IntVariable("v1", 0, 99);
@@ -198,5 +195,5 @@ public class SATFactorSlicerServiceTest {
 		Operation o23 = new Operation(Operation.Operator.AND, o2, o3);
 		check(o1, o23, "(v1<(v2+v3))&&((v2<(v4+v5))&&(v6<(v7+v8)))", "v1<(v2+v3)", "v2<(v4+v5)");
 	}
-	
+
 }

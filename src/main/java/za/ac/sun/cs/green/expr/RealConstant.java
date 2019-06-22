@@ -2,6 +2,8 @@ package za.ac.sun.cs.green.expr;
 
 public class RealConstant extends Constant {
 
+	private static final long serialVersionUID = 5342850784343698801L;
+
 	private final double value;
 
 	public RealConstant(final double value) {

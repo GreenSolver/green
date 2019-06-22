@@ -16,41 +16,41 @@ import za.ac.sun.cs.green.service.SATService;
 import za.ac.sun.cs.green.util.Reporter;
 
 public class SATZ3JavaService extends SATService {
-	
+
 	Context ctx;
-	Solver Z3solver;
-    protected long timeConsumption = 0;
-    protected long translationTimeConsumption = 0;
-    protected long satTimeConsumption = 0;
-    protected long unsatTimeConsumption = 0;
-    protected int conjunctCount = 0;
-    protected int variableCount = 0;
-	
-	private static class Z3Wrapper {
+	Solver z3Solver;
+	protected long timeConsumption = 0;
+	protected long translationTimeConsumption = 0;
+	protected long satTimeConsumption = 0;
+	protected long unsatTimeConsumption = 0;
+	protected int conjunctCount = 0;
+	protected int variableCount = 0;
+
+	private static final class Z3Wrapper {
 		private Context ctx;
 		private Solver solver;
-        private final String LOGIC = "QF_LIA";
+		private final String logic = "QF_LIA";
 
-        private static Z3Wrapper instance = null;
+		private static Z3Wrapper instance = null;
 
 		public static Z3Wrapper getInstance() {
-			if (instance != null) {
-				return instance;
+			if (instance == null) {
+				instance = new Z3Wrapper();
 			}
-			return instance = new Z3Wrapper();
+			return instance;
 		}
 
-		private Z3Wrapper() {			
+		private Z3Wrapper() {
 			HashMap<String, String> cfg = new HashMap<String, String>();
-	        cfg.put("model", "false"); //"true" ?
-			try{
-				ctx = new Context(cfg);		 
+			cfg.put("model", "false"); // "true" ?
+			try {
+				ctx = new Context(cfg);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + e);
-		    }
-            // TODO : Changed logic to QF_LIA from AUF_LIA
-            solver = ctx.mkSolver(LOGIC);
+			}
+			// TODO : Changed logic to QF_LIA from AUF_LIA
+			solver = ctx.mkSolver(logic);
 		}
 
 		public Solver getSolver() {
@@ -61,88 +61,84 @@ public class SATZ3JavaService extends SATService {
 			return this.ctx;
 		}
 	}
-	
+
 	public SATZ3JavaService(Green solver, Properties properties) {
 		super(solver);
-		
+
 		Z3Wrapper z3Wrapper = Z3Wrapper.getInstance();
-		Z3solver = z3Wrapper.getSolver();
+		z3Solver = z3Wrapper.getSolver();
 		ctx = z3Wrapper.getCtx();
-		
+
 		/*
-		HashMap<String, String> cfg = new HashMap<String, String>();
-        cfg.put("model", "false");
-		try{
-			ctx = new Context(cfg);		 
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + e);
-	    }
-	    */
+		 * HashMap<String, String> cfg = new HashMap<String, String>(); cfg.put("model",
+		 * "false"); try{ ctx = new Context(cfg); } catch (Exception e) {
+		 * e.printStackTrace(); throw new
+		 * RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + e); }
+		 */
 	}
 
 	@Override
 	protected Boolean solve(Instance instance) {
-	    long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		Boolean result = false;
 		// translate instance to Z3
-        long T0translation = System.currentTimeMillis();
-        Z3JavaTranslator translator = new Z3JavaTranslator(ctx);
+		long t0Translation = System.currentTimeMillis();
+		Z3JavaTranslator translator = new Z3JavaTranslator(ctx);
 		try {
 			instance.getExpression().accept(translator);
 		} catch (VisitorException e1) {
 			log.warn("Error in translation to Z3 ({})", e1.getMessage());
 		}
 		// get context out of the translator
-        BoolExpr expr = translator.getTranslation();
+		BoolExpr expr = translator.getTranslation();
 		// model should now be in ctx
 		try {
-			//Z3solver = ctx.mkSolver();
-			Z3solver.push();
-			Z3solver.add(expr);
+			// Z3solver = ctx.mkSolver();
+			z3Solver.push();
+			z3Solver.add(expr);
 		} catch (Z3Exception e1) {
 			log.warn("Error in Z3 ({})", e1.getMessage());
 		}
 		conjunctCount += instance.getExpression().getString().split("&&").length;
 		variableCount += translator.getVariableCount();
-        translationTimeConsumption += (System.currentTimeMillis() - T0translation);
-        //solve
+		translationTimeConsumption += (System.currentTimeMillis() - t0Translation);
+		// solve
 		try {
-            result = Status.SATISFIABLE == Z3solver.check();
+			result = Status.SATISFIABLE == z3Solver.check();
 		} catch (Z3Exception e) {
 			log.warn("Error in Z3 ({})", e.getMessage());
 		}
 		// clean up
-		int scopes = Z3solver.getNumScopes();
+		int scopes = z3Solver.getNumScopes();
 		if (scopes > 0) {
-			Z3solver.pop(scopes);
+			z3Solver.pop(scopes);
 		}
 		timeConsumption += (System.currentTimeMillis() - start);
 		if (result) {
-		    satTimeConsumption += (System.currentTimeMillis() - start);
-        } else {
-            unsatTimeConsumption += (System.currentTimeMillis() - start);
-        }
+			satTimeConsumption += (System.currentTimeMillis() - start);
+		} else {
+			unsatTimeConsumption += (System.currentTimeMillis() - start);
+		}
 		return result;
 	}
 
-    @Override
-    public void report(Reporter reporter) {
-        reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
-        reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
-        reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
-        reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
-        reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
-        reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
-        reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
-        reporter.report(getClass().getSimpleName(), "unsatQueries = " + unsatCount);
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-        reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
-        reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
-        reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
-        reporter.report(getClass().getSimpleName(), "translationTimeConsumption = " + translationTimeConsumption);
-        reporter.report(getClass().getSimpleName(), "conjunctCount = " + conjunctCount);
-        reporter.report(getClass().getSimpleName(), "variableCount = " + variableCount);
-    }
+	@Override
+	public void report(Reporter reporter) {
+		reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
+		reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
+		reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
+		reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
+		reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
+		reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
+		reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
+		reporter.report(getClass().getSimpleName(), "unsatQueries = " + unsatCount);
+		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
+		reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
+		reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
+		reporter.report(getClass().getSimpleName(), "translationTimeConsumption = " + translationTimeConsumption);
+		reporter.report(getClass().getSimpleName(), "conjunctCount = " + conjunctCount);
+		reporter.report(getClass().getSimpleName(), "variableCount = " + variableCount);
+	}
 
 }

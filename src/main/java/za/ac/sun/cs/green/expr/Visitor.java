@@ -17,10 +17,12 @@ public abstract class Visitor {
 		preVisit((Variable) intVariable);
 	}
 
+	@Deprecated
 	public void preVisit(IntegerConstant integerConstant) throws VisitorException {
 		preVisit((Constant) integerConstant);
 	}
 
+	@Deprecated
 	public void preVisit(IntegerVariable integerVariable) throws VisitorException {
 		preVisit((Variable) integerVariable);
 	}
@@ -64,10 +66,12 @@ public abstract class Visitor {
 		postVisit((Variable) intVariable);
 	}
 
+	@Deprecated
 	public void postVisit(IntegerConstant integerConstant) throws VisitorException {
 		postVisit((Constant) integerConstant);
 	}
 
+	@Deprecated
 	public void postVisit(IntegerVariable integerVariable) throws VisitorException {
 		postVisit((Variable) integerVariable);
 	}

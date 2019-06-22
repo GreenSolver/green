@@ -1,6 +1,5 @@
 package za.ac.sun.cs.green.parser.klee;
 
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -57,7 +56,7 @@ public class Scanner {
 	public Scanner(Reader reader) throws ParseException {
 		this(reader, new NullLogger());
 	}
-	
+
 	public Scanner(String query, Logger log) throws ParseException {
 		this.log = log;
 		reader = new StringReader(query);
@@ -71,7 +70,7 @@ public class Scanner {
 	public Scanner(String query) throws ParseException {
 		this(query, new NullLogger());
 	}
-	
+
 	/**
 	 * Returns the next token in the token stream.
 	 * 
@@ -196,7 +195,8 @@ public class Scanner {
 					}
 				} else if (nextCh == 'x') { // kexadecimal
 					readNextCh();
-					while (Character.isDigit(nextCh) || ((nextCh >= 'a') && (nextCh <= 'f')) || ((nextCh >= 'A') && (nextCh <= 'F')) || (nextCh == '_')) {
+					while (Character.isDigit(nextCh) || ((nextCh >= 'a') && (nextCh <= 'f'))
+							|| ((nextCh >= 'A') && (nextCh <= 'F')) || (nextCh == '_')) {
 						if (Character.isDigit(nextCh)) {
 							intValue = intValue * 16 + nextCh - '0';
 						} else if ((nextCh >= 'a') && (nextCh <= 'f')) {
@@ -323,11 +323,11 @@ public class Scanner {
 		} catch (IOException e) {
 			throw new ParseException("IO problem: " + e.getMessage());
 		}
-		if (nextCh == 10) {
-			// chLoc.advanceLine();
-		} else {
-			// chLoc.advancePos();
-		}
+//		if (nextCh == 10) {
+//			// chLoc.advanceLine();
+//		} else {
+//			// chLoc.advancePos();
+//		}
 	}
 
 }

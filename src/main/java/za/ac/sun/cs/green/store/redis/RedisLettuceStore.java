@@ -15,7 +15,8 @@ import za.ac.sun.cs.green.util.Configuration;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis (<code>http://www.redis.io</code>).
+ * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis
+ * (<code>http://www.redis.io</code>).
  * 
  * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
@@ -30,17 +31,17 @@ public class RedisLettuceStore extends BasicStore {
 	 * Connection to the Redis server.
 	 */
 	private final StatefulRedisConnection<String, String> redisConnection;
-	
+
 	/**
 	 * Synchronous Redis command channel.
 	 */
 	private final RedisCommands<String, String> syncCommands;
-	
+
 	/**
 	 * Asynchronous Redis command channel.
 	 */
 	private final RedisAsyncCommands<String, String> asyncCommands;
-	
+
 	/**
 	 * Number of times <code>get(...)</code> was called.
 	 */
@@ -54,18 +55,19 @@ public class RedisLettuceStore extends BasicStore {
 	/**
 	 * The default host of the redis server.
 	 */
-	private final String DEFAULT_REDIS_HOST = "localhost";
+	private static final String DEFAULT_REDIS_HOST = "localhost";
 
 	/**
 	 * Options passed to the LattE executable.
 	 */
-	private final int DEFAULT_REDIS_PORT = 6379;
-	
+	private static final int DEFAULT_REDIS_PORT = 6379;
+
 	private long timePut = 0;
 	private long timeGet = 0;
-	
+
 	/**
-	 * Constructor to create a default connection to a redis store running on the local computer.
+	 * Constructor to create a default connection to a redis store running on the
+	 * local computer.
 	 */
 	public RedisLettuceStore(Green solver, Properties properties) {
 		super(solver);
@@ -76,9 +78,10 @@ public class RedisLettuceStore extends BasicStore {
 		syncCommands = redisConnection.sync();
 		asyncCommands = redisConnection.async();
 	}
-	
+
 	/**
-	 * Constructor to create a connection to a redis store given the host and the port.
+	 * Constructor to create a connection to a redis store given the host and the
+	 * port.
 	 * 
 	 * @param host the host on which the redis store is running
 	 * @param port the port on which the redis store is listening
@@ -98,21 +101,21 @@ public class RedisLettuceStore extends BasicStore {
 		reporter.report(getClass().getSimpleName(), "time for get = " + timeGet);
 		reporter.report(getClass().getSimpleName(), "iime for put = " + timePut);
 	}
-	
+
 	@Override
 	public synchronized Object get(String key) {
 		long start = System.currentTimeMillis();
 		retrievalCount++;
 		try {
 			String s = syncCommands.get(key);
-			timeGet += (System.currentTimeMillis()-start);
+			timeGet += (System.currentTimeMillis() - start);
 			return (s == null) ? null : fromString(s);
 		} catch (IOException x) {
-			LOGGER.fatal("io problem", x);
+			log.fatal("io problem", x);
 		} catch (ClassNotFoundException x) {
-			LOGGER.fatal("class not found problem", x);
+			log.fatal("class not found problem", x);
 		}
-		timeGet += (System.currentTimeMillis()-start);
+		timeGet += (System.currentTimeMillis() - start);
 		return null;
 	}
 
@@ -123,32 +126,32 @@ public class RedisLettuceStore extends BasicStore {
 		try {
 			asyncCommands.set(key, toString(value));
 		} catch (IOException x) {
-			LOGGER.fatal("io problem", x);
+			log.fatal("io problem", x);
 		}
-		timePut += (System.currentTimeMillis()-start);
+		timePut += (System.currentTimeMillis() - start);
 	}
-	
+
 	public void flushAll() {
-  //      long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		syncCommands.flushall();
-    //    timeFlush += (System.currentTimeMillis()-start);
-}
+		// timeFlush += (System.currentTimeMillis()-start);
+	}
 
-    @Override
-    public void clear() {
-        // TODO
-    }
+	@Override
+	public void clear() {
+		// TODO
+	}
 
-    @Override
-    public boolean isSet() {
-        // TODO
-        return redisConnection.isOpen();
-    }
+	@Override
+	public boolean isSet() {
+		// TODO
+		return redisConnection.isOpen();
+	}
 
-    @Override
-    public Set<String> keySet() {
-        // TODO
-        return null;
-    }
+	@Override
+	public Set<String> keySet() {
+		// TODO
+		return null;
+	}
 
 }

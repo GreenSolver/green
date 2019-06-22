@@ -16,17 +16,17 @@ public abstract class SATService extends BasicService {
 	protected int satHitCount = 0;
 	protected int unsatHitCount = 0;
 
-    protected int cacheMissCount = 0;
-    protected int satMissCount = 0;
-    protected int unsatMissCount = 0;
+	protected int cacheMissCount = 0;
+	protected int satMissCount = 0;
+	protected int unsatMissCount = 0;
 
 	private long timeConsumption = 0;
 	protected long storageTimeConsumption = 0;
-    private long keyTime = 0;
-    private long moreTime = 0;
+	private long keyTime = 0;
+	private long moreTime = 0;
 
-    protected int satCount = 0;
-    protected int unsatCount = 0;
+	protected int satCount = 0;
+	protected int unsatCount = 0;
 
 	public SATService(Green solver) {
 		super(solver);
@@ -45,15 +45,15 @@ public abstract class SATService extends BasicService {
 		reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
 		reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
 		reporter.report(getClass().getSimpleName(), "unssatQueries = " + unsatCount);
-        reporter.report(getClass().getSimpleName(), "time to get Key = " + keyTime);
-        reporter.report(getClass().getSimpleName(), "outside Redis Time incl keyime= " + moreTime);
+		reporter.report(getClass().getSimpleName(), "time to get Key = " + keyTime);
+		reporter.report(getClass().getSimpleName(), "outside Redis Time incl keyime= " + moreTime);
 	}
 
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
 		return instance.getData(getClass());
 	}
-	
+
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
 		Boolean result = (Boolean) instance.getData(getClass());
@@ -64,38 +64,39 @@ public abstract class SATService extends BasicService {
 			}
 		}
 //        assert result != null;
-        if (result)
-			satCount++; 
-		else 	
+		if (result) {
+			satCount++;
+		} else {
 			unsatCount++;
+		}
 		return null;
 	}
 
 	private Boolean solve0(Instance instance) {
-        invocationCount++;
-        long start = System.currentTimeMillis();
-        String key = SERVICE_KEY + instance.getFullExpression().getString();
-        keyTime += (System.currentTimeMillis() - start);
-        Boolean result = store.getBoolean(key);
+		invocationCount++;
+		long start = System.currentTimeMillis();
+		String key = SERVICE_KEY + instance.getFullExpression().getString();
+		keyTime += (System.currentTimeMillis() - start);
+		Boolean result = store.getBoolean(key);
 
 		if (result == null) {
 			cacheMissCount++;
-            result = solve1(instance);
-            if (result != null) {
-                if (result) {
-                    satMissCount++;
-                } else {
-                    unsatMissCount++;
-                }
+			result = solve1(instance);
+			if (result != null) {
+				if (result) {
+					satMissCount++;
+				} else {
+					unsatMissCount++;
+				}
 				store.put(key, result);
 			}
 		} else {
 			cacheHitCount++;
-            if (result) {
-                satHitCount++;
-            } else {
-                unsatHitCount++;
-            }
+			if (result) {
+				satHitCount++;
+			} else {
+				unsatHitCount++;
+			}
 		}
 		moreTime += (System.currentTimeMillis() - start);
 		return result;

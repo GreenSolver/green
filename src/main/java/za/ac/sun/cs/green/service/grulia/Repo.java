@@ -4,27 +4,25 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import java.util.SortedSet;
 
 /**
- * @date: 2018/08/23
- * @author: JH Taljaard.
- * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018,2019),
- *              Jaco Geldenhuys (2017)
+ * Description: Repository interface for Grulia store.
  *
- * Description:
- * Repository interface for Grulia store.
+ * @date: 2018/08/23
+ * @author: JH Taljaard. Student Number: 18509193
+ * @author: Willem Visser (2018, 2019) (supervisor)
+ * @author: Jaco Geldenhuys (2017) (supervisor)
  */
 public interface Repo {
 
-    public void add(Entry entry);
+	void add(Entry entry);
 
-    public Entry[] getEntries();
+	Entry[] getEntries();
 
-    public int size();
+	int size();
 
-    public Entry[] extract(Double SATDelta, SortedSet<IntVariable> variables, int k);
+	Entry[] extract(Double satDelta, SortedSet<IntVariable> variables, int k);
 
-    public void flushAll();
+	void flushAll();
 
-    public void clear();
+	void clear();
 
 }

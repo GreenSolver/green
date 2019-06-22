@@ -26,7 +26,7 @@ public class Configuration {
 
 	private final Green solver;
 
-	private final Logger LOGGER;
+	private final Logger log;
 
 	private final Properties properties;
 
@@ -34,16 +34,16 @@ public class Configuration {
 
 	public Configuration(final Green solver, final Properties properties) {
 		this.solver = solver;
-		LOGGER = solver.getLogger();
+		log = solver.getLogger();
 		this.properties = properties;
 	}
 
 	public void configure() {
 		String p = properties.getProperty("green.log.level");
 		if (p != null) {
-			Configurator.setLevel(LOGGER.getName(), Level.getLevel(p));
+			Configurator.setLevel(log.getName(), Level.getLevel(p));
 			// setLevel(Level.getLevel(p));
-			LOGGER.trace("logging level changed to {}", p);
+			log.trace("logging level changed to {}", p);
 		}
 		p = properties.getProperty("green.taskmanager");
 		if (p != null) {
@@ -65,7 +65,7 @@ public class Configuration {
 				try {
 					configure(s.trim());
 				} catch (ParseException x) {
-					LOGGER.fatal("parse error", x);
+					log.fatal("parse error", x);
 				}
 			}
 		}
@@ -130,18 +130,18 @@ public class Configuration {
 						Properties.class);
 				return constructor.newInstance(solver, properties);
 			} catch (NoSuchMethodException x) {
-				LOGGER.fatal("constructor not found: " + objectName, x);
+				log.fatal("constructor not found: " + objectName, x);
 			}
 		} catch (SecurityException x) {
-			LOGGER.fatal("constructor not found: " + objectName, x);
+			log.fatal("constructor not found: " + objectName, x);
 		} catch (IllegalArgumentException x) {
-			LOGGER.fatal("constructor error: " + objectName, x);
+			log.fatal("constructor error: " + objectName, x);
 		} catch (InstantiationException x) {
-			LOGGER.fatal("constructor error: " + objectName, x);
+			log.fatal("constructor error: " + objectName, x);
 		} catch (IllegalAccessException x) {
-			LOGGER.fatal("constructor error: " + objectName, x);
+			log.fatal("constructor error: " + objectName, x);
 		} catch (InvocationTargetException x) {
-			LOGGER.fatal("constructor error: " + objectName, x);
+			log.fatal("constructor error: " + objectName, x);
 		}
 		return null;
 	}
@@ -151,9 +151,9 @@ public class Configuration {
 			try {
 				return loader.loadClass(className);
 			} catch (ClassNotFoundException x) {
-				LOGGER.fatal("class not found: " + className, x);
+				log.fatal("class not found: " + className, x);
 			} catch (ExceptionInInitializerError x) {
-				LOGGER.fatal("class not found: " + className, x);
+				log.fatal("class not found: " + className, x);
 			}
 		}
 		return null;
@@ -165,7 +165,7 @@ public class Configuration {
 
 		private final Set<ParseTree> children;
 
-		public ParseTree(final Service service) {
+		ParseTree(final Service service) {
 			this.service = service;
 			children = new HashSet<Configuration.ParseTree>();
 		}
@@ -187,7 +187,7 @@ public class Configuration {
 	@SuppressWarnings("serial")
 	private class ParseException extends Exception {
 
-		public ParseException(String string) {
+		ParseException(String string) {
 			super(string);
 		}
 
@@ -199,8 +199,7 @@ public class Configuration {
 
 		private final Scanner scanner;
 
-		public Parser(final String rootName, final String input)
-				throws ParseException {
+		Parser(final String rootName, final String input) throws ParseException {
 			this.rootName = rootName;
 			scanner = new Scanner(input);
 		}
@@ -256,7 +255,7 @@ public class Configuration {
 
 		private final String representation;
 
-		private Token(String representation) {
+		Token(String representation) {
 			this.representation = representation;
 		}
 
@@ -279,7 +278,7 @@ public class Configuration {
 
 		private String nextName;
 
-		public Scanner(final String input) throws ParseException {
+		Scanner(final String input) throws ParseException {
 			this.input = input;
 			position = 0;
 			nextToken = Token.UNKNOWN;

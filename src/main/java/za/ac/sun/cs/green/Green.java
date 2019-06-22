@@ -34,7 +34,7 @@ public class Green {
 	/**
 	 * The logger for this solver.
 	 */
-	private final Logger LOGGER;
+	private final Logger log;
 
 	/**
 	 * The task manager that handles how requests are processed.
@@ -60,12 +60,11 @@ public class Green {
 	 * Constructs a Green solver instance with the given name. The name can be
 	 * anything whatsoever and is mainly used to obtain a unique logger.
 	 * 
-	 * @param solverName
-	 *            the name of the solver
+	 * @param solverName the name of the solver
 	 */
 	public Green(String solverName, Logger logger) {
 		this.solverName = solverName;
-		this.LOGGER = logger;
+		this.log = logger;
 		taskManager = new SerialTaskManager(this);
 		store = new NullStore(this);
 		services0 = new HashMap<String, Set<Service>>();
@@ -76,8 +75,7 @@ public class Green {
 	 * Constructs a Green solver instance with the given name. The name can be
 	 * anything whatsoever and is mainly used to obtain a unique logger.
 	 * 
-	 * @param solverName
-	 *            the name of the solver
+	 * @param solverName the name of the solver
 	 */
 	public Green(String solverName) {
 		this(solverName, LogManager.getLogger(solverName));
@@ -87,14 +85,15 @@ public class Green {
 	 * Constructs an anonymous -- but unique -- instance of a Green solver.
 	 */
 	public Green(Logger logger) {
-		 this(ManagementFactory.getRuntimeMXBean().getName(), logger);
+		this(ManagementFactory.getRuntimeMXBean().getName(), logger);
 	}
 
 	/**
 	 * Constructs an anonymous -- but unique -- instance of a Green solver.
 	 */
 	public Green() {
-		this(ManagementFactory.getRuntimeMXBean().getName(), LogManager.getLogger(ManagementFactory.getRuntimeMXBean().getName()));
+		this(ManagementFactory.getRuntimeMXBean().getName(),
+				LogManager.getLogger(ManagementFactory.getRuntimeMXBean().getName()));
 	}
 
 	public static void main(String[] args) {
@@ -116,15 +115,14 @@ public class Green {
 	 * @return
 	 */
 	public Logger getLogger() {
-		return LOGGER;
+		return log;
 	}
 
 	/**
-	 * Sets a {@link TaskManager} for this Green solver instance. By default, a
-	 * new {@link SerialTaskManager} is created for a new Green solver instance.
+	 * Sets a {@link TaskManager} for this Green solver instance. By default, a new
+	 * {@link SerialTaskManager} is created for a new Green solver instance.
 	 * 
-	 * @param taskManager
-	 *            the new task manager
+	 * @param taskManager the new task manager
 	 */
 	public void setTaskManager(final TaskManager taskManager) {
 		this.taskManager = taskManager;
@@ -144,16 +142,14 @@ public class Green {
 	 * Sets a {@link Store} for this Green solver instance. By default, a
 	 * {@link NullStore} is created for a new Green solver instance.
 	 * 
-	 * @param store
-	 *            the new store
+	 * @param store the new store
 	 */
 	public void setStore(final Store store) {
 		this.store = store;
 	}
 
 	/**
-	 * Returns the current {@link Store} associated with this Green solver
-	 * instance.
+	 * Returns the current {@link Store} associated with this Green solver instance.
 	 * 
 	 * @return the current store
 	 */
@@ -162,14 +158,12 @@ public class Green {
 	}
 
 	/**
-	 * Returns the set of {@link Service}s associated with the given service
-	 * name. This mechanism allows problem instances to issue a request for a
-	 * named, high-level service such as "sat". The task manager takes care of
-	 * the applying the services - and their subservices - to the problem
-	 * instance.
+	 * Returns the set of {@link Service}s associated with the given service name.
+	 * This mechanism allows problem instances to issue a request for a named,
+	 * high-level service such as "sat". The task manager takes care of the applying
+	 * the services - and their subservices - to the problem instance.
 	 * 
-	 * @param serviceName
-	 *            the name of a service
+	 * @param serviceName the name of a service
 	 * @return the set of {@link Service}s associated with the given name
 	 */
 	public Set<Service> getService(String serviceName) {
@@ -177,13 +171,11 @@ public class Green {
 	}
 
 	/**
-	 * Returns the set of sub-{@link Service}s associated with the given
-	 * service. This mechanism is used by the task manager to determine the
-	 * sub-services that need to be applied to a problem instance or
-	 * sub-instance.
+	 * Returns the set of sub-{@link Service}s associated with the given service.
+	 * This mechanism is used by the task manager to determine the sub-services that
+	 * need to be applied to a problem instance or sub-instance.
 	 * 
-	 * @param service
-	 *            a service
+	 * @param service a service
 	 * @return the set of sub-{@link Service}s associated with the given service
 	 */
 	public Set<Service> getService(Service service) {
@@ -193,25 +185,22 @@ public class Green {
 	/**
 	 * Associates a given service name with a given {@link Service}.
 	 * 
-	 * When clients issue a request for a Green service, this is the name they
-	 * will use. So typically, it is something like "sat", "count", or "model".
-	 * This really represents a meta-service that requires several other
-	 * services (the slicer, the canonizer, a decision procedure, and so on) to
-	 * run. The task manager takes care of this. The associated registered with
-	 * this routine adds one more service to the named (meta-)service. There can
-	 * be many such requests for any given name, and all of the services are
-	 * recorded.
+	 * When clients issue a request for a Green service, this is the name they will
+	 * use. So typically, it is something like "sat", "count", or "model". This
+	 * really represents a meta-service that requires several other services (the
+	 * slicer, the canonizer, a decision procedure, and so on) to run. The task
+	 * manager takes care of this. The associated registered with this routine adds
+	 * one more service to the named (meta-)service. There can be many such requests
+	 * for any given name, and all of the services are recorded.
 	 * 
-	 * The usage idiom for Green is that each service passed to this routine or
-	 * the {@link #registerService(Service, Service)} routine is unique.
+	 * The usage idiom for Green is that each service passed to this routine or the
+	 * {@link #registerService(Service, Service)} routine is unique.
 	 * 
-	 * @param serviceName
-	 *            the name of a (high-level) service
-	 * @param subService
-	 *            another service to associate with the name
+	 * @param serviceName the name of a (high-level) service
+	 * @param subService  another service to associate with the name
 	 */
 	public void registerService(String serviceName, Service subService) {
-		LOGGER.info("register service: name=\"" + serviceName + "\", subservice=" + subService.getClass().getName());
+		log.info("register service: name=\"" + serviceName + "\", subservice=" + subService.getClass().getName());
 		Set<Service> serviceSet = services0.get(serviceName);
 		if (serviceSet == null) {
 			serviceSet = new HashSet<Service>();
@@ -221,17 +210,15 @@ public class Green {
 	}
 
 	/**
-	 * Associates another (sub-)service with the given service. For a little
-	 * more explanation, see the comments for
-	 * {@link #registerService(String, Service)}.
+	 * Associates another (sub-)service with the given service. For a little more
+	 * explanation, see the comments for {@link #registerService(String, Service)}.
 	 * 
-	 * @param service
-	 *            a service
-	 * @param subService
-	 *            another service to associate with the given service
+	 * @param service    a service
+	 * @param subService another service to associate with the given service
 	 */
 	public void registerService(Service service, Service subService) {
-		LOGGER.info("register service: name=\"" + service.getClass().getName() + "\", subservice=" + subService.getClass().getName());
+		log.info("register service: name=\"" + service.getClass().getName() + "\", subservice="
+				+ subService.getClass().getName());
 		Set<Service> serviceSet = services1.get(service);
 		if (serviceSet == null) {
 			serviceSet = new HashSet<Service>();
@@ -242,16 +229,13 @@ public class Green {
 
 	/**
 	 * Dispatches a request to apply the given service to the given instance.
-	 * Arbitrary services can be defined and can produce arbitrary kinds of
-	 * answers. This is fully generalized so that the response is described
-	 * merely as an {@link Object}.
+	 * Arbitrary services can be defined and can produce arbitrary kinds of answers.
+	 * This is fully generalized so that the response is described merely as an
+	 * {@link Object}.
 	 * 
-	 * @param serviceName
-	 *            the name of the service
-	 * @param instance
-	 *            the problem instance
-	 * @return an object that represents the Green solver's response to the
-	 *         request
+	 * @param serviceName the name of the service
+	 * @param instance    the problem instance
+	 * @return an object that represents the Green solver's response to the request
 	 */
 	public Object handleRequest(String serviceName, Instance instance) {
 		return taskManager.process(serviceName, instance);
@@ -264,17 +248,16 @@ public class Green {
 		report(new Reporter() {
 			@Override
 			public void report(String context, String message) {
-				LOGGER.info(context + " :: " + message);
+				log.info(context + " :: " + message);
 			}
 		});
 	}
 
 	/**
-	 * Generates a report using the given {@link Reporter}. This mechanism
-	 * allows clients to process the report in whatever way they see fit.
+	 * Generates a report using the given {@link Reporter}. This mechanism allows
+	 * clients to process the report in whatever way they see fit.
 	 * 
-	 * @param reporter
-	 *            the {@link Reporter} for the report
+	 * @param reporter the {@link Reporter} for the report
 	 */
 	public void report(Reporter reporter) {
 		taskManager.report(reporter);

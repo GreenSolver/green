@@ -1,5 +1,6 @@
 package za.ac.sun.cs.green.expr;
 
+@Deprecated
 public class IntegerVariable extends Variable {
 
 	private static final long serialVersionUID = 8942503924718973792L;

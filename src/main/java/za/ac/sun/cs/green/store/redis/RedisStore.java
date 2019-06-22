@@ -12,25 +12,27 @@ import za.ac.sun.cs.green.util.Configuration;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis (<code>http://www.redis.io</code>).
+ * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis
+ * (<code>http://www.redis.io</code>).
  * 
  * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
 public class RedisStore extends BasicStore {
 
 	/**
-	 * The time (in seconds) of inactivity until the connection to the redis store timeout.
+	 * The time (in seconds) of inactivity until the connection to the redis store
+	 * timeout.
 	 */
 	private static final int TIMEOUT = 2000;
-	
+
 	/**
 	 * Connection to the redis store.
 	 */
 	private Jedis db = null;
-    private long timeConsumption = 0;
-    private long getTime = 0;
-    private long putTime = 0;
-    private Boolean set = null;
+	private long timeConsumption = 0;
+	private long getTime = 0;
+	private long putTime = 0;
+	private Boolean set = null;
 	/**
 	 * Number of times <code>get(...)</code> was called.
 	 */
@@ -44,15 +46,16 @@ public class RedisStore extends BasicStore {
 	/**
 	 * The default host of the redis server.
 	 */
-	private final String DEFAULT_REDIS_HOST = "localhost";
+	private static final String DEFAULT_REDIS_HOST = "localhost";
 
 	/**
 	 * Options passed to the LattE executable.
 	 */
-	private final int DEFAULT_REDIS_PORT = 6379;
-	
+	private static final int DEFAULT_REDIS_PORT = 6379;
+
 	/**
-	 * Constructor to create a default connection to a redis store running on the local computer.
+	 * Constructor to create a default connection to a redis store running on the
+	 * local computer.
 	 */
 	public RedisStore(Green solver, Properties properties) {
 		super(solver);
@@ -60,9 +63,10 @@ public class RedisStore extends BasicStore {
 		int p = Configuration.getIntegerProperty(properties, "green.redis.port", DEFAULT_REDIS_PORT);
 		db = new Jedis(h, p, TIMEOUT);
 	}
-	
+
 	/**
-	 * Constructor to create a connection to a redis store given the host and the port.
+	 * Constructor to create a connection to a redis store given the host and the
+	 * port.
 	 * 
 	 * @param host the host on which the redis store is running
 	 * @param port the port on which the redis store is listening
@@ -70,84 +74,84 @@ public class RedisStore extends BasicStore {
 	public RedisStore(Green solver, String host, int port) {
 		super(solver);
 		db = new Jedis(host, port, TIMEOUT);
-    }
+	}
 
 	@Override
 	public void report(Reporter reporter) {
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-        reporter.report(getClass().getSimpleName(), "get = " + getTime);
-        reporter.report(getClass().getSimpleName(), "put = " + putTime);
-        reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
+		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.report(getClass().getSimpleName(), "get = " + getTime);
+		reporter.report(getClass().getSimpleName(), "put = " + putTime);
+		reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
 		reporter.report(getClass().getSimpleName(), "insertionCount = " + insertionCount);
 	}
 
 	@Override
 	public synchronized Object get(String key) {
-        long startTime = System.currentTimeMillis();
-        retrievalCount++;
+		long startTime = System.currentTimeMillis();
+		retrievalCount++;
 		try {
 			String s = db.get(key);
-            getTime += (System.currentTimeMillis() - startTime);
-            timeConsumption += (System.currentTimeMillis() - startTime);
-            return (s == null) ? null : fromString(s);
+			getTime += (System.currentTimeMillis() - startTime);
+			timeConsumption += (System.currentTimeMillis() - startTime);
+			return (s == null) ? null : fromString(s);
 		} catch (IOException x) {
-			LOGGER.fatal("io problem", x);
+			log.fatal("io problem", x);
 		} catch (ClassNotFoundException x) {
-			LOGGER.fatal("class not found problem", x);
+			log.fatal("class not found problem", x);
 		}
-        getTime += (System.currentTimeMillis() - startTime);
-        timeConsumption += (System.currentTimeMillis() - startTime);
+		getTime += (System.currentTimeMillis() - startTime);
+		timeConsumption += (System.currentTimeMillis() - startTime);
 		return null;
 	}
 
 	@Override
 	public synchronized void put(String key, Serializable value) {
-        long startTime = System.currentTimeMillis();
-        insertionCount++;
+		long startTime = System.currentTimeMillis();
+		insertionCount++;
 		try {
 			db.set(key, toString(value));
 		} catch (IOException x) {
-			LOGGER.fatal("io problem", x);
+			log.fatal("io problem", x);
 		}
-        putTime += (System.currentTimeMillis() - startTime);
-        timeConsumption += (System.currentTimeMillis() - startTime);
+		putTime += (System.currentTimeMillis() - startTime);
+		timeConsumption += (System.currentTimeMillis() - startTime);
 	}
 
-    @Override
-    public Set<String> keySet() {
-        return db.keys("*");
-    }
+	@Override
+	public Set<String> keySet() {
+		return db.keys("*");
+	}
 
-    private long satCacheHit = 0;
-    private long unsatCacheHit = 0;
+	// private long satCacheHit = 0;
+	// private long unsatCacheHit = 0;
 
-    @Override
-    public synchronized void flushAll() {
-        // do nothing
-    }
+	@Override
+	public synchronized void flushAll() {
+		// do nothing
+	}
 
-    @Override
-    public void clear() {
-        long startTime = System.currentTimeMillis();
-        try {
-            unsatCacheHit = 0;
-            satCacheHit = 0;
-            db.flushAll();
-        } catch (Exception e) {}
-        timeConsumption += (System.currentTimeMillis() - startTime);
-    }
+	@Override
+	public void clear() {
+		long startTime = System.currentTimeMillis();
+		try {
+			// unsatCacheHit = 0;
+			// satCacheHit = 0;
+			db.flushAll();
+		} catch (Exception e) {
+		}
+		timeConsumption += (System.currentTimeMillis() - startTime);
+	}
 
-    public boolean isSet() {
-        try {
-            if (set == null) {
-                db.get("foo");
-                return (set = true);
-            } else {
-                return set;
-            }
-        } catch (Exception e) {
-            set = false;
-            return false;
-        }
-    }
+	public boolean isSet() {
+		try {
+			if (set == null) {
+				db.get("foo");
+				set = true;
+			}
+		} catch (Exception e) {
+			set = false;
+		}
+		return set;
+	}
+
 }

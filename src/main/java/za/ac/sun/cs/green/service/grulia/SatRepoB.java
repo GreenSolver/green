@@ -1,57 +1,60 @@
 package za.ac.sun.cs.green.service.grulia;
 
+import java.util.Iterator;
+import java.util.TreeSet;
+
 import za.ac.sun.cs.green.Green;
 
-import java.util.*;
-
 /**
- * @date: 2018/08/23
- * @author: JH Taljaard.
- * Student Number: 18509193.
- * Supervisor:  Willem Visser   (2018,2019),
- *              Jaco Geldenhuys (2017)
+ * Description: Storage unit for the possible reusable models of the satisfied
+ * expressions.
  *
- * Description:
- * Storage unit for the possible reusable models of the satisfied expressions.
+ * @date: 2018/08/23
+ * @author: JH Taljaard (USnr 18509193)
+ * @author: Willem Visser (2018) (supervisor)
+ * @author: Jaco Geldenhuys (2017) (supervisor)
  */
 public class SatRepoB extends BinaryRepo {
 
-    /**
-     * Contains the entries in the repo.
-     */
-    private TreeSet<Entry> entries;
-    private boolean default_zero;
+	private static final long serialVersionUID = 6087675126011461571L;
 
-    public SatRepoB(Green solver, boolean default_zero) {
-        super(solver, default_zero);
-        this.entries = new TreeSet<>();
-        this.default_zero = default_zero;
-    }
+	/**
+	 * Contains the entries in the repo.
+	 */
+	@SuppressWarnings("unused")
+	private TreeSet<Entry> entries;
+	private boolean defaultZero;
 
-    /**
-     * To test if the two objects are of the same size.
-     *
-     * @param a size of new model
-     * @param desiredSize desired model size
-     * @return if a is the same size as b
-     */
-    private boolean isValid(int a, int desiredSize) {
-        return a >= desiredSize;
-    }
+	public SatRepoB(Green solver, boolean defaultZero) {
+		super(solver, defaultZero);
+		this.entries = new TreeSet<>();
+		this.defaultZero = defaultZero;
+	}
 
-    @Override
-    protected Entry next(Iterator<Entry> list, int numOfVars) {
-        Entry tmp;
-        while (list.hasNext()) {
-            tmp = list.next();
-            if (default_zero) {
-                return tmp;
-            } else {
-                if (isValid(tmp.getSize(), numOfVars)) {
-                    return tmp;
-                }
-            }
-        }
-        return null;
-    }
+	/**
+	 * To test if the two objects are of the same size.
+	 *
+	 * @param a           size of new model
+	 * @param desiredSize desired model size
+	 * @return if a is the same size as b
+	 */
+	private boolean isValid(int a, int desiredSize) {
+		return a >= desiredSize;
+	}
+
+	@Override
+	protected Entry next(Iterator<Entry> list, int numOfVars) {
+		Entry tmp;
+		while (list.hasNext()) {
+			tmp = list.next();
+			if (defaultZero) {
+				return tmp;
+			} else {
+				if (isValid(tmp.getSize(), numOfVars)) {
+					return tmp;
+				}
+			}
+		}
+		return null;
+	}
 }

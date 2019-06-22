@@ -36,12 +36,15 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
 			// b.append("(set-logic QF_BV)"); // Quantifier Free Bit Vector
-			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
+			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear
+			// Integer Real Arithmetic
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
-			//b = new StringBuilder(); 
-			//b.append("(set-option :produce-models true)(set-logic FloatingPoint)(declare-fun v () (_ Float32))(assert (and (and (bvsge v #x00000000) (bvsle v #x00000032)) (bvsge v #x00000001)))(check-sat)");
+			// b = new StringBuilder();
+			// b.append("(set-option :produce-models true)(set-logic
+			// FloatingPoint)(declare-fun v () (_ Float32))(assert (and (and (bvsge v
+			// #x00000000) (bvsle v #x00000032)) (bvsge v #x00000001)))(check-sat)");
 			return solve0(b.toString(), t.getVariables());
 		} catch (TranslatorUnsupportedOperation x) {
 			log.warn(x.getMessage(), x);
@@ -55,21 +58,26 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 
 	@SuppressWarnings("serial")
 	private static class TranslatorUnsupportedOperation extends VisitorException {
-		public TranslatorUnsupportedOperation(String message) {
+
+		TranslatorUnsupportedOperation(String message) {
 			super(message);
 		}
+
 	}
 
 	private static class TranslatorPair {
 		private final String string;
 		private final Class<? extends Variable> type;
-		public TranslatorPair(final String string, final Class<? extends Variable> type) {
+
+		TranslatorPair(final String string, final Class<? extends Variable> type) {
 			this.string = string;
 			this.type = type;
 		}
+
 		public String getString() {
 			return string;
 		}
+
 		public Class<? extends Variable> getType() {
 			return type;
 		}
@@ -82,18 +90,18 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 		private final List<String> defs;
 		private final List<String> domains;
 
-		public Translator() {
+		Translator() {
 			stack = new Stack<ModelSMTLIBBitVectorService.TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
 			domains = new LinkedList<String>();
 		}
 
-        public List<String> getVariableDecls() {
-            return defs;
-        }
+		public List<String> getVariableDecls() {
+			return defs;
+		}
 
-        public Map<Variable, String> getVariables() {
+		public Map<Variable, String> getVariables() {
 			return varMap;
 		}
 
@@ -140,7 +148,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			long val = constant.getValue();
 			stack.push(new TranslatorPair(transformNegative(val), IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealConstant constant) {
 			double val = constant.getValue();
@@ -190,7 +198,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			}
 			stack.push(new TranslatorPair(n, IntegerVariable.class));
 		}
-		
+
 		@Override
 		public void postVisit(RealVariable variable) {
 			String v = varMap.get(variable);
@@ -235,7 +243,8 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 			}
 		}
 
-		private String setFPOperator(Operator op) throws TranslatorUnsupportedOperation{
+		@SuppressWarnings("unused")
+		private String setFPOperator(Operator op) throws TranslatorUnsupportedOperation {
 			switch (op) {
 			case EQ:
 				return "fp.eq";
@@ -288,7 +297,8 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 				throw new TranslatorUnsupportedOperation("unsupported operation " + op);
 			}
 		}
-		
+
+		@SuppressWarnings("unused")
 		private String setBVOperator(Operator op) throws TranslatorUnsupportedOperation {
 			switch (op) {
 			case EQ:
@@ -370,7 +380,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 				} else {
 					Class<? extends Variable> v = superType(l, r);
 					StringBuilder b = new StringBuilder();
-					//b.append('(').append(setOperator(op)).append(' ');
+					// b.append('(').append(setOperator(op)).append(' ');
 					b.append(adjust(l, v)).append(' ');
 					b.append(adjust(r, v)).append(')');
 					stack.push(new TranslatorPair(b.toString(), v));
@@ -381,7 +391,7 @@ public abstract class ModelSMTLIBBitVectorService extends ModelService {
 				}
 				Class<? extends Variable> v = IntVariable.class;
 				StringBuilder b = new StringBuilder();
-				//b.append('(').append(setOperator(op)).append(' ');
+				// b.append('(').append(setOperator(op)).append(' ');
 				b.append(adjust(l, v)).append(')');
 				stack.push(new TranslatorPair(b.toString(), v));
 			}

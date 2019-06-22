@@ -2,6 +2,7 @@ package za.ac.sun.cs.green.parser.smtlib2;
 
 public enum Keyword0 {
 
+	// @formatter:off
 	UNPREDEFINED("\"a user-predefined keyword\""),
 	ALL_STATISTICS("\":all-statistics\""),
 	AUTHORS("\":authors\""),
@@ -21,6 +22,7 @@ public enum Keyword0 {
 	STATUS("\":status\""),
 	VERBOSITY("\":verbosity\""),
 	VERSION("\":version\"");
+	// @formatter:on
 	
 	/**
 	 * A description string for the information flag.
@@ -32,7 +34,7 @@ public enum Keyword0 {
 	 * 
 	 * @param string the description string
 	 */
-	private Keyword0(String string) {
+	Keyword0(String string) {
 		this.string = string;
 	}
 

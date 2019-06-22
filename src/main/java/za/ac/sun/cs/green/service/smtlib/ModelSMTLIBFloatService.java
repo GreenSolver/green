@@ -36,8 +36,9 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 			instance.getExpression().accept(t);
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
-			//b.append("(set-logic QF_LIA)"); // Quantifier Free Linear Integer Arithmetic
-			//b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear Integer Real Arithmetic
+			// b.append("(set-logic QF_LIA)"); // Quantifier Free Linear Integer Arithmetic
+			// b.append("(set-logic AUFLIRA)"); // Arrays Uninterpreted Functions Linear
+			// Integer Real Arithmetic
 			b.append(Misc.join(t.getVariableDecls(), " "));
 			b.append("(assert ").append(t.getTranslation()).append(')');
 			b.append("(check-sat)");
@@ -54,16 +55,18 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 
 	@SuppressWarnings("serial")
 	private static class TranslatorUnsupportedOperation extends VisitorException {
-		public TranslatorUnsupportedOperation(String message) {
+
+		TranslatorUnsupportedOperation(String message) {
 			super(message);
 		}
+
 	}
 
 	private static class TranslatorPair {
 		private final String string;
 		private final Class<? extends Variable> type;
 
-		public TranslatorPair(final String string, final Class<? extends Variable> type) {
+		TranslatorPair(final String string, final Class<? extends Variable> type) {
 			this.string = string;
 			this.type = type;
 		}
@@ -84,7 +87,7 @@ public abstract class ModelSMTLIBFloatService extends ModelService {
 		private final List<String> defs;
 		private final List<String> domains;
 
-		public Translator() {
+		Translator() {
 			stack = new Stack<ModelSMTLIBFloatService.TranslatorPair>();
 			varMap = new HashMap<Variable, String>();
 			defs = new LinkedList<String>();
