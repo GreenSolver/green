@@ -29,14 +29,31 @@ public class SATCanonizerService extends BasicService {
 	 * Number of times the slicer has been invoked.
 	 */
 	private int invocations = 0;
+
+	/**
+	 * Milliseconds spent in the canonizer.
+	 */
 	private long timeConsumption = 0;
 
+	/**
+	 * Create a service to canonize expressions for SAT queries.
+	 * 
+	 * @param solver the associated Green solver
+	 */
 	public SATCanonizerService(Green solver) {
 		super(solver);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.service.BasicService#processRequest(za.ac.sun.cs.green.
+	 * Instance)
+	 */
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
+		log.trace("[{}]", instance);
 		long startTime = System.currentTimeMillis();
 		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
@@ -51,26 +68,42 @@ public class SATCanonizerService extends BasicService {
 		return result;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.service.BasicService#report(za.ac.sun.cs.green.util.
+	 * Reporter)
+	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
 		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
 	}
 
+	/**
+	 * Canonize an expression: order individuals conjuncts, canonize individual
+	 * conjuncts, and rename variables.
+	 * 
+	 * @param expression what to canonize
+	 * @param map        mapping of old to new variable names
+	 * @return the canonized expression
+	 */
 	public Expression canonize(Expression expression, Map<Variable, Variable> map) {
 		try {
-			// log.debug("Before Canonization: {}", expression);
+			log.trace("before: {}", expression);
 			invocations++;
 			OrderingVisitor orderingVisitor = new OrderingVisitor();
 			expression.accept(orderingVisitor);
 			expression = orderingVisitor.getExpression();
+			log.trace("after ordering: {}", expression);
 			CanonizationVisitor canonizationVisitor = new CanonizationVisitor();
 			expression.accept(canonizationVisitor);
 			Expression canonized = canonizationVisitor.getExpression();
+			log.trace("after canonization: {}", canonized);
 			if (canonized != null) {
 				canonized = new Renamer(map, canonizationVisitor.getVariableSet()).rename(canonized);
+				log.trace("after renaming: {}", canonized);
 			}
-			// log.debug("After Canonization: {}", canonized);
 			return canonized;
 		} catch (VisitorException x) {
 			log.fatal("encountered an exception -- this should not be happening!", x);
@@ -78,62 +111,111 @@ public class SATCanonizerService extends BasicService {
 		return null;
 	}
 
+	// ======================================================================
+	//
+	// RE-ORDERING VISITOR
+	//
+	// ======================================================================
+
+	/**
+	 * The ordering visitor normalizes expressions of the form "@{code A <> B}",
+	 * where "@{code <>}" is one of "{@code ==}", "{@code !=}", "{@code <}",
+	 * "{@code <=}", "{@code >}", or "{@code >=}". The operands are swapped:
+	 * 
+	 * <ul>
+	 * <li>If both are variables, they are arranged alphabetically.</li>
+	 * <li>If {@code A} is a constant and {@code B} is a variable, they are
+	 * swapped.</li>
+	 * <li>Otherwise, the operation remains the same.</li>
+	 * </ul>
+	 * 
+	 * If the operands and swapped, the operator is changed appropriately.
+	 */
 	private static class OrderingVisitor extends Visitor {
 
+		/**
+		 * Stack where operands are stored.
+		 */
 		private Stack<Expression> stack;
 
+		/**
+		 * Create an ordering visitor.
+		 */
 		OrderingVisitor() {
 			stack = new Stack<Expression>();
 		}
 
+		/**
+		 * Return the resulting re-ordered expression.
+		 * 
+		 * @return re-ordered expression
+		 */
 		public Expression getExpression() {
 			return stack.pop();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+		 * IntConstant)
+		 */
 		@Override
 		public void postVisit(IntConstant constant) {
 			stack.push(constant);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+		 * IntVariable)
+		 */
 		@Override
 		public void postVisit(IntVariable variable) {
 			stack.push(variable);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
+		 */
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
 			Operation.Operator op = operation.getOperator();
-			Operation.Operator nop = null;
+			Operation.Operator newOp = null;
 			switch (op) {
 			case EQ:
-				nop = Operation.Operator.EQ;
+				newOp = Operation.Operator.EQ;
 				break;
 			case NE:
-				nop = Operation.Operator.NE;
+				newOp = Operation.Operator.NE;
 				break;
 			case LT:
-				nop = Operation.Operator.GT;
+				newOp = Operation.Operator.GT;
 				break;
 			case LE:
-				nop = Operation.Operator.GE;
+				newOp = Operation.Operator.GE;
 				break;
 			case GT:
-				nop = Operation.Operator.LT;
+				newOp = Operation.Operator.LT;
 				break;
 			case GE:
-				nop = Operation.Operator.LE;
+				newOp = Operation.Operator.LE;
 				break;
 			default:
 				break;
 			}
-			if (nop != null) {
+			if (newOp != null) {
 				Expression r = stack.pop();
 				Expression l = stack.pop();
 				if ((r instanceof IntVariable) && (l instanceof IntVariable)
 						&& (((IntVariable) r).getName().compareTo(((IntVariable) l).getName()) < 0)) {
-					stack.push(new Operation(nop, r, l));
+					stack.push(new Operation(newOp, r, l));
 				} else if ((r instanceof IntVariable) && (l instanceof IntConstant)) {
-					stack.push(new Operation(nop, r, l));
+					stack.push(new Operation(newOp, r, l));
 				} else {
 					stack.push(operation);
 				}
@@ -150,6 +232,12 @@ public class SATCanonizerService extends BasicService {
 		}
 
 	}
+
+	// ======================================================================
+	//
+	// CANONIZATION VISITOR
+	//
+	// ======================================================================
 
 	private static class CanonizationVisitor extends Visitor {
 
@@ -564,7 +652,7 @@ public class SATCanonizerService extends BasicService {
 			for (Map.Entry<Variable, Integer> e : coefficients.entrySet()) {
 				int coef = e.getValue();
 				if (coef != 0) {
-					Operation term = new Operation(Operation.Operator.MUL, new IntConstant(coef));
+					Operation term = new Operation(Operation.Operator.MUL, new IntConstant(coef), e.getKey());
 					if (lr == null) {
 						lr = term;
 					} else {
