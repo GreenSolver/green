@@ -25,7 +25,7 @@ public class RenamerServiceTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props1 = new Properties();
 		props1.setProperty("green.services", "sat");
 		props1.setProperty("green.service.sat", "(rename sink)");

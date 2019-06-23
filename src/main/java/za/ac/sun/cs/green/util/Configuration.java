@@ -1,5 +1,11 @@
 package za.ac.sun.cs.green.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -16,34 +22,213 @@ import za.ac.sun.cs.green.store.Store;
 import za.ac.sun.cs.green.taskmanager.TaskManager;
 
 /**
- * This is a utility class that takes an instance of {@link Properties} and
- * processes all the "{@code green.service}" properties to configure a green
- * solver.
- * 
- * @author jaco
+ * Utility class that takes an instance of {@link Properties} and processes all
+ * the "{@code green.service}" properties to configure a green solver.
  */
 public class Configuration {
 
+	/**
+	 * The user's home directory.
+	 */
+	private static final String HOME_DIRECTORY = System.getProperty("user.home");
+
+	/**
+	 * The subdirectory in the user's home directory where the personal Green file
+	 * is searched for.
+	 */
+	private static final String GREEN_DIRECTORY = ".green";
+
+	/**
+	 * The full name of the subdirectory where the personal file is searched for.
+	 */
+	private static final String HOME_GREEN_DIRECTORY = HOME_DIRECTORY + File.separator + GREEN_DIRECTORY + File.separator;
+
+	/**
+	 * The Green solver to configure.
+	 */
 	private final Green solver;
 
+	/**
+	 * Logger.
+	 */
 	private final Logger log;
 
+	/**
+	 * The properties to use for the configuration.
+	 */
 	private final Properties properties;
 
-	private final ClassLoader loader = Configuration.class.getClassLoader();
+	/**
+	 * Whether default have been
+	 */
+	private boolean defaultsLoaded = false;
 
+	/**
+	 * Construct a configuration instance.
+	 * 
+	 * @param solver     the Green solver to configure
+	 * @param properties the properties to configure with
+	 */
 	public Configuration(final Green solver, final Properties properties) {
 		this.solver = solver;
 		log = solver.getLogger();
 		this.properties = properties;
 	}
 
-	public void configure() {
+	/**
+	 * Add additional default properties to the set of properties of this
+	 * configuration.
+	 */
+	private void loadDefaults() {
+		if (defaultsLoaded) {
+			return;
+		}
+		loadDefaults(log, properties);
+		defaultsLoaded = true;
+	}
+
+	/**
+	 * Add additional default properties to a set of properties. There are two
+	 * places where such properties may be located:
+	 * 
+	 * <ol>
+	 * <li>the file resource/build.properties</li>
+	 * <li>the file $HOME/.green/build.properties</li>
+	 * </ol>
+	 * 
+	 * The properties in these files are added to the {@link #properties} object if
+	 * they are not already present there.
+	 * 
+	 * If the property name starts with "<code>$</code>", the property is added
+	 * (after removing the "<code>$</code>") even if it already exists. In other
+	 * words, this indicates that the property should be overwritten.
+	 *
+	 * @param log        the logger
+	 * @param properties the properties to which the defaults are added
+	 */
+	public static void loadDefaults(Logger log, Properties properties) {
+		Properties homeProperties = loadPropertiesFromFile(log, HOME_GREEN_DIRECTORY + "green.properties");
+		if (homeProperties == null) {
+			homeProperties = loadPropertiesFromFile(log, HOME_GREEN_DIRECTORY + "build.properties");
+		}
+		loadDefaults(properties, homeProperties);
+		Properties resourceProperties = loadPropertiesFromResource(log, "green.properties");
+		if (resourceProperties == null) {
+			resourceProperties = loadPropertiesFromResource(log, "build.properties");
+		}
+		loadDefaults(properties, resourceProperties);
+	}
+
+	/**
+	 * Copy (some) properties to the official set of properties.
+	 * 
+	 * @param properties    the target for new properties
+	 * @param newProperties the source for new properties
+	 */
+	private static void loadDefaults(Properties properties, Properties newProperties) {
+		if (newProperties != null) {
+			for (Object k : newProperties.keySet()) {
+				if (k instanceof String) {
+					String key = (String) k;
+					if (key.startsWith("$")) {
+						properties.setProperty(key.substring(1), newProperties.getProperty(key));
+					} else if (!properties.containsKey(key)) {
+						properties.setProperty(key, newProperties.getProperty(key));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Load properties from a named file.
+	 * 
+	 * @param log      the logger
+	 * @param filename the name of the file
+	 * @return the set of properties (or {@code null})
+	 */
+	public static Properties loadPropertiesFromFile(Logger log, String filename) {
+		try {
+			InputStream inputStream = new FileInputStream(filename);
+			Properties properties = loadPropertiesFromStream(inputStream);
+			log.trace("loaded configuration from {}", filename);
+			return properties;
+		} catch (FileNotFoundException e) {
+			log.trace("failed to load configuration from {}", filename);
+		} catch (IOException e) {
+			log.trace("failed to load configuration from {}", filename);
+		}
+		return null;
+	}
+
+	/**
+	 * Load properties from a named resource.
+	 * 
+	 * @param log          the logger
+	 * @param resourceName the name of the resource
+	 * @return the set of properties (or {@code null})
+	 */
+	private static Properties loadPropertiesFromResource(Logger log, String resourceName) {
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
+			if (resourceStream != null) {
+				return loadPropertiesFromStream(resourceStream);
+			}
+		} catch (IOException x) {
+			log.trace("failed to load configuration from {}", resourceName);
+		}
+		return null;
+	}
+
+	/**
+	 * Load properties from an input stream.
+	 * 
+	 * @param inputStream the input stream
+	 * @return the set of properties
+	 * @throws IOException if the input stream cannot be read
+	 */
+	private static Properties loadPropertiesFromStream(InputStream inputStream) throws IOException {
+		Properties properties = new Properties();
+		properties.load(inputStream);
+		return properties;
+	}
+
+	/**
+	 * Load properties from a string.
+	 * 
+	 * @param propertiesString the string with the properties
+	 * @return the set of properties
+	 */
+	@SuppressWarnings("unused")
+	private static Properties loadPropertiesFromString(String propertiesString) {
+		if (propertiesString == null) {
+			return null;
+		}
+		try {
+			InputStream in = new ByteArrayInputStream(propertiesString.getBytes());
+			return loadPropertiesFromStream(in);
+		} catch (IOException x) {
+			// ignore
+		}
+		return null;
+	}
+
+	/**
+	 * Configure the Green solver by reading four important properties:
+	 * {@code log.level}, {@code taskmanager}, {@code store}, and {@code services}.
+	 * Based on the values of these properties, various routines are called in the
+	 * Green instance.
+	 * 
+	 * @param loadDefaults whether or not default properties should be loaded
+	 */
+	public void configure(boolean loadDefaults) {
+		if (loadDefaults) {
+			loadDefaults();
+		}
 		String p = properties.getProperty("green.log.level");
 		if (p != null) {
 			Configurator.setLevel(log.getName(), Level.getLevel(p));
-			// setLevel(Level.getLevel(p));
-			log.trace("logging level changed to {}", p);
+			log.info("green.log.level is deprecated -- IGNORED");
 		}
 		p = properties.getProperty("green.taskmanager");
 		if (p != null) {
@@ -71,20 +256,20 @@ public class Configuration {
 		}
 	}
 
-//	private void setLevel(Level level) {
-//		final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-//		final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
-//		LoggerConfig loggerConfig = config.getLoggerConfig(LOGGER.getName());
-//		LoggerConfig specificConfig = loggerConfig;
-//		if (!loggerConfig.getName().equals(LOGGER.getName())) {
-//			specificConfig = new LoggerConfig(LOGGER.getName(), level, true);
-//			specificConfig.setParent(loggerConfig);
-//			config.addLogger(LOGGER.getName(), specificConfig);
-//		}
-//		specificConfig.setLevel(level);
-//		ctx.updateLoggers();
-//	}
+	/**
+	 * Load defaults and configure the Green solver.
+	 */
+	public void configure() {
+		configure(true);
+	}
 
+	/**
+	 * Used internally to register Green services.
+	 * 
+	 * @param serviceName the name of the service to register
+	 * @throws ParseException if the properties contain badly-formatted service
+	 *                        specifications
+	 */
 	private void configure(String serviceName) throws ParseException {
 		String ss = properties.getProperty("green.service." + serviceName);
 		if (ss != null) {
@@ -97,6 +282,14 @@ public class Configuration {
 		}
 	}
 
+	/**
+	 * Used internally to register Green services. It recursively walks three the
+	 * tree of service definitions.
+	 * 
+	 * @param rootName  the name of the root service
+	 * @param service   the name of the subservice
+	 * @param parseTree the tree of service definitions
+	 */
 	private void configure(String rootName, Service service, ParseTree parseTree) {
 		for (ParseTree p : parseTree.getChildren()) {
 			Service s = p.getService();
@@ -105,6 +298,14 @@ public class Configuration {
 		}
 	}
 
+	/**
+	 * Return the value of a property as an integer.
+	 * 
+	 * @param properties   the properties to consult
+	 * @param key          the name of the property
+	 * @param defaultValue the default value is the key is not found
+	 * @return the integer value
+	 */
 	public static int getIntegerProperty(Properties properties, String key, int defaultValue) {
 		String s = properties.getProperty(key, Integer.toString(defaultValue));
 		try {
@@ -115,6 +316,12 @@ public class Configuration {
 		return defaultValue;
 	}
 
+	/**
+	 * Create an instance of a given class.
+	 * 
+	 * @param objectName the name of the class
+	 * @return the new instance
+	 */
 	private Object createInstance(String objectName) {
 		Class<?> classx = loadClass(objectName);
 		try {
@@ -126,8 +333,7 @@ public class Configuration {
 				// ignore
 			}
 			try {
-				constructor = classx.getConstructor(Green.class,
-						Properties.class);
+				constructor = classx.getConstructor(Green.class, Properties.class);
 				return constructor.newInstance(solver, properties);
 			} catch (NoSuchMethodException x) {
 				log.fatal("constructor not found: " + objectName, x);
@@ -146,7 +352,14 @@ public class Configuration {
 		return null;
 	}
 
+	/**
+	 * Load a given class.
+	 * 
+	 * @param className the class to load
+	 * @return the loaded class or {@code null} if something went wrong
+	 */
 	private Class<?> loadClass(String className) {
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		if ((className != null) && (className.length() > 0)) {
 			try {
 				return loader.loadClass(className);
@@ -158,6 +371,12 @@ public class Configuration {
 		}
 		return null;
 	}
+
+	// ======================================================================
+	//
+	// SERVICE TREE
+	//
+	// ======================================================================
 
 	private class ParseTree {
 
@@ -184,6 +403,12 @@ public class Configuration {
 
 	}
 
+	// ======================================================================
+	//
+	// EXCEPTION FOR SERVICE LANGUAGE
+	//
+	// ======================================================================
+
 	@SuppressWarnings("serial")
 	private class ParseException extends Exception {
 
@@ -192,6 +417,12 @@ public class Configuration {
 		}
 
 	}
+
+	// ======================================================================
+	//
+	// PARSER FOR SERVICE LANGUAGE
+	//
+	// ======================================================================
 
 	private class Parser {
 
@@ -210,14 +441,12 @@ public class Configuration {
 
 		public ParseTree parse(Service service) throws ParseException {
 			ParseTree t = new ParseTree(service);
-			while ((scanner.next() != Token.EOS)
-					&& (scanner.next() != Token.RPAREN)) {
+			while ((scanner.next() != Token.EOS) && (scanner.next() != Token.RPAREN)) {
 				if (scanner.next() == Token.NAME) {
 					String n = scanner.expectName();
 					Service s = lookup(rootName, n);
 					if (s == null) {
-						throw new ParseException("Unknown service \""
-								+ rootName + "." + n + "\"");
+						throw new ParseException("Unknown service \"" + rootName + "." + n + "\"");
 					}
 					t.addChild(new ParseTree(s));
 				} else if (scanner.next() == Token.LPAREN) {
@@ -225,22 +454,19 @@ public class Configuration {
 					String n = scanner.expectName();
 					Service s = lookup(rootName, n);
 					if (s == null) {
-						throw new ParseException("Unknown service \""
-								+ rootName + "." + n + "\"");
+						throw new ParseException("Unknown service \"" + rootName + "." + n + "\"");
 					}
 					t.addChild(parse(s));
 					scanner.expect(Token.RPAREN); // ')'
 				} else {
-					throw new ParseException("Unexpected token in \""
-							+ scanner.getInput() + "\"");
+					throw new ParseException("Unexpected token in \"" + scanner.getInput() + "\"");
 				}
 			}
 			return t;
 		}
 
 		private Service lookup(String rootName, String serviceName) {
-			String s = properties.getProperty("green.service." + rootName + "."
-					+ serviceName);
+			String s = properties.getProperty("green.service." + rootName + "." + serviceName);
 			if (s != null) {
 				return (Service) createInstance(s);
 			}
@@ -249,9 +475,14 @@ public class Configuration {
 
 	}
 
+	// ======================================================================
+	//
+	// TOKENS FOR SERVICE LANGUAGE
+	//
+	// ======================================================================
+
 	public enum Token {
-		LPAREN("\"(\""), RPAREN("\")\""), NAME("a name"), EOS(
-				"the end of input"), UNKNOWN("an unknown token");
+		LPAREN("\"(\""), RPAREN("\")\""), NAME("a name"), EOS("the end of input"), UNKNOWN("an unknown token");
 
 		private final String representation;
 
@@ -265,6 +496,12 @@ public class Configuration {
 		}
 
 	}
+
+	// ======================================================================
+	//
+	// SCANNER FOR SERVICE LANGUAGE
+	//
+	// ======================================================================
 
 	private class Scanner {
 
@@ -293,8 +530,7 @@ public class Configuration {
 
 		public void expect(Token token) throws ParseException {
 			if (nextToken != token) {
-				throw new ParseException("Expected " + token + " but found "
-						+ nextToken + " in \"" + input + "\"");
+				throw new ParseException("Expected " + token + " but found " + nextToken + " in \"" + input + "\"");
 			}
 			scan();
 		}
@@ -331,8 +567,7 @@ public class Configuration {
 					nextName = n.toString();
 					nextToken = Token.NAME;
 				} else {
-					throw new ParseException("Unrecognized token in \"" + input
-							+ "\"");
+					throw new ParseException("Unrecognized token in \"" + input + "\"");
 				}
 			}
 		}
@@ -346,4 +581,5 @@ public class Configuration {
 		}
 
 	}
+
 }

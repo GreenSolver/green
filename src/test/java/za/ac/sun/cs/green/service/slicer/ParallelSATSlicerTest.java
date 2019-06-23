@@ -24,7 +24,7 @@ public class ParallelSATSlicerTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.taskmanager", ParallelTaskManager.class.getCanonicalName());
 		props.setProperty("green.services", "sat");

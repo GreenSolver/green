@@ -23,7 +23,6 @@ import za.ac.sun.cs.green.util.Configuration;
 
 public class ModelSMTLIBFloatServiceTest {
 
-	private static final String DEFAULT_Z3_PATH = "/usr/bin/z3";
 	public static Green solver;
 
 	@BeforeClass
@@ -33,7 +32,6 @@ public class ModelSMTLIBFloatServiceTest {
 		props.setProperty("green.services", "model");
 		props.setProperty("green.service.model", "(z3)");
 		props.setProperty("green.service.model.z3", "za.ac.sun.cs.green.service.z3.ModelZ3FloatService");
-		props.setProperty("green.z3.path", DEFAULT_Z3_PATH);
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}

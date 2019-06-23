@@ -23,7 +23,7 @@ public class SATFactorSlicerServiceTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
 		props.setProperty("green.service.sat", "(slice sink)");

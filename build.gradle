@@ -30,16 +30,6 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
-			groupId = group
-			version gitVersion() + '-SNAPSHOT'
-		}
-	}
-}
-
 checkstyle {
 	toolVersion '8.1'
 }
@@ -49,6 +39,16 @@ jacocoTestReport {
         xml.enabled true
         html.enabled false
     }
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			groupId = group
+			version gitVersion() + '-SNAPSHOT'
+		}
+	}
 }
 
 artifactory {

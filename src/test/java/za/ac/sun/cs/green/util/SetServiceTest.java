@@ -12,7 +12,7 @@ public class SetServiceTest {
 
 	@Test
 	public void test() {
-		Green solver = new Green();
+		Green solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
 //		props.setProperty("green.service.sat", "(slice (canonize (z3 cvc3 choco)))");
