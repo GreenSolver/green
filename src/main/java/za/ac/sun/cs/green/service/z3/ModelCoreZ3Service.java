@@ -1,8 +1,6 @@
 package za.ac.sun.cs.green.service.z3;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,10 +27,7 @@ import za.ac.sun.cs.green.util.Reporter;
 
 public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
-	private static final String DEFAULT_Z3_ARGS = "-smt2 -in";
-
 	private final String z3Command;
-	private final String resourceName = "build.properties";
 
 	/**
 	 * Execution Time of the service.
@@ -43,26 +38,8 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
 	public ModelCoreZ3Service(Green solver, Properties properties) {
 		super(solver);
-		String z3Path = "/z3/build/z3";
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream resourceStream;
-		try {
-			resourceStream = loader.getResourceAsStream(resourceName);
-			if (resourceStream == null) {
-				// If properties are correct, override with that specified path.
-				resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + resourceName);
-			}
-			if (resourceStream != null) {
-				properties.load(resourceStream);
-				z3Path = properties.getProperty("z3path");
-			}
-			resourceStream.close();
-		} catch (IOException x) {
-			// ignore
-		}
-
-		String p = properties.getProperty("green.z3.path", z3Path);
-		String a = properties.getProperty("green.z3.args", DEFAULT_Z3_ARGS);
+		String p = properties.getProperty("green.z3.path");
+		String a = properties.getProperty("green.z3.args");
 		z3Command = p + ' ' + a;
 	}
 

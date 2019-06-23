@@ -23,15 +23,15 @@ public class ParallelSATTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.taskmanager", ParallelTaskManager.class.getCanonicalName());
 		props.setProperty("green.services", "sat");
-		props.setProperty("green.service.sat", "(slice (canonize choco cvc3))");
+		props.setProperty("green.service.sat", "(slice (canonize choco z3))");
 		props.setProperty("green.service.sat.slice", "za.ac.sun.cs.green.service.slicer.SATSlicerService");
 		props.setProperty("green.service.sat.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
-		props.setProperty("green.service.sat.choco", "za.ac.sun.cs.green.service.choco.SATChocoService");
-		props.setProperty("green.service.sat.cvc3", "za.ac.sun.cs.green.service.cvc3.SATCVC3Service");
+		props.setProperty("green.service.sat.choco", "za.ac.sun.cs.green.service.choco4.SATChocoService");
+		props.setProperty("green.service.sat.z3", "za.ac.sun.cs.green.service.z3.SATZ3Service");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}

@@ -30,7 +30,7 @@ public class ModelZ3JavaBVServiceTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "model");
 //        props.setProperty("green.service.model", "(z3bv)");

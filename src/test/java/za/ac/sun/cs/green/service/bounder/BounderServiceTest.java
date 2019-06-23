@@ -27,7 +27,7 @@ public class BounderServiceTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "bound");
 		props.setProperty("green.service.bound", "(bounder sink)");

@@ -721,6 +721,12 @@ public class SATCanonizerService extends BasicService {
 
 	}
 
+	// ======================================================================
+	//
+	// RENAMING VISITOR
+	//
+	// ======================================================================
+
 	private static class Renamer extends Visitor {
 
 		private Map<Variable, Variable> map;

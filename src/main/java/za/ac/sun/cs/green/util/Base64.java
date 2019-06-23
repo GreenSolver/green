@@ -1,11 +1,18 @@
 package za.ac.sun.cs.green.util;
 
+/**
+ * Routines for Base64 (https://en.wikipedia.org/wiki/Base64) encoding/decoding.
+ */
 public class Base64 {
 
-	// The line separator string of the operating system.
+	/**
+	 * The line separator string of the operating system.
+	 */
 	private static final String SYSTEM_LINE_SEPARATOR = System.getProperty("line.separator");
 
-	// Mapping table from 6-bit nibbles to Base64 characters.
+	/**
+	 * Mapping table from 6-bit nibbles to Base64 characters.
+	 */
 	private static final char[] MAP1 = new char[64];
 
 	static {
@@ -23,7 +30,9 @@ public class Base64 {
 		MAP1[i++] = '/';
 	}
 
-	// Mapping table from Base64 characters to 6-bit nibbles.
+	/**
+	 * Mapping table from Base64 characters to 6-bit nibbles.
+	 */
 	private static final byte[] MAP2 = new byte[128];
 
 	static {

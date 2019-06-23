@@ -14,11 +14,13 @@ public class SinkService extends BasicService {
 
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
+		log.trace("[{}]", instance);
 		return null;
 	}
 
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
+		log.trace("[{}]", instance);
 		return instance;
 	}
 	

@@ -16,7 +16,7 @@ public class SetTaskManagerTest {
 
 	@Test
 	public void test() {
-		Green solver = new Green();
+		Green solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.taskmanager", DummyTaskManager.class.getCanonicalName());
 		Configuration config = new Configuration(solver, props);

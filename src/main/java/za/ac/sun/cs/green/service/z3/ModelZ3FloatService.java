@@ -1,7 +1,6 @@
 package za.ac.sun.cs.green.service.z3;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,8 +24,6 @@ import za.ac.sun.cs.green.util.Reporter;
 
 public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 
-	private static final String DEFAULT_Z3_ARGS = "-smt2 -in";
-
 	private final String z3Command;
 
 	/**
@@ -38,22 +35,8 @@ public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 
 	public ModelZ3FloatService(Green solver, Properties properties) {
 		super(solver);
-		String drive = new File("").getAbsolutePath() + "/";
-		String sub = "lib/z3/build/z3";
-		String z3Path = drive + sub;
-		InputStream is = SATZ3Service.class.getClassLoader().getResourceAsStream("green/build.properties");
-		if (is != null) {
-			Properties p = new Properties();
-			try {
-				p.load(is);
-				z3Path = p.getProperty("z3path");
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
-
-		String p = properties.getProperty("green.z3.path", z3Path);
-		String a = properties.getProperty("green.z3.args", DEFAULT_Z3_ARGS);
+		String p = properties.getProperty("green.z3.path");
+		String a = properties.getProperty("green.z3.args");
 		z3Command = p + ' ' + a;
 	}
 
