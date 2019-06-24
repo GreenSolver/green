@@ -75,7 +75,8 @@ public abstract class SATService extends BasicService {
 	private Boolean solve0(Instance instance) {
 		invocationCount++;
 		long start = System.currentTimeMillis();
-		String key = SERVICE_KEY + instance.getFullExpression().getString();
+//		String key = SERVICE_KEY + instance.getFullExpression().getString();
+		String key = SERVICE_KEY + instance.getFullExpression().toString();
 		keyTime += (System.currentTimeMillis() - start);
 		Boolean result = store.getBoolean(key);
 

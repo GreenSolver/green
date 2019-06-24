@@ -21,7 +21,6 @@ import za.ac.sun.cs.green.util.Configuration;
 public class CountLattEWithBounderTest {
 
 	public static Green solver = null;
-    private static final String DEFAULT_LATTE_PATH = "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
 
 	@BeforeClass
 	public static void initialize() {
@@ -29,14 +28,13 @@ public class CountLattEWithBounderTest {
 //			Assume.assumeTrue(false);
 //			return;
 //		}
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "count");
 		props.setProperty("green.service.count", "(bounder (canonize latte))");
 		props.setProperty("green.service.count.latte", "za.ac.sun.cs.green.service.latte.CountLattEService");
 		props.setProperty("green.service.count.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		props.setProperty("green.service.count.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
-		props.setProperty("green.latte.path", DEFAULT_LATTE_PATH);
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}

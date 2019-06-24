@@ -62,7 +62,7 @@ public class RealVariable extends Variable {
 	}
 
 	@Override
-	public String toString() {
+	public String toString0() {
 		return getName();
 	}
 

@@ -3,10 +3,6 @@ package za.ac.sun.cs.green.service.barvinok;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import org.apfloat.Apint;
@@ -26,38 +22,13 @@ public class CountBarvinokTest {
 
 	public static Green solver = null;
 
-	private static final String BARVINOK_PATH = "barvinoklattepath";
-	private static final String RESOURCE_NAME = "build.properties";
-
 	@BeforeClass
 	public static void initialize() {
 		solver = new Green();
 		Properties properties = new Properties();
 		properties.setProperty("green.services", "count");
 		properties.setProperty("green.service.count", "barvinok");
-		properties.setProperty("green.service.count.barvinok",
-				"za.ac.sun.cs.green.service.barvinok.CountBarvinokService");
-
-		String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barvlatte";
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream resourceStream;
-		try {
-			resourceStream = loader.getResourceAsStream(RESOURCE_NAME);
-			if (resourceStream == null) {
-				// If properties are correct, override with that specified path.
-				resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + RESOURCE_NAME);
-
-			}
-			if (resourceStream != null) {
-				properties.load(resourceStream);
-				barvPath = properties.getProperty(BARVINOK_PATH);
-				resourceStream.close();
-			}
-		} catch (IOException x) {
-			// ignore
-		}
-
-		properties.setProperty("green.barvinok.path", barvPath);
+		properties.setProperty("green.service.count.barvinok", "za.ac.sun.cs.green.service.barvinok.CountBarvinokService");
 		Configuration config = new Configuration(solver, properties);
 		config.configure();
 	}

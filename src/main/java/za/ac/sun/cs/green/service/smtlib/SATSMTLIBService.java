@@ -45,7 +45,8 @@ public abstract class SATSMTLIBService extends SATService {
 			b.append("(check-sat)");
 			String a = b.toString();
 			translationTimeConsumption += (System.currentTimeMillis() - start);
-			conjunctCount += instance.getExpression().getString().split("&&").length;
+//			conjunctCount += instance.getExpression().getString().split("&&").length;
+			conjunctCount += instance.getExpression().toString().split("&&").length;
 			varCount += t.getVariables().size();
 			return solve0(a);
 		} catch (TranslatorUnsupportedOperation x) {

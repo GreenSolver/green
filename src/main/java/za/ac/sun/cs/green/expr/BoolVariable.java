@@ -10,7 +10,18 @@ public class BoolVariable extends Variable {
 
 	@Override
 	public void accept(Visitor visitor) throws VisitorException {
-		// placeholder
+		visitor.preVisit(this);
+		visitor.postVisit(this);
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof IntVariable) {
+			IntVariable variable = (IntVariable) object;
+			return getName().equals(variable.getName());
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -19,15 +30,8 @@ public class BoolVariable extends Variable {
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		// placeholder
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		// placeholder
-		return null;
+	public String toString0() {
+		return getName();
 	}
 
 }

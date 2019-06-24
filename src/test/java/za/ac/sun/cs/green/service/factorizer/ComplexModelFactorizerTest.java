@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.Map;
 import java.util.Properties;
 
@@ -23,8 +22,6 @@ import za.ac.sun.cs.green.util.Configuration;
 public class ComplexModelFactorizerTest {
 
 	public static Green solver;
-	private static final String DRIVE = new File("").getAbsolutePath() + "/";
-	private static final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
 
 	@SuppressWarnings("unused")
 	private static Properties setupNoCanon(Properties props) {
@@ -48,7 +45,6 @@ public class ComplexModelFactorizerTest {
 		props = setupWithCanon(props);
 		props.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		props.setProperty("green.service.model.z3", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
-		props.setProperty("green.z3.path", DEFAULT_Z3_PATH);
 		props.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		Configuration config = new Configuration(solver, props);
 		config.configure();

@@ -3,12 +3,9 @@ package za.ac.sun.cs.green.service.latte;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Collections;
@@ -43,6 +40,7 @@ import za.ac.sun.cs.green.service.CountService;
 /**
  * [Dependencies] - LattE library installation:
  * https://www.math.ucdavis.edu/~latte/software.php
+ * https://github.com/latte-int/latte
  */
 public class CountLattEService extends CountService {
 
@@ -51,10 +49,19 @@ public class CountLattEService extends CountService {
 	 */
 	private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
 
+	/**
+	 * Date used for naming LattE output directory
+	 */
 	private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
 
+	/**
+	 * Random number used for naming LattE output directory
+	 */
 	private static final int RANDOM = new Random().nextInt(9);
 
+	/**
+	 * Directory where we attempt to place the LattE output files
+	 */
 	private static final String DIRNAME = String.format("%s/%s%s", DIRECTORY, DATE, RANDOM);
 
 	private static String directory = null;
@@ -81,17 +88,6 @@ public class CountLattEService extends CountService {
 	private static final String ANSWER_PATTERN = "numberOfLatticePoints(";
 
 	/**
-	 * The location of the LattE executable file.
-	 */
-	private final String defaultLattePath;
-	private static final String LATTE_PATH = "lattepath";
-
-	/**
-	 * Options passed to the LattE executable.
-	 */
-	private static final String DEFAULT_LATTE_ARGS = "--triangulation=cddlib";
-
-	/**
 	 * Combination of the LattE executable, options, and the filename, all separated
 	 * by spaces.
 	 */
@@ -105,35 +101,11 @@ public class CountLattEService extends CountService {
 	public CountLattEService(Green solver, Properties properties) {
 		super(solver);
 		log = solver.getLogger();
-
-		String lattePath = new File("").getAbsolutePath()
-				+ "lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
-		InputStream is = null;
-		try {
-			is = new FileInputStream("build.properties");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		if (is != null) {
-			// If properties are correct, override with that specified path.
-			Properties p = new Properties();
-			try {
-				p.load(is);
-				lattePath = p.getProperty(LATTE_PATH);
-				is.close();
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
-
-		defaultLattePath = lattePath;
-
-		String p = properties.getProperty("green.latte.path", defaultLattePath);
-		String a = properties.getProperty("green.latte.args", DEFAULT_LATTE_ARGS);
+		String p = properties.getProperty("green.latte.path");
+		String a = properties.getProperty("green.latte.args");
 		latteCommand = p + ' ' + a + ' ' + FILENAME;
-		log.debug("latteCommand=" + latteCommand);
-		log.debug("directory=" + directory);
+		log.trace("latteCommand={}", latteCommand);
+		log.trace("directory={}", directory);
 	}
 
 	@Override

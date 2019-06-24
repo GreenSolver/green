@@ -48,7 +48,7 @@ public class IntConstant extends Constant {
 	}
 
 	@Override
-	public String toString() {
+	public String toString0() {
 		return Integer.toString(value);
 	}
 
