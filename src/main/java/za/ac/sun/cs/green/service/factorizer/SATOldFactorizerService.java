@@ -111,10 +111,11 @@ public class SATOldFactorizerService extends BasicService {
 	
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "totalConstraints = " + constraintCount);
-		reporter.report(getClass().getSimpleName(), "factoredConstraints = " + factorCount);
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocations", invocationCount);
+		reporter.report("totalConstraints", constraintCount);
+		reporter.report("factoredConstraints", factorCount);
+        reporter.report("timeConsumption", timeConsumption);
 	}
 
 }

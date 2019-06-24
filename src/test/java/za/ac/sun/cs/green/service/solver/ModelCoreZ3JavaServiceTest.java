@@ -35,7 +35,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Properties props = new Properties();
 		props.setProperty("green.services", "model");
 //        props.setProperty("green.service.model", "(z3bv)");
-		props.setProperty("green.service.model", "(bounder (z3bv))");
+		props.setProperty("green.service.model", "(bounder z3bv)");
 //        props.setProperty("green.service.sat", "(fact (z3bv))");
 //        props.setProperty("green.service.sat.fact", "za.ac.sun.cs.green.service.factorizer.ModelFactorizerService");
 		props.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");

@@ -35,17 +35,18 @@ public abstract class SATService1 extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocationCount = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
-		reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
-		reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
-		reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
-		reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
-		reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-		reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
-		reporter.report(getClass().getSimpleName(), "unsatQueries = " + unsatCount);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocationCount", invocationCount);
+		reporter.report("cacheHitCount", cacheHitCount);
+		reporter.report("satCacheHitCount", satHitCount);
+		reporter.report("unsatCacheHitCount", unsatHitCount);
+		reporter.report("cacheMissCount", cacheMissCount);
+		reporter.report("satCacheMissCount", satMissCount);
+		reporter.report("unsatCacheMissCount", unsatMissCount);
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("storageTimeConsumption", storageTimeConsumption);
+		reporter.report("satQueries", satCount);
+		reporter.report("unsatQueries", unsatCount);
 	}
 
 	@Override

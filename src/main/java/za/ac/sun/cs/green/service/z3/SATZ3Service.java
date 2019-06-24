@@ -60,20 +60,21 @@ public class SATZ3Service extends SATSMTLIBService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
-		reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
-		reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satHitCount);
-		reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatHitCount);
-		reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satMissCount);
-		reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatMissCount);
-		reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
-		reporter.report(getClass().getSimpleName(), "unsatQueries = " + unsatCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-		reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "storageTimeConsumption = " + storageTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "translationTimeConsumption = " + translationTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "conjunctCount = " + conjunctCount);
-		reporter.report(getClass().getSimpleName(), "varCount = " + varCount);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("cacheHitCount", cacheHitCount);
+		reporter.report("cacheMissCount", cacheMissCount);
+		reporter.report("satCacheHitCount", satHitCount);
+		reporter.report("unsatCacheHitCount", unsatHitCount);
+		reporter.report("satCacheMissCount", satMissCount);
+		reporter.report("unsatCacheMissCount", unsatMissCount);
+		reporter.report("satQueries", satCount);
+		reporter.report("unsatQueries", unsatCount);
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("satTimeConsumption", satTimeConsumption);
+		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
+		reporter.report("storageTimeConsumption", storageTimeConsumption);
+		reporter.report("translationTimeConsumption", translationTimeConsumption);
+		reporter.report("conjunctCount", conjunctCount);
+		reporter.report("varCount", varCount);
 	}
 }

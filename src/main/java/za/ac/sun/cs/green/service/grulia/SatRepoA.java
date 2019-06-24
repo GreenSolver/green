@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
+import za.ac.sun.cs.green.util.Pair;
+
 /**
  * Description: Storage unit for the possible reusable models of the satisfied
  * expressions.

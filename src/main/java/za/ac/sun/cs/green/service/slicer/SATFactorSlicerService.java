@@ -81,15 +81,16 @@ public class SATFactorSlicerService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "totalConjuncts = " + totalConjunctCount);
-		reporter.report(getClass().getSimpleName(), "minimalConjuncts = " + minimalConjunctCount);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocations", invocationCount);
+		reporter.report("totalConjuncts", totalConjunctCount);
+		reporter.report("minimalConjuncts", minimalConjunctCount);
 		double conjunctReduction = (totalConjunctCount - minimalConjunctCount) * 100.0D / totalConjunctCount;
-		reporter.report(getClass().getSimpleName(), "conjunctReduction = " + conjunctReduction);
-		reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
-		reporter.report(getClass().getSimpleName(), "minimalVariables = " + minimalVariableCount);
+		reporter.report("conjunctReduction", conjunctReduction);
+		reporter.report("totalVariables", totalVariableCount);
+		reporter.report("minimalVariables", minimalVariableCount);
 		double variableReduction = (totalVariableCount - minimalVariableCount) * 100.0D / totalVariableCount;
-		reporter.report(getClass().getSimpleName(), "variableReduction = " + variableReduction);
+		reporter.report("variableReduction", variableReduction);
 	}
 
 }

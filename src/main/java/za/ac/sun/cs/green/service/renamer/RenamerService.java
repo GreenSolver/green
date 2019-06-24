@@ -57,8 +57,9 @@ public class RenamerService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocations", invocations);
+		reporter.report("timeConsumption", timeConsumption);
 	}
 
 	public Expression rename(Expression expression, Map<Variable, Variable> map) {

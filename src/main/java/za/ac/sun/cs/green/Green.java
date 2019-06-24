@@ -1,8 +1,10 @@
 package za.ac.sun.cs.green;
 
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +15,7 @@ import za.ac.sun.cs.green.store.NullStore;
 import za.ac.sun.cs.green.store.Store;
 import za.ac.sun.cs.green.taskmanager.SerialTaskManager;
 import za.ac.sun.cs.green.taskmanager.TaskManager;
+import za.ac.sun.cs.green.util.Pair;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
@@ -245,12 +248,62 @@ public class Green {
 	 * Generates a report to the log.
 	 */
 	public void report() {
+		final Map<String, List<String>> messages = new HashMap<>();
+		final Map<String, List<Pair<String, String>>> keyValues = new HashMap<>();
 		report(new Reporter() {
 			@Override
-			public void report(String context, String message) {
-				log.info(context + " :: " + message);
+			public void reportMessage(String context, String message) {
+				List<String> messageList = messages.get(context);
+				if (messageList == null) {
+					messageList = new ArrayList<>();
+					messages.put(context, messageList);
+				}
+				messageList.add(message);
+			}
+
+			@Override
+			public void report(String context, String key, String value) {
+				List<Pair<String, String>> keyValueList = keyValues.get(context);
+				if (keyValueList == null) {
+					keyValueList = new ArrayList<>();
+					keyValues.put(context, keyValueList);
+				}
+				keyValueList.add(new Pair<>(key, value));
 			}
 		});
+		
+		// Now write the report
+		StringBuilder sb = new StringBuilder();
+		for (String context : messages.keySet()) {
+			sb.setLength(0);
+			sb.append("=== ").append(context).append(' ');
+			for (int n = 80 - sb.length(); n > 0; n--) {
+				sb.append('=');
+			}
+			log.info("{}", sb.toString());
+			for (String message : messages.get(context)) {
+				log.info("  {}", message);
+			}
+			if (keyValues.containsKey(context)) {
+				for (Pair<String, String> keyValue : keyValues.get(context)) {
+					log.info("  {} == {}", keyValue.getL(), keyValue.getR());
+				}
+			}
+		}
+		for (String context : keyValues.keySet()) {
+			if (messages.containsKey(context)) {
+				continue;
+			}
+			sb.setLength(0);
+			sb.append("=== ").append(context).append(' ');
+			for (int n = 80 - sb.length(); n > 0; n--) {
+				sb.append('=');
+			}
+			log.info("{}", sb.toString());
+			for (Pair<String, String> keyValue : keyValues.get(context)) {
+				log.info("  {} == {}", keyValue.getL(), keyValue.getR());
+			}
+		}
 	}
 
 	/**

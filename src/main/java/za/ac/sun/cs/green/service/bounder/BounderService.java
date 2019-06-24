@@ -74,9 +74,10 @@ public class BounderService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocations", invocationCount);
+		reporter.report("totalVariables", totalVariableCount);
+		reporter.report("timeConsumption", timeConsumption);
 	}
 
 	/**

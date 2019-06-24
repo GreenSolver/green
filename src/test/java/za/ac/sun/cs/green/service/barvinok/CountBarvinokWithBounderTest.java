@@ -3,11 +3,6 @@ package za.ac.sun.cs.green.service.barvinok;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import org.apfloat.Apint;
@@ -26,41 +21,16 @@ import za.ac.sun.cs.green.util.Configuration;
 public class CountBarvinokWithBounderTest {
 
 	public static Green solver = null;
-	private static final String LATTE_PATH = "lattepath";
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "count");
 		props.setProperty("green.service.count", "(bounder (canonize latte))");
 		props.setProperty("green.service.count.latte", "za.ac.sun.cs.green.service.latte.CountLattEService");
 		props.setProperty("green.service.count.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		props.setProperty("green.service.count.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
-
-		String lattePath = new File("").getAbsolutePath()
-				+ "/lib/latte-integrale-1.7.3/latte-int-1.7.3/code/latte/count";
-		InputStream is = null;
-		try {
-			is = new FileInputStream("build.properties");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		if (is != null) {
-			// If properties are correct, override with that specified path.
-			Properties p = new Properties();
-			try {
-				p.load(is);
-				lattePath = p.getProperty(LATTE_PATH);
-				is.close();
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
-
-		props.setProperty("green.latte.path", lattePath);
-
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}

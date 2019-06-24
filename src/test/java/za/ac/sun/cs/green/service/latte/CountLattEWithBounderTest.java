@@ -28,6 +28,7 @@ public class CountLattEWithBounderTest {
 //			Assume.assumeTrue(false);
 //			return;
 //		}
+		// solver = new Green();
 		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "count");

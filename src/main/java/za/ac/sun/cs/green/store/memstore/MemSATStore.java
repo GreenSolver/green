@@ -50,11 +50,12 @@ public class MemSATStore extends BasicStore {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
-		reporter.report(getClass().getSimpleName(), "insertionCount = " + insertionCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-		reporter.report(getClass().getSimpleName(), "getTime = " + timeGet);
-		reporter.report(getClass().getSimpleName(), "putTime = " + timePut);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("retrievalCount", retrievalCount);
+		reporter.report("insertionCount", insertionCount);
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("getTime", timeGet);
+		reporter.report("putTime", timePut);
 	}
 
 	@Override
