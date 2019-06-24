@@ -89,9 +89,10 @@ public class ParallelTaskManager implements TaskManager {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "processedCount = " + processedCount);
-		reporter.report(getClass().getSimpleName(), "threadsCreated = " + threadsCreated);
-		reporter.report(getClass().getSimpleName(), "maxSimultaneousThreads = " + maxSimultaneousThreads);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("processedCount", processedCount);
+		reporter.report("threadsCreated", threadsCreated);
+		reporter.report("maxSimultaneousThreads", maxSimultaneousThreads);
 	}
 
 	@Override

@@ -11,11 +11,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * @date: 2018/06/20
- * @author: JH Taljaard. Student Number: 18509193. Supervisor: Willem Visser
- *          (2018,2019), Jaco Geldenhuys (2017)
+ * Parent for cache implementing RB-Tree.
  *
- *          Description: Parent for cache implementing RB-Tree.
+ * @date: 2018/06/20
+ * @author: JH Taljaard (USnr 18509193)
+ * @contributor: Willem Visser (2018, 2019) (supervisor)
+ * @contributor: Jaco Geldenhuys (2017) (supervisor)
  */
 public abstract class BinaryRepo implements Repo, Comparator<Entry>, Serializable {
 

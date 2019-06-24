@@ -52,10 +52,11 @@ public class SATPropagationService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocations);
-		reporter.report(getClass().getSimpleName(), "simplifications = " + simplifications);
-		reporter.report(getClass().getSimpleName(), "propagations = " + propagations);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocations", invocations);
+		reporter.report("simplifications", simplifications);
+		reporter.report("propagations", propagations);
+		reporter.report("timeConsumption", timeConsumption);
 	}
 
 	public Expression simplify(Expression expression) {

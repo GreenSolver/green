@@ -22,7 +22,6 @@ public class SMTLIB2Parser0Test {
 			log = Logger.getLogger("za.ac.sun.cs.green[JUnit4]");
 			log.setUseParentHandlers(false);
 			log.setLevel(Level.ALL);
-//			log.addHandler(new GreenHandler(Level.ALL));
 		} else {
 			log = new NullLogger();
 		}

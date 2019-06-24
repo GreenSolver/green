@@ -96,10 +96,11 @@ public class RedisLettuceStore extends BasicStore {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "retrievalCount = " + retrievalCount);
-		reporter.report(getClass().getSimpleName(), "insertionCount = " + insertionCount);
-		reporter.report(getClass().getSimpleName(), "time for get = " + timeGet);
-		reporter.report(getClass().getSimpleName(), "iime for put = " + timePut);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("retrievalCount", retrievalCount);
+		reporter.report("insertionCount", insertionCount);
+		reporter.report("time for get", timeGet);
+		reporter.report("iime for put", timePut);
 	}
 
 	@Override

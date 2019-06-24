@@ -36,43 +36,37 @@ import java.util.Set;
 import java.util.Stack;
 
 /**
- * @date: 2017/07/26
- * @author: JH Taljaard. Student Number: 18509193. Supervisor: Willem Visser
- *          (2018, 2019), Jaco Geldenhuys (2017)
+ * <ul>
+ * <li>CNR -- Count and Recur</li>
+ * <li>Get the recurring function from Barvinok.</li>
+ * <li>Use the recurring function to calculate the SAT count value.</li>
+ * <li>Stores the recurring function for reuse.</li>
+ * </ul>
  *
- *          Description:
- *          <ul>
- *          <li>CNR -- Count and Recur</li>
- *          <li>Get the recurring function from Barvinok.</li>
- *          <li>Use the recurring function to calculate the SAT count
- *          value.</li>
- *          <li>Stores the recurring function for reuse.</li>
- *          </ul>
+ * [Dependency]
+ * <ul>
+ * <li>Barvinok library installation: http://barvinok.gforge.inria.fr/ Which
+ * depends on:
+ * <ul>
+ * <li>GMP:
+ * https://gmplib.org/list-archives/gmp-announce/2014-March/000042.html</li>
+ * <li>NTL:</li>
+ * </ul>
+ * </li>
+ * <li>A script file (barviscc) is needed to pass the input from the Sevice to
+ * Barvinok. The iscc tool of Barvinok is called to get the recurring
+ * function.</li>
+ * </ul>
  *
- *          [Dependency]
- *          <ul>
- *          <li>Barvinok library installation: http://barvinok.gforge.inria.fr/
- *          Which depends on:
- *          <ul>
- *          <li>GMP:
- *          https://gmplib.org/list-archives/gmp-announce/2014-March/000042.html</li>
- *          <li>NTL:</li>
- *          </ul>
- *          </li>
- *          <li>A script file (barviscc) is needed to pass the input from the
- *          Sevice to Barvinok. The iscc tool of Barvinok is called to get the
- *          recurring function.</li>
- *          </ul>
- *
- *          Script file (basic):
+ * Script file (basic):
  * 
- *          <pre>
+ * <pre>
  * /path/to/iscc < $1
- *          </pre>
+ * </pre>
  *
- *          Script file (verbose):
+ * Script file (verbose):
  * 
- *          <pre>
+ * <pre>
  * ############################################
  * #!/bin/sh
  *
@@ -84,10 +78,15 @@ import java.util.Stack;
  * ${WORKDIR}/iscc < ${FILE} > ${OUTFILE}.postiscc
  * cat ${OUTFILE}.postiscc
  * ###########################################
- *          </pre>
+ * </pre>
  * 
- *          The DEFAULT_CNR_PATH must be appropriately updated such that it
- *          points to <code>isccpath</code> the script file.
+ * The DEFAULT_CNR_PATH must be appropriately updated such that it points to
+ * <code>isccpath</code> the script file.
+ *
+ * @date: 2017/07/26
+ * @author: JH Taljaard (USnr 18509193)
+ * @contributor: Willem Visser (2018, 2019) (supervisor)
+ * @contributor: Jaco Geldenhuys (2017) (supervisor)
  */
 public class CNRService extends CountService {
 
@@ -389,10 +388,11 @@ public class CNRService extends CountService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
-		reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocations", invocationCount);
+		reporter.report("cacheHitCount", cacheHitCount);
+		reporter.report("cacheMissCount", cacheMissCount);
+		reporter.report("timeConsumption", timeConsumption);
 	}
 }
 

@@ -24,11 +24,12 @@ public class CountBarvinokTest {
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties properties = new Properties();
 		properties.setProperty("green.services", "count");
 		properties.setProperty("green.service.count", "barvinok");
-		properties.setProperty("green.service.count.barvinok", "za.ac.sun.cs.green.service.barvinok.CountBarvinokService");
+		properties.setProperty("green.service.count.barvinok",
+				"za.ac.sun.cs.green.service.barvinok.CountBarvinokService");
 		Configuration config = new Configuration(solver, properties);
 		config.configure();
 	}

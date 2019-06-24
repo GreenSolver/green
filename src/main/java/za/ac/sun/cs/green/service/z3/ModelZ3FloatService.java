@@ -158,9 +158,10 @@ public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-		reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("satTimeConsumption", satTimeConsumption);
+		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
 	}
 
 }

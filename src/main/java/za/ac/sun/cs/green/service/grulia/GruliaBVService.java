@@ -457,7 +457,7 @@ public class GruliaBVService extends SATService1 {
 	 */
 	private Double calculateSATDelta(Expression expr) {
 		Double result = 0.0;
-		GruliaVisitor gVisitor = new GruliaVisitor();
+		GruliaBVVisitor gVisitor = new GruliaBVVisitor();
 		gVisitor.setRefSol(REFERENCE_SOLUTION);
 
 		try {
@@ -512,7 +512,7 @@ public class GruliaBVService extends SATService1 {
 
 				// test model satisfiability
 				start1 = System.currentTimeMillis();
-				GruliaExpressionEvaluator exprSATCheck = new GruliaExpressionEvaluator();
+				GruliaBVExpressionEvaluator exprSATCheck = new GruliaBVExpressionEvaluator();
 				exprSATCheck.setModelMap(((SatEntry) entry).getSolution());
 				try {
 					expr.accept(exprSATCheck);
@@ -653,7 +653,7 @@ public class GruliaBVService extends SATService1 {
 			histogram.merge(x, 1, (a, b) -> a + b);
 		}
 
-		reporter.report(getClass().getSimpleName(), histogram.toString());
+		reporter.reportMessage(histogram.toString());
 	}
 
 	/**
@@ -671,7 +671,7 @@ public class GruliaBVService extends SATService1 {
 			s.append(i + 1).append("=").append(a[i]).append(", ");
 		}
 		s.append(ks + "=").append(a[n]).append("}");
-		reporter.report(getClass().getSimpleName(), s.toString());
+		reporter.reportMessage(s.toString());
 	}
 
 	/**
@@ -685,8 +685,8 @@ public class GruliaBVService extends SATService1 {
 		Double avg = 0.0;
 		Collections.sort(list);
 
-		reporter.report(getClass().getSimpleName(), "minSATDelta = " + list.get(0));
-		reporter.report(getClass().getSimpleName(), "maxSATDelta = " + list.get(list.size() - 1));
+		reporter.report("minSATDelta", list.get(0));
+		reporter.report("maxSATDelta", list.get(list.size() - 1));
 
 		for (Double x : list) {
 			avg += x;
@@ -694,7 +694,7 @@ public class GruliaBVService extends SATService1 {
 
 		avg = avg / list.size();
 
-		reporter.report(getClass().getSimpleName(), "meanSATDelta = " + avg);
+		reporter.report("meanSATDelta", avg);
 
 		Double sum = 0.0;
 
@@ -705,33 +705,34 @@ public class GruliaBVService extends SATService1 {
 		Double sigma = sum / (list.size() - 1);
 		sigma = Math.sqrt(sigma);
 
-		reporter.report(getClass().getSimpleName(), "standard deviation of SATDelta = " + sigma);
+		reporter.report("standard deviation of SATDelta", sigma);
 
 		Double cv = sigma / avg;
 
-		reporter.report(getClass().getSimpleName(), "coefficient of variation of SATDelta = " + cv);
+		reporter.report("coefficient of variation of SATDelta", cv);
 
 	}
 
 	@Override
 	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
 		mcs.report(reporter);
-		reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-//        reporter.report(getClass().getSimpleName(), "totalVariables = " + totalVariableCount);
-//        reporter.report(getClass().getSimpleName(), "totalNewVariables = " + newVariableCount);
-//        reporter.report(getClass().getSimpleName(), "totalOldVariables = " + (totalVariableCount-newVariableCount));
-//		reporter.report(getClass().getSimpleName(), "total SAT queries = " + totSatCount);
-		reporter.report(getClass().getSimpleName(), "satQueries = " + satCount);
-		reporter.report(getClass().getSimpleName(), "unsatQueries = " + unsatCount);
-		reporter.report(getClass().getSimpleName(), "satCacheHitCount = " + satCacheHitCount);
-		reporter.report(getClass().getSimpleName(), "satCacheMissCount = " + satCacheMissCount);
-		reporter.report(getClass().getSimpleName(), "unsatCacheHitCount = " + unsatCacheHitCount);
-		reporter.report(getClass().getSimpleName(), "unsatCacheMissCount = " + unsatCacheMissCount);
-		reporter.report(getClass().getSimpleName(), "solverCalls = " + solverCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
-		reporter.report(getClass().getSimpleName(), "satTimeConsumption = " + satTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "unsatTimeConsumption = " + unsatTimeConsumption);
-//		reporter.report(getClass().getSimpleName(), "total Models reused = " + totSatModelCount);
+		reporter.report("invocations", invocationCount);
+//        reporter.reportZZ("totalVariables", totalVariableCount);
+//        reporter.reportZZ("totalNewVariables", newVariableCount);
+//        reporter.reportZZ("totalOldVariables", (totalVariableCount-newVariableCount));
+//		reporter.reportZZ("total SAT queries", totSatCount);
+		reporter.report("satQueries", satCount);
+		reporter.report("unsatQueries", unsatCount);
+		reporter.report("satCacheHitCount", satCacheHitCount);
+		reporter.report("satCacheMissCount", satCacheMissCount);
+		reporter.report("unsatCacheHitCount", unsatCacheHitCount);
+		reporter.report("unsatCacheMissCount", unsatCacheMissCount);
+		reporter.report("solverCalls", solverCount);
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("satTimeConsumption", satTimeConsumption);
+		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
+//		reporter.reportZZ("total Models reused", totSatModelCount);
 		/*
 		 * if (false) { // Sat delta values reporter.report(getClass().getSimpleName(),
 		 * "totalSatDeltaValues distribution: "); distribution(reporter,
@@ -749,22 +750,22 @@ public class GruliaBVService extends SATService1 {
 		 * "Display ModelNumbers as histogram: "); displayAsHistogram(reporter,
 		 * modelNumbers); }
 		 */
-		reporter.report(getClass().getSimpleName(), "cacheLoadTime = " + cacheLoadTimeConsumption);
-		reporter.report(getClass().getSimpleName(), "models_tested = " + modelsTested);
-		reporter.report(getClass().getSimpleName(), "models_reused = " + satModelCount);
-		reporter.report(getClass().getSimpleName(), "unsatCores_tested = " + unsatCoresTested);
-		reporter.report(getClass().getSimpleName(), "unsatCores_reused = " + sharesUnsatCoresCount);
-		reporter.report(getClass().getSimpleName(), "satEntries added to cache = " + satEntryCount);
-		reporter.report(getClass().getSimpleName(), "unsatEntries added to cache = " + unsatEntryCount);
-		reporter.report(getClass().getSimpleName(), "K_Model_extractTime = " + timeOfModelsExtraction);
-//		reporter.report(getClass().getSimpleName(), "K Model Extract count = " + count_of_models_extraction);
-		reporter.report(getClass().getSimpleName(), "K_Model_testingTime = " + timeOfModelsTesting);
-		reporter.report(getClass().getSimpleName(), "model_evaluationTime = " + timeOfModelEval);
-		reporter.report(getClass().getSimpleName(), "count_of_0_satdelta  = " + countOf0Sd);
-		reporter.report(getClass().getSimpleName(), "satDelta_computationTime = " + timeOfSatDeltaCalculation);
-		reporter.report(getClass().getSimpleName(), "satCache_checkTime = " + timeOfSatCache);
-		reporter.report(getClass().getSimpleName(), "unsatCache_checkTime = " + timeOfUnsatCache);
-		reporter.report(getClass().getSimpleName(), "solverCallTime = " + timeOfSolver);
+		reporter.report("cacheLoadTime", cacheLoadTimeConsumption);
+		reporter.report("models_tested", modelsTested);
+		reporter.report("models_reused", satModelCount);
+		reporter.report("unsatCores_tested", unsatCoresTested);
+		reporter.report("unsatCores_reused", sharesUnsatCoresCount);
+		reporter.report("satEntries added to cache", satEntryCount);
+		reporter.report("unsatEntries added to cache", unsatEntryCount);
+		reporter.report("K_Model_extractTime", timeOfModelsExtraction);
+//		reporter.reportZZ("K Model Extract count", count_of_models_extraction);
+		reporter.report("K_Model_testingTime", timeOfModelsTesting);
+		reporter.report("model_evaluationTime", timeOfModelEval);
+		reporter.report("count_of_0_satdelta ", countOf0Sd);
+		reporter.report("satDelta_computationTime", timeOfSatDeltaCalculation);
+		reporter.report("satCache_checkTime", timeOfSatCache);
+		reporter.report("unsatCache_checkTime", timeOfUnsatCache);
+		reporter.report("solverCallTime", timeOfSolver);
 
 	}
 
@@ -797,332 +798,333 @@ public class GruliaBVService extends SATService1 {
 			}
 		}
 	}
-}
 
-class GruliaBVVisitor extends Visitor {
+	private static class GruliaBVVisitor extends Visitor {
 
-	/*
-	 * Local stack to calculate the SAT-Delta value
-	 */
-	private Stack<Integer> stack = new Stack<Integer>();
+		/*
+		 * Local stack to calculate the SAT-Delta value
+		 */
+		private Stack<Integer> stack = new Stack<Integer>();
 
-	private Integer[] referenceSolution;
-	private int index;
+		private Integer[] referenceSolution;
+		private int index;
 
-	public void setRefSol(Integer[] models) {
-		referenceSolution = models;
-	}
-
-	public void setRefIndex(int index) {
-		this.index = index;
-	}
-
-	/**
-	 * @return x - SAT-Delta value
-	 */
-	public Double getResult() {
-		Double x = 0.0;
-		x += stack.pop();
-		return x;
-	}
-
-	@Override
-	public void postVisit(Expression expression) throws VisitorException {
-		super.postVisit(expression);
-	}
-
-	@Override
-	public void postVisit(Variable variable) throws VisitorException {
-		super.postVisit(variable);
-
-//		if (!GruliaService.newVariables.contains((IntVariable) variable)) {
-//			GruliaService.newVariables.add((IntVariable) variable);
-//			GruliaService.newVariableCount++;
-//		}
-
-		Integer value = referenceSolution[index];
-		stack.push(value);
-	}
-
-	@Override
-	public void postVisit(IntConstant constant) throws VisitorException {
-		super.postVisit(constant);
-		stack.push(constant.getValue());
-	}
-
-	@Override
-	public void postVisit(Operation operation) throws VisitorException {
-		super.postVisit(operation);
-		SATDelta(operation, stack);
-	}
-
-	/**
-	 * Calculates the SAT-Delta value for a given operation and pushes the result to
-	 * a given stack.
-	 *
-	 * The distance of an expression from a set of reference models is called
-	 * "SatDelta" and is defined in the paper: "Heuristically Matching Formula
-	 * Solution Spaces To Efficiently Reuse Solutions" published at the
-	 * International Conference on Software Engineering (ICSE'17) by Andrea Aquino,
-	 * Giovanni Denaro and Mauro Pezze'.
-	 *
-	 * @param operation the current operation working with
-	 * @param stack     the stack to push the result to
-	 */
-	private void SATDelta(Operation operation, Stack<Integer> stack) {
-		Integer l = null;
-		Integer r = null;
-
-		int arity = operation.getOperator().getArity();
-		if (arity == 2) {
-			if (!stack.isEmpty()) {
-				r = stack.pop();
-			}
-			if (!stack.isEmpty()) {
-				l = stack.pop();
-			}
+		public void setRefSol(Integer[] models) {
+			referenceSolution = models;
 		}
 
-		Operation.Operator op = operation.getOperator();
-		assert (l != null);
-		assert (r != null);
-
-		switch (op) {
-		case LT:
-			if (l >= r) {
-				stack.push((l - r) + 1);
-			} else {
-				stack.push(0);
-			}
-			break;
-		case LE:
-			if (l > r) {
-				stack.push(l - r);
-			} else {
-				stack.push(0);
-			}
-			break;
-		case ADD:
-		case OR:
-		case AND:
-			stack.push(l + r);
-			break;
-		case GT:
-			if (l <= r) {
-				stack.push((r - l) + 1);
-			} else {
-				stack.push(0);
-			}
-			break;
-		case GE:
-			if (l < r) {
-				stack.push(r - l);
-			} else {
-				stack.push(0);
-			}
-			break;
-		case EQ:
-			if (!l.equals(r)) {
-				stack.push(Math.abs(l - r));
-			} else {
-				stack.push(0);
-			}
-			break;
-		case NE:
-			if (l.equals(r)) {
-				stack.push(1);
-			} else {
-				stack.push(0);
-			}
-			break;
-		case MUL:
-			stack.push(l * r);
-			break;
-		case SUB:
-			stack.push(Math.abs(Math.abs(r) - Math.abs(l)));
-			break;
-		case MOD:
-			stack.push(Math.floorMod(l, r));
-			break;
-		default:
-			stack.push(0);
-			break;
-		}
-	}
-}
-
-class GruliaBVExpressionEvaluator extends Visitor {
-
-	/*
-	 * Local stack for the evaluation of the expression.
-	 */
-	private Stack<Object> evalStack = new Stack<Object>();
-
-	private Map<Variable, Constant> modelMap;
-
-	/**
-	 * Public method to get the satisfiability status of the expression.
-	 *
-	 * @return SAT - true if the expression is satisfied, - false otherwise
-	 */
-	public Boolean isSat() {
-		return (Boolean) evalStack.pop();
-	}
-
-	public void setModelMap(Map<Variable, Constant> modelMap) {
-		this.modelMap = modelMap;
-	}
-
-	@Override
-	public void postVisit(Expression expression) throws VisitorException {
-		super.postVisit(expression);
-	}
-
-	@Override
-	public void postVisit(Variable variable) throws VisitorException {
-		super.postVisit(variable);
-		Constant val = modelMap.get(variable);
-		Integer value = -1;
-		if (val == null) {
-			value = 0;
-		} else if (val instanceof IntConstant) {
-			value = ((IntConstant) val).getValue();
-		} else {
-			value = 0;
-		}
-		evalStack.push(value);
-	}
-
-	@Override
-	public void postVisit(IntConstant constant) throws VisitorException {
-		super.postVisit(constant);
-		evalStack.push(constant.getValue());
-	}
-
-	@Override
-	public void postVisit(Operation operation) throws VisitorException {
-		super.postVisit(operation);
-
-		Boolean isSat = false;
-		Object l = null;
-		Object r = null;
-
-		int arity = operation.getOperator().getArity();
-		if (arity == 2) {
-			if (!evalStack.isEmpty()) {
-				r = evalStack.pop();
-			}
-			if (!evalStack.isEmpty()) {
-				l = evalStack.pop();
-			}
-		} else if (arity == 1) {
-			if (!evalStack.isEmpty()) {
-				l = evalStack.pop();
-			}
+		public void setRefIndex(int index) {
+			this.index = index;
 		}
 
-		Operation.Operator op = operation.getOperator();
+		/**
+		 * @return x - SAT-Delta value
+		 */
+		public Double getResult() {
+			Double x = 0.0;
+			x += stack.pop();
+			return x;
+		}
 
-		// Vars for casting
-		Integer leftI, rightI;
-		Boolean leftB, rightB;
+		@Override
+		public void postVisit(Expression expression) throws VisitorException {
+			super.postVisit(expression);
+		}
 
-		// test sat
-		switch (op) {
-		case LE:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+		@Override
+		public void postVisit(Variable variable) throws VisitorException {
+			super.postVisit(variable);
 
-			isSat = (leftI <= rightI);
-			evalStack.push(isSat);
-			break;
-		case LT:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+//			if (!GruliaService.newVariables.contains((IntVariable) variable)) {
+//				GruliaService.newVariables.add((IntVariable) variable);
+//				GruliaService.newVariableCount++;
+//			}
 
-			isSat = (leftI < rightI);
-			evalStack.push(isSat);
-			break;
-		case AND:
-			leftB = (Boolean) l;
-			rightB = (Boolean) r;
-			assert (leftB != null && rightB != null);
+			Integer value = referenceSolution[index];
+			stack.push(value);
+		}
 
-			isSat = (leftB && rightB);
-			evalStack.push(isSat);
-			break;
-		case ADD:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+		@Override
+		public void postVisit(IntConstant constant) throws VisitorException {
+			super.postVisit(constant);
+			stack.push(constant.getValue());
+		}
 
-			evalStack.push(leftI + rightI);
-			break;
-		case SUB:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+		@Override
+		public void postVisit(Operation operation) throws VisitorException {
+			super.postVisit(operation);
+			SATDelta(operation, stack);
+		}
 
-			evalStack.push(leftI - rightI);
-			break;
-		case EQ:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+		/**
+		 * Calculates the SAT-Delta value for a given operation and pushes the result to
+		 * a given stack.
+		 *
+		 * The distance of an expression from a set of reference models is called
+		 * "SatDelta" and is defined in the paper: "Heuristically Matching Formula
+		 * Solution Spaces To Efficiently Reuse Solutions" published at the
+		 * International Conference on Software Engineering (ICSE'17) by Andrea Aquino,
+		 * Giovanni Denaro and Mauro Pezze'.
+		 *
+		 * @param operation the current operation working with
+		 * @param stack     the stack to push the result to
+		 */
+		private void SATDelta(Operation operation, Stack<Integer> stack) {
+			Integer l = null;
+			Integer r = null;
 
-			isSat = (leftI.equals(rightI));
-			evalStack.push(isSat);
-			break;
-		case GE:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+			int arity = operation.getOperator().getArity();
+			if (arity == 2) {
+				if (!stack.isEmpty()) {
+					r = stack.pop();
+				}
+				if (!stack.isEmpty()) {
+					l = stack.pop();
+				}
+			}
 
-			isSat = (leftI >= rightI);
-			evalStack.push(isSat);
-			break;
-		case GT:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
+			Operation.Operator op = operation.getOperator();
+			assert (l != null);
+			assert (r != null);
 
-			isSat = (leftI > rightI);
-			evalStack.push(isSat);
-			break;
-		case MUL:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
-
-			evalStack.push(leftI * rightI);
-			break;
-		case OR:
-			leftB = (Boolean) l;
-			rightB = (Boolean) r;
-			assert (leftB != null && rightB != null);
-
-			isSat = (leftB || rightB);
-			evalStack.push(isSat);
-			break;
-		case NE:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
-
-			isSat = (!leftI.equals(rightI));
-			evalStack.push(isSat);
-			break;
-		case MOD:
-			leftI = (Integer) l;
-			rightI = (Integer) r;
-			assert (leftI != null && rightI != null);
-
-			evalStack.push(Math.floorMod(leftI, rightI));
-			break;
-		default:
-			break;
+			switch (op) {
+			case LT:
+				if (l >= r) {
+					stack.push((l - r) + 1);
+				} else {
+					stack.push(0);
+				}
+				break;
+			case LE:
+				if (l > r) {
+					stack.push(l - r);
+				} else {
+					stack.push(0);
+				}
+				break;
+			case ADD:
+			case OR:
+			case AND:
+				stack.push(l + r);
+				break;
+			case GT:
+				if (l <= r) {
+					stack.push((r - l) + 1);
+				} else {
+					stack.push(0);
+				}
+				break;
+			case GE:
+				if (l < r) {
+					stack.push(r - l);
+				} else {
+					stack.push(0);
+				}
+				break;
+			case EQ:
+				if (!l.equals(r)) {
+					stack.push(Math.abs(l - r));
+				} else {
+					stack.push(0);
+				}
+				break;
+			case NE:
+				if (l.equals(r)) {
+					stack.push(1);
+				} else {
+					stack.push(0);
+				}
+				break;
+			case MUL:
+				stack.push(l * r);
+				break;
+			case SUB:
+				stack.push(Math.abs(Math.abs(r) - Math.abs(l)));
+				break;
+			case MOD:
+				stack.push(Math.floorMod(l, r));
+				break;
+			default:
+				stack.push(0);
+				break;
+			}
 		}
 	}
+
+	private static class GruliaBVExpressionEvaluator extends Visitor {
+
+		/*
+		 * Local stack for the evaluation of the expression.
+		 */
+		private Stack<Object> evalStack = new Stack<Object>();
+
+		private Map<Variable, Constant> modelMap;
+
+		/**
+		 * Public method to get the satisfiability status of the expression.
+		 *
+		 * @return SAT - true if the expression is satisfied, - false otherwise
+		 */
+		public Boolean isSat() {
+			return (Boolean) evalStack.pop();
+		}
+
+		public void setModelMap(Map<Variable, Constant> modelMap) {
+			this.modelMap = modelMap;
+		}
+
+		@Override
+		public void postVisit(Expression expression) throws VisitorException {
+			super.postVisit(expression);
+		}
+
+		@Override
+		public void postVisit(Variable variable) throws VisitorException {
+			super.postVisit(variable);
+			Constant val = modelMap.get(variable);
+			Integer value = -1;
+			if (val == null) {
+				value = 0;
+			} else if (val instanceof IntConstant) {
+				value = ((IntConstant) val).getValue();
+			} else {
+				value = 0;
+			}
+			evalStack.push(value);
+		}
+
+		@Override
+		public void postVisit(IntConstant constant) throws VisitorException {
+			super.postVisit(constant);
+			evalStack.push(constant.getValue());
+		}
+
+		@Override
+		public void postVisit(Operation operation) throws VisitorException {
+			super.postVisit(operation);
+
+			Boolean isSat = false;
+			Object l = null;
+			Object r = null;
+
+			int arity = operation.getOperator().getArity();
+			if (arity == 2) {
+				if (!evalStack.isEmpty()) {
+					r = evalStack.pop();
+				}
+				if (!evalStack.isEmpty()) {
+					l = evalStack.pop();
+				}
+			} else if (arity == 1) {
+				if (!evalStack.isEmpty()) {
+					l = evalStack.pop();
+				}
+			}
+
+			Operation.Operator op = operation.getOperator();
+
+			// Vars for casting
+			Integer leftI, rightI;
+			Boolean leftB, rightB;
+
+			// test sat
+			switch (op) {
+			case LE:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				isSat = (leftI <= rightI);
+				evalStack.push(isSat);
+				break;
+			case LT:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				isSat = (leftI < rightI);
+				evalStack.push(isSat);
+				break;
+			case AND:
+				leftB = (Boolean) l;
+				rightB = (Boolean) r;
+				assert (leftB != null && rightB != null);
+
+				isSat = (leftB && rightB);
+				evalStack.push(isSat);
+				break;
+			case ADD:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				evalStack.push(leftI + rightI);
+				break;
+			case SUB:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				evalStack.push(leftI - rightI);
+				break;
+			case EQ:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				isSat = (leftI.equals(rightI));
+				evalStack.push(isSat);
+				break;
+			case GE:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				isSat = (leftI >= rightI);
+				evalStack.push(isSat);
+				break;
+			case GT:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				isSat = (leftI > rightI);
+				evalStack.push(isSat);
+				break;
+			case MUL:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				evalStack.push(leftI * rightI);
+				break;
+			case OR:
+				leftB = (Boolean) l;
+				rightB = (Boolean) r;
+				assert (leftB != null && rightB != null);
+
+				isSat = (leftB || rightB);
+				evalStack.push(isSat);
+				break;
+			case NE:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				isSat = (!leftI.equals(rightI));
+				evalStack.push(isSat);
+				break;
+			case MOD:
+				leftI = (Integer) l;
+				rightI = (Integer) r;
+				assert (leftI != null && rightI != null);
+
+				evalStack.push(Math.floorMod(leftI, rightI));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 }

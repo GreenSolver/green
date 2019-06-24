@@ -26,10 +26,11 @@ public abstract class CountService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "invocationCount = " + invocationCount);
-		reporter.report(getClass().getSimpleName(), "cacheHitCount = " + cacheHitCount);
-		reporter.report(getClass().getSimpleName(), "cacheMissCount = " + cacheMissCount);
-		reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocationCount", invocationCount);
+		reporter.report("cacheHitCount", cacheHitCount);
+		reporter.report("cacheMissCount", cacheMissCount);
+		reporter.report("timeConsumption", timeConsumption);
 	}
 
 	@Override

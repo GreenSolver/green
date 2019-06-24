@@ -68,7 +68,8 @@ public class SerialTaskManager implements TaskManager {
 
 	@Override
 	public void report(Reporter reporter) {
-		reporter.report(getClass().getSimpleName(), "processedCount = " + processedCount);
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("processedCount", processedCount);
 	}
 
 	@Override

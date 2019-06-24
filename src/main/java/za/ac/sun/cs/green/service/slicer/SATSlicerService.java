@@ -35,18 +35,19 @@ public class SATSlicerService extends BasicService {
 
 	@Override
 	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
 		int ic = slicer.getInvocationCount();
 		int tc = slicer.getTotalConjunctCount();
 		int mc = slicer.getMinimalConjunctCount();
 		int tv = slicer.getTotalVariableCount();
 		int mv = slicer.getMinimalVariableCount();
-		reporter.report(getClass().getSimpleName(), "invocations = " + ic);
-		reporter.report(getClass().getSimpleName(), "totalConjuncts = " + tc);
-		reporter.report(getClass().getSimpleName(), "minimalConjuncts = " + mc);
-		reporter.report(getClass().getSimpleName(), "conjunctReduction = " + ((tc - mc) * 100.0D / tc));
-		reporter.report(getClass().getSimpleName(), "totalVariables = " + tv);
-		reporter.report(getClass().getSimpleName(), "minimalVariables = " + mv);
-		reporter.report(getClass().getSimpleName(), "variableReduction = " + ((tv - mv) * 100.0D / tv));
+		reporter.report("invocations", ic);
+		reporter.report("totalConjuncts", tc);
+		reporter.report("minimalConjuncts", mc);
+		reporter.report("conjunctReduction", ((tc - mc) * 100.0D / tc));
+		reporter.report("totalVariables", tv);
+		reporter.report("minimalVariables", mv);
+		reporter.report("variableReduction", ((tv - mv) * 100.0D / tv));
 	}
 
 }

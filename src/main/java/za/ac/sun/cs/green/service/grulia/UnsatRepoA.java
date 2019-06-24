@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import za.ac.sun.cs.green.util.Pair;
+
 /**
  * Description: Storage unit for the possible reusable unsat-cores of the
  * unsatisfied expressions.

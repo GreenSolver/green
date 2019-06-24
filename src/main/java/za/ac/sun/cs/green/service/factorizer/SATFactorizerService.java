@@ -98,15 +98,16 @@ public class SATFactorizerService extends BasicService {
 
     @Override
     public void report(Reporter reporter) {
-        reporter.report(getClass().getSimpleName(), "invocations = " + invocationCount);
-        reporter.report(getClass().getSimpleName(), "totalConstraints = " + constraintCount);
-        reporter.report(getClass().getSimpleName(), "factoredConstraints = " + factorCount);
-        reporter.report(getClass().getSimpleName(), "conjunctCount = " + factorizer.getConjunctCount());
-        reporter.report(getClass().getSimpleName(), "timeConsumption = " + timeConsumption);
+		reporter.setContext(getClass().getSimpleName());
+        reporter.report("invocations", invocationCount);
+        reporter.report("totalConstraints", constraintCount);
+        reporter.report("factoredConstraints", factorCount);
+        reporter.report("conjunctCount", factorizer.getConjunctCount());
+        reporter.report("timeConsumption", timeConsumption);
 
-//        reporter.report(getClass().getSimpleName(), "collectorTime = " + factorizer.collectorTime);
-//        reporter.report(getClass().getSimpleName(), "connectedTime = " + factorizer.connectedTime);
-//        reporter.report(getClass().getSimpleName(), "conjunctsTime = " + factorizer.conjunctsTime);
+//        reporter.reportZZ("collectorTime = " + factorizer.collectorTime);
+//        reporter.reportZZ("connectedTime = " + factorizer.connectedTime);
+//        reporter.reportZZ("conjunctsTime = " + factorizer.conjunctsTime);
     }
 }
 
