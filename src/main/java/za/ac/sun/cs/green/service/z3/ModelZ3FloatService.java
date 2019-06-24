@@ -87,6 +87,10 @@ public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 		return null;
 	}
 
+	// (define-fun a () Int 5)
+	// (define-fun a () Int (- 5))
+	// (define-fun a () Real (/ 10.0 3.0))
+	// (define-fun a () Real (- (/ 5.0 2.0)))
 	private Map<Variable, Object> retrieveModel(String output, Map<Variable, String> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
@@ -95,6 +99,19 @@ public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 		for (String asgn : output.split(";;")) {
 			if (asgn.contains("==")) {
 				String[] pair = asgn.split("==");
+				String[] nums = pair[1].replaceAll("[\\(\\)]", "").trim().split("  *");
+				if (nums[0].equals("-")) {
+					if (nums[1].equals("/")) {
+						pair[1] = "-" + (Double.parseDouble(nums[2]) / Double.parseDouble(nums[3])); 
+					} else {
+						pair[1] = "-" + nums[1].trim();
+					}
+				} else if (nums[0].equals("/")) {
+					pair[1] = "" + (Double.parseDouble(nums[1]) / Double.parseDouble(nums[2])); 
+				} else {
+					pair[1] = nums[0];
+				}
+				/*
 				pair[1] = pair[1].trim();
 				if (pair[1].charAt(0) == ('(')) {
 					pair[1] = pair[1].substring(1, pair[1].length() - 1).trim();
@@ -113,6 +130,7 @@ public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 					fin = negate ? -fin : fin;
 					pair[1] = fin + "";
 				}
+				*/
 				assignment.put(pair[0].trim(), pair[1].trim());
 			}
 		}
@@ -124,9 +142,9 @@ public class ModelZ3FloatService extends ModelSMTLIBFloatService {
 			if (assignment.containsKey(name)) {
 				Constant value = null;
 				if (var instanceof IntVariable) {
-					String val = assignment.get(name);
-					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
-					value = new IntConstant(Integer.parseInt(val));
+//					String val = assignment.get(name);
+//					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
+					value = new IntConstant(Integer.parseInt(assignment.get(name)));
 				} else if (var instanceof RealVariable) {
 					value = new RealConstant(Double.parseDouble(assignment.get(name)));
 				}

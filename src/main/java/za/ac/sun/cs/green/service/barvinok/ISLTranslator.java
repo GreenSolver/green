@@ -100,9 +100,10 @@ public class ISLTranslator {
 
 	private void constructBounds(ArrayList<IntVariable> vars, ArrayList<IntVariable> bounds) {
 		for (IntVariable x : vars) {
-			IntVariable upper = new IntVariable(x.getString() + "min", 0, 0);
-			IntVariable lower = new IntVariable(x.getString() + "max", 0, 0);
-
+//			IntVariable upper = new IntVariable(x.getString() + "min", 0, 0);
+//			IntVariable lower = new IntVariable(x.getString() + "max", 0, 0);
+			IntVariable upper = new IntVariable(x.toString() + "min", 0, 0);
+			IntVariable lower = new IntVariable(x.toString() + "max", 0, 0);
 			bounds.add(upper);
 			bounds.add(lower);
 		}
@@ -126,8 +127,10 @@ public class ISLTranslator {
 		StringBuilder bound = new StringBuilder();
 		int j = 0;
 		for (IntVariable var : vars) {
-			bound.append(" and (").append(bounds.get(j).getString()).append(" <= ").append(var.getString())
-					.append(" <= ").append(bounds.get(j + 1)).append(")");
+//			bound.append(" and (").append(bounds.get(j).getString()).append(" <= ").append(var.getString())
+//					.append(" <= ").append(bounds.get(j + 1)).append(")");
+			bound.append(" and (").append(bounds.get(j).toString()).append(" <= ").append(var.toString())
+			.append(" <= ").append(bounds.get(j + 1)).append(")");
 			j = j + 2;
 		}
 		return bound.toString();

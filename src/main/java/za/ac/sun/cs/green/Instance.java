@@ -181,7 +181,8 @@ public class Instance {
 		if (expression == null) {
 			return 0;
 		} else {
-			return expression.getString().hashCode();
+//			return expression.getString().hashCode();
+			return expression.hashCode();
 		}
 	}
 

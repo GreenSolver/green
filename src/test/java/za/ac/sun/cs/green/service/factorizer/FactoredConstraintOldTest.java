@@ -11,9 +11,10 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 
 public class FactoredConstraintOldTest {
+
 	private void checkForSubstrings(String wholeString, String... partialStrings) {
 		for (String s : partialStrings) {
-			// System.out.println("Looking for "+s+" in "+factorString);
+			// System.out.println("Looking for " + s + " in " + factorString);
 			int p = wholeString.indexOf(s);
 			assertTrue(p >= 0);
 			if (p == 0) {

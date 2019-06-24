@@ -261,7 +261,8 @@ public class CNRService extends CountService {
 
 		if (store != null) {
 			// check in store
-			cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().getString());
+//			cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().getString());
+			cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().toString());
 
 			if (cases == null) {
 				// not in store
@@ -284,7 +285,8 @@ public class CNRService extends CountService {
 
 						// add to store
 						// key: query; value: case -> expression tree
-						store.put(instance.getFullExpression().getString(), cases);
+//						store.put(instance.getFullExpression().getString(), cases);
+						store.put(instance.getFullExpression().toString(), cases);
 					}
 				} catch (TranslatorUnsupportedOperation x) {
 					log.warn(x.getMessage(), x);

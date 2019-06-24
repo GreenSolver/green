@@ -99,7 +99,8 @@ public class SATZ3JavaService extends SATService {
 		} catch (Z3Exception e1) {
 			log.warn("Error in Z3 ({})", e1.getMessage());
 		}
-		conjunctCount += instance.getExpression().getString().split("&&").length;
+//		conjunctCount += instance.getExpression().getString().split("&&").length;
+		conjunctCount += instance.getExpression().toString().split("&&").length;
 		variableCount += translator.getVariableCount();
 		translationTimeConsumption += (System.currentTimeMillis() - t0Translation);
 		// solve

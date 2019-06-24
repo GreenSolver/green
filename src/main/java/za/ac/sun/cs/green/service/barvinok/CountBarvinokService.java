@@ -1,11 +1,11 @@
 package za.ac.sun.cs.green.service.barvinok;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Collections;
@@ -21,11 +21,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.logging.log4j.Logger;
 import org.apfloat.Apint;
 
@@ -42,32 +39,41 @@ import za.ac.sun.cs.green.service.CountService;
  * http://barvinok.gforge.inria.fr/ Which depends on: || GMP:
  * https://gmplib.org/list-archives/gmp-announce/2014-March/000042.html || NTL:
  * http://www.shoup.net/ntl/download.html - A script file (barvlatte) is needed
- * to pass the input from the Sevice to Barvinok.
+ * to pass the input from the Service to Barvinok.
  *
- * Script contents: ################################# #!/bin/sh
- * WORKDIR=/full/path/to/lib/barvinok-0.39 FILE=${1} ${WORKDIR}/latte2polylib.pl
- * ${FILE} > $1a ${WORKDIR}/barvinok_count < $1a
+ * Script contents:
+ * 
+ * <pre>
  * #################################
+ * #!/bin/sh
+ * WORKDIR=/full/path/to/lib/barvinok-0.39
+ * FILE=${1}
+ * ${WORKDIR}/latte2polylib.pl ${FILE} > $1a
+ * ${WORKDIR}/barvinok_count < $1a
+ * #################################
+ * </pre>
  */
 
 public class CountBarvinokService extends CountService {
 
-	private static final String DRIVE = new File("").getAbsolutePath();
-
-	// private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
-	private static final String DIRECTORY = DRIVE + "/out";
+	/**
+	 * Directory where the Barvinok output file is stored.
+	 */
+	private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
 
 	/**
-	 * The location of the LattE executable file.
+	 * Date used for naming Barvinok output directory
 	 */
-	private final String defaultBarvinokPath;
-	private static final String BARVINOK_PATH = "barvinoklattepath";
-	private static final String RESOURCE_NAME = "build.properties";
-
 	private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
 
+	/**
+	 * Random number used for naming Barvinok output directory
+	 */
 	private static final int RANDOM = new Random().nextInt(9);
 
+	/**
+	 * Directory where we attempt to place the Barvinok output files
+	 */
 	private static final String DIRNAME = String.format("%s/%s%s", DIRECTORY, DATE, RANDOM);
 
 	private static String directory = null;
@@ -84,19 +90,9 @@ public class CountBarvinokService extends CountService {
 	}
 
 	/**
-	 * File where the LattE input is stored.
+	 * File where the Barvinok input is stored.
 	 */
-	private static final String FILENAME = directory + "/probsymbc-barvinok.in";
-
-	/**
-	 * Pattern that identifies the answer from Barvinok.
-	 */
-	// private static final String ANSWER_PATTERN = "";
-
-	/**
-	 * Options passed to the Barvinok executable.
-	 */
-	private static final String DEFAULT_BARVINOK_ARGS = " ";
+	// private static final String FILENAME = directory + "/probsymbc-barvinok.in";
 
 	/**
 	 * Combination of the Barvinok executable, options, and the filename, all
@@ -104,11 +100,11 @@ public class CountBarvinokService extends CountService {
 	 */
 	private final String barvinokCommand;
 
-	/**
-	 * Pearl script to transform latte to barvinok This will be removed later just a
-	 * hack to get barvinok to work quickly
-	 */
-	private final String barvinokTransformScript;
+//	/**
+//	 * Perl script to transform latte to barvinok This will be removed later just a
+//	 * hack to get barvinok to work quickly
+//	 */
+//	private final String barvinokTransformScript;
 
 	/**
 	 * Logger.
@@ -118,36 +114,17 @@ public class CountBarvinokService extends CountService {
 	public CountBarvinokService(Green solver, Properties properties) {
 		super(solver);
 		log = solver.getLogger();
+		String p = properties.getProperty("green.barvinok.path");
+		String a = properties.getProperty("green.barvinok.args");
+		barvinokCommand = p + ' ' + a;
 
-		String barvPath = new File("").getAbsolutePath() + "/lib/barvinok-0.39/barvlatte";
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream resourceStream;
-		try {
-			resourceStream = loader.getResourceAsStream(RESOURCE_NAME);
-			if (resourceStream == null) {
-				// If properties are correct, override with that specified path.
-				resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + RESOURCE_NAME);
-
-			}
-			if (resourceStream != null) {
-				properties.load(resourceStream);
-				barvPath = properties.getProperty(BARVINOK_PATH);
-				resourceStream.close();
-			}
-		} catch (IOException x) {
-			// ignore
-		}
-
-		defaultBarvinokPath = barvPath;
-
-		String p = properties.getProperty("green.barvinok.path", defaultBarvinokPath);
-		String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
-		barvinokCommand = p + ' ' + a + FILENAME;
-		String script = p.substring(0, p.lastIndexOf('/'));
-		barvinokTransformScript = script + "/latte2polylib.pl " + FILENAME + " > " + FILENAME + "2";
-		log.debug("barvinokCommand=" + barvinokCommand);
-		log.debug("barvinokScript=" + barvinokTransformScript);
-		log.debug("directory=" + directory);
+//		String script = p.substring(0, p.lastIndexOf('/'));
+//		barvinokTransformScript = script + "/latte2polylib.pl " + FILENAME + " > " + FILENAME + "2";
+		log.trace("barvinokCommand={}", barvinokCommand);
+		log.trace("directory={}", directory);
+//		log.debug("barvinokCommand=" + barvinokCommand);
+//		log.debug("barvinokScript=" + barvinokTransformScript);
+//		log.debug("directory=" + directory);
 	}
 
 	@Override
@@ -654,51 +631,85 @@ public class CountBarvinokService extends CountService {
 		 * @return the number of satisfying solutions as a string
 		 */
 		private String invokeBarvinok(String input) {
-			// System.out.println(">>> INVOKING Barvinok Latte:");
-			// System.out.println(input);
-			String result = "";
 			try {
-				// First store the input in a file
-				File file = new File(FILENAME);
-				if (file.exists()) {
-					file.delete();
+				log.trace("input: {}", input);
+				Process process = Runtime.getRuntime().exec(barvinokCommand);
+				OutputStream stdin = process.getOutputStream();
+				InputStream stdout = process.getInputStream();
+				BufferedReader outReader = new BufferedReader(new InputStreamReader(stdout));
+				stdin.write((input + "\n").getBytes());
+				stdin.flush();
+				String output = outReader.readLine();
+
+				if (!output.startsWith("POLYHEDRON")) {
+					stdin.close();
+					stdout.close();
+					process.destroy();
+					throw new RuntimeException();
 				}
-				file.createNewFile();
-				FileWriter writer = new FileWriter(file);
-				writer.write(input);
-				writer.close();
-				// Now invoke Barvinok
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				DefaultExecutor executor = new DefaultExecutor();
-				executor.setStreamHandler(new PumpStreamHandler(outputStream));
-				executor.setWorkingDirectory(new File(directory));
-				executor.setExitValues(null);
-				executor.execute(CommandLine.parse(barvinokCommand));
-				result = outputStream.toString();
-			} catch (ExecuteException e) {
-				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
-				e.printStackTrace();
-				throw new RuntimeException();
-			} catch (IOException e) {
-				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
-				e.printStackTrace();
-				throw new RuntimeException();
+				stdin.close();
+				output = outReader.lines().collect(Collectors.joining());
+				stdout.close();
+				process.destroy();
+				log.trace("output: {}", output);
+				int lastSpace = output.lastIndexOf(' ');
+				int secondLastSpace = output.substring(0, lastSpace).lastIndexOf(' ');
+				output = output.substring(secondLastSpace + 1, lastSpace);
+				int newlineIndex = output.indexOf("\n");
+				if (newlineIndex != -1) {
+					output = output.substring(newlineIndex + 1);
+				}
+				return output;
+			} catch (IOException x) {
+				log.trace("IO EXCEPTION", x);
 			}
-			// Process Barvinok's output
-			// System.out.println(result);
-			if (!result.startsWith("POLYHEDRON", 0)) {
-				System.out.println("Barvinok Failed! ");
-				throw new RuntimeException();
-			}
-			int lastSpace = result.lastIndexOf(' ');
-			int secondLastSpace = result.substring(0, lastSpace).lastIndexOf(' ');
-			result = result.substring(secondLastSpace + 1, lastSpace);
-			int newlineIndex = result.indexOf("\n");
-			if (newlineIndex != -1) {
-				result = result.substring(newlineIndex + 1);
-				// System.out.println(result);
-			}
-			return result;
+			return null;
+
+//			// System.out.println(">>> INVOKING Barvinok Latte:");
+//			// System.out.println(input);
+//			String result = "";
+//			try {
+//				// First store the input in a file
+//				File file = new File(FILENAME);
+//				if (file.exists()) {
+//					file.delete();
+//				}
+//				file.createNewFile();
+//				FileWriter writer = new FileWriter(file);
+//				writer.write(input);
+//				writer.close();
+//				// Now invoke Barvinok
+//				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//				DefaultExecutor executor = new DefaultExecutor();
+//				executor.setStreamHandler(new PumpStreamHandler(outputStream));
+//				executor.setWorkingDirectory(new File(directory));
+//				executor.setExitValues(null);
+//				executor.execute(CommandLine.parse(barvinokCommand));
+//				result = outputStream.toString();
+//			} catch (ExecuteException e) {
+//				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
+//				e.printStackTrace();
+//				throw new RuntimeException();
+//			} catch (IOException e) {
+//				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
+//				e.printStackTrace();
+//				throw new RuntimeException();
+//			}
+//			// Process Barvinok's output
+//			// System.out.println(result);
+//			if (!result.startsWith("POLYHEDRON", 0)) {
+//				System.out.println("Barvinok Failed! ");
+//				throw new RuntimeException();
+//			}
+//			int lastSpace = result.lastIndexOf(' ');
+//			int secondLastSpace = result.substring(0, lastSpace).lastIndexOf(' ');
+//			result = result.substring(secondLastSpace + 1, lastSpace);
+//			int newlineIndex = result.indexOf("\n");
+//			if (newlineIndex != -1) {
+//				result = result.substring(newlineIndex + 1);
+//				// System.out.println(result);
+//			}
+//			return result;
 		}
 
 	}

@@ -89,7 +89,8 @@ public abstract class ModelCoreService extends BasicService {
 		Set<Expression> core = null;
 		SatEntry se = null;
 		UnsatEntry ue = null;
-		String key = SERVICE_KEY + instance.getFullExpression().getString();
+//		String key = SERVICE_KEY + instance.getFullExpression().getString();
+		String key = SERVICE_KEY + instance.getFullExpression().toString();
 		long tmpConsumption = 0L;
 		long start = System.currentTimeMillis();
 		Boolean isSat = (Boolean) store.get(key + "-SAT");

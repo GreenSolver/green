@@ -3,7 +3,6 @@ package za.ac.sun.cs.green.service.factorizer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
@@ -20,19 +19,16 @@ import za.ac.sun.cs.green.util.Configuration;
 public class ComplexSATFactorizerTest {
 
 	public static Green solver;
-	private static final String DRIVE = new File("").getAbsolutePath() + "/";
-	private static final String DEFAULT_Z3_PATH = DRIVE + "lib/z3/build/z3";
 
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
 		props.setProperty("green.service.sat", "(factor (canonize z3))");
 		props.setProperty("green.service.sat.factor", "za.ac.sun.cs.green.service.factorizer.SATOldFactorizerService");
 		props.setProperty("green.service.sat.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
 		props.setProperty("green.service.sat.z3", "za.ac.sun.cs.green.service.z3.SATZ3Service");
-		props.setProperty("green.z3.path", DEFAULT_Z3_PATH);
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}

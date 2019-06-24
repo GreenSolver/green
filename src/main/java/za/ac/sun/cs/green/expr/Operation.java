@@ -128,7 +128,7 @@ public class Operation extends Expression {
 
 	private int hashCode = -1;
 	private final Operator operator;
-	private String stringRep = null;
+	// private String stringRep = null;
 	private final Expression[] operands;
 
 	public Operation(final Operator operator, Expression... operands) {
@@ -268,24 +268,24 @@ public class Operation extends Expression {
 
 	}
 
-	private StringBuilder strRep() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(operands[0].getString());
-		for (int i = 1, n = operands.length; i < n; i++) {
-			sb.append(' ').append(operands[i].getString());
-		}
-		return sb;
-	}
-
-	public String getString() {
-		if (stringRep == null) {
-			stringRep = strRep().toString();
-		}
-		return stringRep;
-	}
+//	private StringBuilder strRep() {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append(operands[0].getString());
+//		for (int i = 1, n = operands.length; i < n; i++) {
+//			sb.append(' ').append(operands[i].getString());
+//		}
+//		return sb;
+//	}
+//
+//	public String getString() {
+//		if (stringRep == null) {
+//			stringRep = strRep().toString();
+//		}
+//		return stringRep;
+//	}
 
 	@Override
-	public String toString() {
+	public String toString0() {
 		StringBuilder sb = new StringBuilder();
 		int arity = operator.getArity();
 		Fix fix = operator.getFix();

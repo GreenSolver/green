@@ -48,7 +48,7 @@ public class RealConstant extends Constant {
 	}
 
 	@Override
-	public String toString() {
+	public String toString0() {
 		return Double.toString(value);
 	}
 
