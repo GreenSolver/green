@@ -1,0 +1,46 @@
+- title: Intro
+
+  submenu:
+  - title: Installation
+    url: /userguide/installation/
+
+  - title: "Getting started"
+    url: /userguide/getting-started/
+
+  - title: Troubleshooting
+    url: /userguide/troubleshooting/
+
+  - title: "Configuration settings"
+    url: /userguide/configuration/
+
+  - title: "Basic usage"
+    url: /userguide/basic-usage/
+
+  - title: Examples
+    url: /userguide/examples/
+
+#----------------------------------------------------------------------
+- title: Overview
+
+  submenu:
+  - title: How GREEN works
+    url: /userguide/overview/
+
+  - title: Services
+    url: /userguide/services/
+
+#----------------------------------------------------------------------
+- title: Tutorials
+  submenu:
+
+  - title: Something1
+    url: /userguide/xxx/
+
+  - title: Something2
+    url: /userguide/xxx/
+
+  - title: Something3
+    url: /userguide/xxx/
+
+  - title: Something3
+    url: /userguide/xxx/

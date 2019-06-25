@@ -1,0 +1,59 @@
+#-------------------------------------------------------------------------------
+# GREEN Jekyll site
+#-------------------------------------------------------------------------------
+
+title: GREEN
+email: jacogeld+green@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  Write an awesome description for your new site here. You can edit this
+  line in _config.yml. It will appear in your document head meta (for
+  Google search results) and in your feed.xml site description.
+baseurl: "/green"
+url: ""
+excerpt_separator: "<!-- more -->"
+twitter_username: green
+github_username:  green
+markdown: kramdown
+include: ["_pages", "coastal.dtd"]
+exclude: ["copyapi.sh", "runlocal.sh", "Gemfile", "Gemfile.lock", "README.md"]
+defaults:
+  -
+    scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      permalink: /blog/:year/:month/:day/:slug/
+      layout: "post"
+      excerpt_separator: "<!--more-->"
+  -
+    scope:
+      path: "_pages/devguide"
+      type: "pages"
+    values:
+      layout: page
+      sidebar: devguide
+      toc: true
+  -
+    scope:
+      path: "_pages/api"
+      type: "pages"
+    values:
+      layout: api
+      toc: true
+  -
+    scope:
+      path: "_pages/userguide"
+      type: "pages"
+    values:
+      layout: page
+      sidebar: userguide
+      toc: true
+  -
+    scope:
+      path: "_pages/casestudy"
+      type: "pages"
+    values:
+      layout: page
+      sidebar: casestudy
+      toc: true
+
