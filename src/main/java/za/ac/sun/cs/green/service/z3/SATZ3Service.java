@@ -72,7 +72,6 @@ public class SATZ3Service extends SATSMTLIBService {
 		reporter.report("timeConsumption", timeConsumption);
 		reporter.report("satTimeConsumption", satTimeConsumption);
 		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
-		reporter.report("storageTimeConsumption", storageTimeConsumption);
 		reporter.report("translationTimeConsumption", translationTimeConsumption);
 		reporter.report("conjunctCount", conjunctCount);
 		reporter.report("varCount", varCount);

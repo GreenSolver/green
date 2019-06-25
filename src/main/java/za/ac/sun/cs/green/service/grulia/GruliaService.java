@@ -1,14 +1,7 @@
 package za.ac.sun.cs.green.service.grulia;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
@@ -25,289 +18,209 @@ import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
-import za.ac.sun.cs.green.service.SATService1;
-import za.ac.sun.cs.green.service.z3.ModelCoreZ3JavaService;
+import za.ac.sun.cs.green.service.SATService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
+ * Based on Utopia (an SMT caching framework), which is defined in the paper:
+ * "Heuristically Matching Formula Solution Spaces To Efficiently Reuse
+ * Solutions" published at the International Conference on Software Engineering
+ * (ICSE'17) by Andrea Aquino, Giovanni Denaro and Mauro Pezze'.
+ *
+ * Julia (Java version of Utopia Linear Integer Arithmetic) re-implemented to
+ * improve GREEN. Julia is implemented as a service in GREEN -- Grulia.
+ *
  * @date (last updated): 04/02/2019
- * @author: JH Taljaard. Student Number: 18509193. Supervisor: Willem Visser
- *          (2018,2019), Jaco Geldenhuys (2017)
- *
- *          Description: Based on Utopia (an SMT caching framework), which is
- *          defined in the paper: "Heuristically Matching Formula Solution
- *          Spaces To Efficiently Reuse Solutions" published at the
- *          International Conference on Software Engineering (ICSE'17) by Andrea
- *          Aquino, Giovanni Denaro and Mauro Pezze'.
- *
- *          Julia (Java version of Utopia Linear Integer Arithmetic)
- *          re-implemented to improve GREEN. Julia is implemented as a service
- *          in GREEN -- Grulia.
- *
+ * @author: JH Taljaard (USnr 18509193)
+ * @author: Willem Visser (2018, 2019) (supervisor)
+ * @author: Jaco Geldenhuys (2017) (supervisor)
  */
-public class GruliaService extends SATService1 {
+public class GruliaService extends SATService {
 
-	/*
-	 * ##################################################################
-	 * ####################### Variables to set #########################
-	 * ##################################################################
-	 */
-
-	/**
-	 * The number of closest entries to extract
-	 */
-	private final int ks = 10;
+	// ======================================================================
+	//
+	// CONSTANTS THAT DEFINE THE BEHAVIOUR OF GRULIA
+	//
+	// ======================================================================
 
 	/**
-	 * Substitute zero if is variable not present in model
+	 * The number of closest entries to extract.
 	 */
-	private final boolean defaultZero = false;
+	private static final int K = 10;
+
+	/**
+	 * Whether to substitute zero for variables not present in model.
+	 */
+	private static final boolean DEFAULT_ZERO = false;
 
 	/**
 	 * TreeSet repo or not.
 	 */
-	private final boolean binarysearch = true;
+	private static final boolean BINARY_TREE_REPO = true;
 
 	/**
-	 * The value of the reference solution. For experiments: -10000, 0, 100
+	 * The reference solutions.
+	 * 
+	 * For experiments, use -10000, 0, 100.
 	 */
 	private static final Integer[] REFERENCE_SOLUTION = { -10000, 0, 100 };
-	private static final int REF_SOL_SIZE = REFERENCE_SOLUTION.length;
-
-	/**
-	 * For debugging purposes.
-	 */
-	public static final boolean DEBUG = false;
-
-	/* ################################################################## */
 
 	/**
 	 * Stores data of satisfiable formulas.
 	 */
-	private Repo satRepo;
+	private final Repo satRepo = BINARY_TREE_REPO ? new SatRepoB(solver, DEFAULT_ZERO) : new SatRepoA(DEFAULT_ZERO);
+
 	/**
 	 * Stores data of unsatisfiable formulas.
 	 */
-	private Repo unsatRepo;
+	private final Repo unsatRepo = BINARY_TREE_REPO ? new UnsatRepoB(solver, DEFAULT_ZERO)
+			: new UnsatRepoA(DEFAULT_ZERO);
+
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
 
 	/**
-	 * Instance of model checker.
+	 * Number of times Grulia could not compute a result and that the instance is
+	 * passed down to a solver.
 	 */
-	private ModelCoreService mcs;
-
-	/*
-	 * ##################################################################
-	 * #################### For logging purposes ########################
-	 * ##################################################################
-	 */
+	private long passedToSolverCount = 0;
 
 	/**
-	 * Number of times the service has been invoked.
+	 * Number of times SatDelta is zero, which means that one of the reference
+	 * solutions satisfied the expression to solve.
 	 */
-	private int invocationCount = 0;
+	private long zeroSatDeltaCount = 0;
 
 	/**
-	 * Number of times some model satisfied some expression (in a run).
+	 * Number of times a model in the SAT repo was found to satisfy an expression.
 	 */
-	private int satModelCount = 0;
+	private int repoModelHitCount = 0;
 
 	/**
-	 * Number of times some unsat-core was in some expression (in a run).
+	 * Number of times {@link #findSharedModel(Expression, SortedSet)} found no
+	 * model in the SAT repo to satisfy an expression.
 	 */
-	private int sharesUnsatCoresCount = 0;
-
-	/**
-	 * Total Number of times some model satisfied some expression (across runs).
-	 */
-	// private int totSatModelCount = 0;
-
-	/**
-	 * Total Number of times some unsat-core was in some expression (across runs).
-	 */
-	// private int totUnsatCoresCount = 0;
+	private int satRepoMissCount = 0;
 
 	/**
 	 * Number of times some model did not satisfy some expression.
 	 */
-	private int modelsTested = 0;
-	private int unsatCoresTested = 0;
+	private int repoModelFailCount = 0;
 
 	/**
-	 * Number of times the SMT solver was called.
+	 * Number of times a core in the UNSAT repo was found to subsume an expression.
+	 */
+	private int repoCoreHitCount = 0;
+
+	/**
+	 * Number of times {@link #findSharedCore(Expression, SortedSet)} found no core
+	 * in the UNSAT repo to subsume an expression.
+	 */
+	private int unsatRepoMissCount = 0;
+
+	/**
+	 * Number of times some core did not subsume some expression.
+	 */
+	private int repoCoreFailCount = 0;
+
+	/**
+	 * Number of times the instance was relegated to an SMT solver.
 	 */
 	private int solverCount = 0;
 
 	/**
-	 * Number of models cached.
+	 * Number of times a new model was added to the satRepo.
 	 */
-	private int satEntryCount = 0;
-	/**
-	 * Number of cores cached.
-	 */
-	private int unsatEntryCount = 0;
+	private int satRepoAddCount = 0;
 
 	/**
-	 * Number of satisfied expressions (for a run).
+	 * Number of times a new core was added to the unsatRepo.
 	 */
-	private int satCount = 0;
+	private int unsatRepoAddCount = 0;
+
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
 
 	/**
-	 * Total number of satisfied expressions (across runs).
+	 * Milliseconds used to load the repos from the store.
 	 */
-	// private int totSatCount = 0;
+	private long repoLoadTimeConsumption = 0;
 
 	/**
-	 * Total number of unsatisfied expressions (across runs).
+	 * Milliseconds used to compute the set of variables in full expressions.
 	 */
-	// private int totUnsatCount = 0;
+	private long variableSetTimeConsumption = 0;
 
 	/**
-	 * Number of unsatisfied expressions.
+	 * Milliseconds used to compute the SatDelta values.
 	 */
-	private int unsatCount = 0;
+	private long satDeltaTimeConsumption = 0;
 
 	/**
-	 * Execution Time of the service.
+	 * Milliseconds used to consult the SAT repo for models that might satisfy the
+	 * expression.
 	 */
-	private long timeConsumption = 0;
-
-	private long satTimeConsumption = 0;
-
-	private long unsatTimeConsumption = 0;
-
-	private long cacheLoadTimeConsumption = 0;
-
-	private long timeOfSatCache = 0;
-	private long timeOfUnsatCache = 0;
-	private long timeOfSolver = 0;
-	private long timeOfSatdeltaCalculation = 0;
-	private long countOf0Sd = 0;
-
-	private long timeOfModelsExtraction = 0;
-	private long timeOfModelsTesting = 0;
-	private long timeOfModelEval = 0;
+	private long satRepoTimeConsumption = 0;
 
 	/**
-	 * Number of times a valid entry found in the Repo.
+	 * Milliseconds used to consult the UNSAT repo for core that might be contained
+	 * in the expression.
 	 */
-	private int satCacheHitCount = 0;
-
-	private int unsatCacheHitCount = 0;
+	private long unsatRepoTimeConsumption = 0;
 
 	/**
-	 * Number of times a valid entry was not found in the satRepo.
+	 * Milliseconds used to extract {@link #K} models from the SAT repo.
 	 */
-	private int satCacheMissCount = 0;
-
-	private int unsatCacheMissCount = 0;
+	private long modelExtractionTimeConsumption = 0;
 
 	/**
-	 * Total number of variables encountered.
+	 * Milliseconds used to check if models satisfy expressions.
 	 */
-//	private int totalVariableCount = 0;
+	private long modelEvaluationTimeConsumption = 0;
 
 	/**
-	 * To keep track of the already seen variables.
+	 * Milliseconds spent evaluating potentially shared models (excluding model
+	 * extraction time).
 	 */
-	/*
-	 * protected static ArrayList<IntVariable> newVariables; protected static
-	 * ArrayList<Double> satDeltaValues; protected static ArrayList<Double>
-	 * satDeltaValuesInRepo; protected static int[] modelNumbers;
-	 */
+	private long sharedModelTimeConsumption = 0;
 
 	/**
-	 * Total number of new variables encountered.
+	 * Milliseconds used to extract {@link #K} cores from the UNSAT repo.
 	 */
-	protected int newVariableCount = 0;
-
-	/*** Resetting counters ***/
-	private void setSatModelCount(int x) {
-		satModelCount = x;
-	}
-
-	private void setUnsatCoreCount(int x) {
-		sharesUnsatCoresCount = x;
-	}
-
-	private void setSolverCount(int x) {
-		solverCount = x;
-	}
-
-	private void setEntryCount(int x) {
-		satEntryCount = x;
-		unsatEntryCount = x;
-	}
-
-	private void setSatCount(int x) {
-		satCount = x;
-	}
-
-	private void setUnsatCount(int x) {
-		unsatCount = x;
-	}
-
-	private void setTimeConsumption(long x) {
-		timeConsumption = x;
-		satTimeConsumption = x;
-		unsatTimeConsumption = x;
-	}
-
-	private void setCacheHitCount(int x) {
-		satCacheHitCount = x;
-	}
-
-	private void setUnsatCacheHitCount(int x) {
-		unsatCacheHitCount = x;
-	}
-
-	private void setCacheMissCount(int x) {
-		satCacheMissCount = x;
-	}
-
-	private void setUnsatCacheMissCount(int x) {
-		unsatCacheMissCount = x;
-	}
-
-	public void reset() {
-		setCacheHitCount(0);
-		setCacheMissCount(0);
-		setEntryCount(0);
-		setSatCount(0);
-		setSatModelCount(0);
-		setSolverCount(0);
-		setTimeConsumption(0L);
-		setUnsatCount(0);
-		setUnsatCacheHitCount(0);
-		setUnsatCacheMissCount(0);
-		setUnsatCoreCount(0);
-	}
-
-	private final String defaultZ3Path;
-	// private static final String DEFAULT_Z3_ARGS = "-smt2 -in";
-	private static final String RESOURCE_NAME = "build.properties";
-
-	/* ################################################################## */
+	private long coreExtractionTimeConsumption = 0;
 
 	/**
-	 * Constructor for the basic service. It simply initializes its three
-	 * attributes.
-	 *
+	 * Milliseconds used to check if cores subsume expressions.
+	 */
+	private long coreEvaluationTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent evaluating potentially shared cores (excluding core
+	 * extraction time).
+	 */
+	private long sharedCoreTimeConsumption = 0;
+
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
+
+	/**
+	 * Constructor for the Grulia service.
+	 * 
 	 * GuliaService recommends to run with Factorizer and Renamer.
 	 *
 	 * @param solver the {@link Green} solver this service will be added to
 	 */
 	public GruliaService(Green solver) {
 		super(solver);
-		if (binarysearch) {
-			satRepo = new SatRepoB(solver, defaultZero);
-			unsatRepo = new UnsatRepoB(solver, defaultZero);
-		} else {
-			satRepo = new SatRepoA(defaultZero);
-			unsatRepo = new UnsatRepoA(defaultZero);
-		}
-
-		// Load from store (specifically redis)
-		// -- for persistent storage
 		long start = System.currentTimeMillis();
 		for (String key : solver.getStore().keySet()) {
 			Object val = solver.getStore().get(key);
@@ -317,454 +230,343 @@ public class GruliaService extends SATService1 {
 				unsatRepo.add((UnsatEntry) val);
 			}
 		}
-		cacheLoadTimeConsumption += (System.currentTimeMillis() - start);
-
-		/*
-		 * newVariables = new ArrayList<IntVariable>(); satDeltaValues = new
-		 * ArrayList<Double>(); satDeltaValuesInRepo = new ArrayList<Double>();
-		 * modelNumbers = new int[Ks];
-		 */
-
-		// Properties for model checking.
-		Properties properties = new Properties();
-		String z3Path = "/z3/build/z3";
-
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream resourceStream;
-		try {
-			resourceStream = loader.getResourceAsStream(RESOURCE_NAME);
-			if (resourceStream == null) {
-				// If properties are correct, override with that specified path.
-				resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + RESOURCE_NAME);
-
-			}
-			if (resourceStream != null) {
-				properties.load(resourceStream);
-				z3Path = properties.getProperty("z3path");
-
-				resourceStream.close();
-			}
-		} catch (IOException x) {
-			// ignore
-		}
-
-		defaultZ3Path = z3Path;
-
-		String p = properties.getProperty("green.z3.path", defaultZ3Path);
-		String store = properties.getProperty("green.store", "");
-		properties.setProperty("green.z3.path", p);
-		properties.setProperty("z3path", p);
-		properties.setProperty("green.store", store);
-
-		properties.setProperty("green.services", "solver");
-		properties.setProperty("green.service.solver", "(z3mc)");
-//        props.setProperty("green.service.solver.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
-		properties.setProperty("green.service.solver.z3mc", "za.ac.sun.cs.green.service.z3.ModelCoreZ3JavaService");
-//        properties.setProperty("green.service.solver.z3mc", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
-		mcs = new ModelCoreZ3JavaService(solver, properties);
-//        mcs = new ModelCoreZ3Service(solver, properties);
+		repoLoadTimeConsumption += (System.currentTimeMillis() - start);
 	}
 
-	protected Integer getReferenceSolution(int a) {
-		return REFERENCE_SOLUTION[a];
-	}
-
+	/**
+	 * Overrides the method of the {@link SATService} superclass. This version makes
+	 * provision for the fact that Grulia may or may not compute an answer to the
+	 * process.
+	 * 
+	 * <ul>
+	 * <li>In the former case, the result is stored "inside" the instance, and is
+	 * picked up by {@link #allChildrenDone(Instance, Object)}. This method returns
+	 * {@code null} to tell Green that the instance should not be passed down the
+	 * tree.</li>
+	 * <li>In the latter case, this routine returns the instance (as a singleton
+	 * set).</li>
+	 * </ul>
+	 * 
+	 * @param instance Green instance to solve
+	 * @return {@code null} if Grulia finds an answer for the request or a singleton
+	 *         set with the same instance
+	 * @see za.ac.sun.cs.green.service.SATService#processRequest(za.ac.sun.cs.green.Instance)
+	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	protected Boolean solve(Instance instance) {
-		// Wrapper function to calculate time consumption.
+	public Set<Instance> processRequest(Instance instance) {
+		log.trace("processing {}", instance);
 		long startTime = System.currentTimeMillis();
-		Boolean isSat;
-		isSat = solve1(instance);
-		long a = (System.currentTimeMillis() - startTime);
-		timeConsumption += a;
-		if (isSat) {
-			satTimeConsumption += a;
-		} else {
-			unsatTimeConsumption += a;
+		Set<Instance> returnValue = null;
+		Object result = instance.getData(getClass());
+		if (result == null) {
+			log.trace("not found inside instance");
+			result = solve0(instance);
 		}
-		return isSat;
+		if (result == null) {
+			log.trace("need to delegate to the solver");
+			returnValue = Collections.singleton(instance);
+			instance.setData(getClass(), returnValue);
+			passedToSolverCount++;
+		} else if (result instanceof Boolean) {
+			log.trace("solved!");
+			instance.setData(getClass(), result);
+			if ((Boolean) result) {
+				satCount++;
+				satTimeConsumption += (System.currentTimeMillis() - startTime);
+			} else {
+				unsatCount++;
+				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
+			}
+		} else {
+			assert (result instanceof Set<?>);
+			returnValue = (Set<Instance>) result;
+		}
+		if (returnValue instanceof Set<?>) {
+			log.trace("delegating to solver");
+			instance.setData("SOLVER" + getClass(), Boolean.TRUE);
+		}
+		serviceTimeConsumption += (System.currentTimeMillis() - startTime);
+		log.trace("returning {}", returnValue);
+		return returnValue;
+	}
+
+	/**
+	 * Overrides the method of the {@link SATService} superclass. This version does
+	 * not consult the store.
+	 *
+	 * @param instance The instance to solve.
+	 * @return satisfiability of the constraint.
+	 * @see za.ac.sun.cs.green.service.SATService#solve0(za.ac.sun.cs.green.Instance)
+	 */
+	@Override
+	protected Boolean solve0(Instance instance) {
+		long startTime = System.currentTimeMillis();
+		invocationCount++;
+		Boolean result = solve(instance);
+		fullTimeConsumption += (System.currentTimeMillis() - startTime);
+		return result;
 	}
 
 	/**
 	 * Executes the Utopia algorithm as described in the paper of Aquino.
 	 *
-	 * @param instance The instance to solve.
-	 * @return satisfiability of the constraint.
+	 * @param instance The instance to solve
+	 * @return satisfiability of the constraint
 	 */
-	private Boolean solve1(Instance instance) {
-		Double satDelta;
-		long startTime;
-		boolean status = false;
+	@Override
+	protected Boolean solve(Instance instance) {
+		long startTime = System.currentTimeMillis();
+		Boolean result = null;
+		Expression fullExpr = instance.getFullExpression();
+		log.trace("fullExpr: {}", fullExpr);
 
-		invocationCount++;
-		Expression target = instance.getFullExpression();
-		ExprVisitor exprVisitor = new ExprVisitor();
-
+		// Compute the set of variables.
+		long startTime0 = System.currentTimeMillis();
+		ExpressionVisitor expressionVisitor = new ExpressionVisitor();
 		try {
-			target.accept(exprVisitor);
+			fullExpr.accept(expressionVisitor);
 		} catch (VisitorException x) {
 			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
+		SortedSet<IntVariable> setOfVariables = expressionVisitor.getVariableSet();
+		variableSetTimeConsumption += (System.currentTimeMillis() - startTime0);
+		log.trace("set of variables: {}", () -> setOfVariables);
 
-		SortedSet<IntVariable> setOfVars = exprVisitor.getVariableSet();
-
-		startTime = System.currentTimeMillis();
-		satDelta = calculateSATDelta(target);
-		timeOfSatdeltaCalculation += (System.currentTimeMillis() - startTime);
+		// Compute SatDelta
+		double satDelta = calculateSatDelta(fullExpr);
+		log.trace("satDelta (average): {}", satDelta);
 		if (satDelta == 0.0) {
 			// The sat-delta computation produced a hit
-			countOf0Sd++;
-			return true;
+			zeroSatDeltaCount++;
+			result = true;
 		}
 
-		startTime = System.currentTimeMillis();
-		status = sharesModel(satDelta, target, setOfVars);
-		timeOfSatCache += (System.currentTimeMillis() - startTime);
-		if (status) {
-			// if model satisfied expression, i.e. query is sat
-			// return immediately
-			return true;
+		// Try to find a model in the SAT repo that satisfies the expression.
+		if (result == null) {
+			startTime0 = System.currentTimeMillis();
+			result = findSharedModel(fullExpr, setOfVariables);
+			satRepoTimeConsumption += (System.currentTimeMillis() - startTime);
 		}
 
-		startTime = System.currentTimeMillis();
-		status = sharesUnsatCores(satDelta, target, setOfVars);
-		timeOfUnsatCache += (System.currentTimeMillis() - startTime);
-		if (status) {
-			// if shares unsat cores i.e. query is unsat
-			// return immediately
-			return false;
+		// Try to find a core in the UNSAT repo contained in the expression.
+		if (result == null) {
+			startTime0 = System.currentTimeMillis();
+			result = findSharedCore(fullExpr, setOfVariables);
+			unsatRepoTimeConsumption += (System.currentTimeMillis() - startTime);
 		}
 
-		// else continue and calculate solution
-		// call solver & store
-		startTime = System.currentTimeMillis();
-		status = callSolver(satDelta, target);
+		// If result is still null, we have to pass the instance on to whatever
+		// solver sits "below" this service. We don't have to "do" anything
+		// about that here: returning null is sufficient.
 
-		timeOfSolver += (System.currentTimeMillis() - startTime);
-		return status;
-	}
-
-	/**
-	 * Calculates the average SATDelta value of a given Expression.
-	 *
-	 * @param expr the given Expression.
-	 * @return the average SATDelta value.
-	 */
-	private Double calculateSATDelta(Expression expr) {
-		Double result = 0.0;
-		GruliaVisitor gVisitor = new GruliaVisitor();
-		gVisitor.setRefSol(REFERENCE_SOLUTION);
-
-		try {
-			for (int i = 0; i < REF_SOL_SIZE; i++) {
-				gVisitor.setRefIndex(i);
-				expr.accept(gVisitor);
-				Double x = gVisitor.getResult();
-				result += x;
-			}
-
-			// calculate average SAT-Delta
-			result = result / REF_SOL_SIZE;
-			expr.satDelta = result;
-//			satDeltaValues.add(result);
-//			totalVariableCount += VARS.size();
-		} catch (VisitorException x) {
-			log.fatal("encountered an exception -- this should not be happening!", x);
-		}
-
+		innerTimeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
 	/**
-	 * Finds reusable models for the given Expression from the given SATDelta value.
+	 * Calculates the average SatDelta value of a given Expression.
 	 *
-	 * @param satDelta the SATDelta value for the model filtering
-	 * @param expr     the Expression to solve
-	 * @return SAT - if the Expression could be satisfied from previous models
+	 * @param expr the given expression
+	 * @return the average SatDelta value
 	 */
-	private Boolean sharesModel(Double satDelta, Expression expr, SortedSet<IntVariable> setOfVars) {
-		/*
-		 * Strategy: Check if SAT-Delta is in table If in table -> test if model
-		 * satisfies If not take next (k) closest SAT-Delta If not satisfied, call
-		 * solver
-		 */
-		if (satRepo.size() != 0) {
-			long start = System.currentTimeMillis();
-			long start1;
-			Entry[] temp = satRepo.extract(satDelta, setOfVars, ks);
-			timeOfModelsExtraction += (System.currentTimeMillis() - start);
-			if (temp[0] == null) {
-				satCacheMissCount++;
-				return false;
+	private double calculateSatDelta(Expression expr) {
+		long startTime = System.currentTimeMillis();
+		double result = 0.0;
+		GruliaVisitor gruliaVisitor = new GruliaVisitor();
+		try {
+			for (int i = REFERENCE_SOLUTION.length - 1; i >= 0; i--) {
+				gruliaVisitor.setReferenceValue(REFERENCE_SOLUTION[i]);
+				expr.accept(gruliaVisitor);
+				result += gruliaVisitor.getResult();
+				log.trace("referenceSolution: {} satDelta: {}", REFERENCE_SOLUTION[i], gruliaVisitor.getResult());
 			}
+			result = result / REFERENCE_SOLUTION.length;
+			expr.satDelta = result;
+		} catch (VisitorException x) {
+			log.fatal("encountered an exception -- this should not be happening!", x);
+		}
+		satDeltaTimeConsumption += (System.currentTimeMillis() - startTime);
+		return result;
+	}
 
-			start = System.currentTimeMillis();
-			for (Entry entry : temp) {
-				// extract model
-				if (entry == null) {
+	/**
+	 * Find a reusable model (based on the satDelta distance) for the given
+	 * expression. This method follows the following strategy:
+	 * 
+	 * <ol>
+	 * <li>Find closest models in satRepo.</li>
+	 * <li>For each such model, check if it satisfies the expression.</li>
+	 * <li>If so, return {@code true}.</li>
+	 * <li>If none of the models satisfies the expression, return {@code null}.</li>
+	 * </ol>
+	 *
+	 * @param expr      expression to satisfy
+	 * @param setOfVars variables in expression, passed to repo
+	 * @return {@code true} if a satisfying model was found, otherwise {@code null}
+	 */
+	private Boolean findSharedModel(Expression expr, SortedSet<IntVariable> setOfVars) {
+		log.trace("looking for shared models");
+		satRepoMissCount++; // Assume that we won't find a model.
+		Boolean result = null;
+		if (satRepo.size() != 0) {
+			long startTime = System.currentTimeMillis();
+			Entry[] models = satRepo.extract(expr.satDelta, setOfVars, K);
+			modelExtractionTimeConsumption += (System.currentTimeMillis() - startTime);
+			log.trace("found {} close models", models.length);
+			startTime = System.currentTimeMillis();
+			for (Entry model : models) {
+				if (model == null) {
 					break;
 				}
-
-				// test model satisfiability
-				start1 = System.currentTimeMillis();
-				GruliaExpressionEvaluator exprSATCheck = new GruliaExpressionEvaluator();
-				exprSATCheck.setModelMap(((SatEntry) entry).getSolution());
+				log.trace("investigating model {}", model);
+				long startTime0 = System.currentTimeMillis();
+				GruliaExpressionEvaluator satCheck = new GruliaExpressionEvaluator(((SatEntry) model).getSolution());
 				try {
-					expr.accept(exprSATCheck);
+					expr.accept(satCheck);
 				} catch (VisitorException x) {
 					log.fatal("encountered an exception -- this should not be happening!", x);
 				}
-				timeOfModelEval += (System.currentTimeMillis() - start1);
-
-				if (exprSATCheck.isSat()) {
-					// already in repo,
-					// don't have to do anything
-					satModelCount++;
-					satCount++;
-					// totSatCount++;
-					// totSatModelCount++;
-					satCacheHitCount++;
-//                    modelNumbers[i]++;
-					timeOfModelsTesting += (System.currentTimeMillis() - start);
-					return true;
+				modelEvaluationTimeConsumption += (System.currentTimeMillis() - startTime0);
+				if (satCheck.isSat()) {
+					log.trace("found satisfying model");
+					result = true;
+					repoModelHitCount++;
+					satRepoMissCount--; // Initial assumption was false.
+					break;
 				} else {
-					modelsTested++;
+					repoModelFailCount++;
 				}
 			}
-			timeOfModelsTesting += (System.currentTimeMillis() - start);
-		} // else :: repo empty -> check unsat cache
-
-		satCacheMissCount++;
-		return false;
+			sharedModelTimeConsumption += (System.currentTimeMillis() - startTime);
+		}
+		log.trace("result: {}", result);
+		return result;
 	}
 
 	/**
-	 * Looks for shared unsat cores in the given Expression from the given SATDelta
-	 * value.
+	 * Find a reusable core (based on the satDelta distance) for the given
+	 * expression. This method follows the following strategy:
+	 * 
+	 * <ol>
+	 * <li>Find closest cores in unsatRepo.</li>
+	 * <li>For each such core, check if it subsumes the expression.</li>
+	 * <li>If so, return {@code false}.</li>
+	 * <li>If none of the mores subsumes the expression, return {@code null}.</li>
+	 * </ol>
 	 *
-	 * @param satDelta the SATDelta value for the core filtering
-	 * @param expr     the Expression to solve
-	 * @return SAT - if the Expression shares some unsat core from previous cores
+	 * @param expr      expression to subsume
+	 * @param setOfVars variables in expression, passed to repo
+	 * @return {@code false} if a subsuming core was found, otherwise {@code null}
 	 */
-	private Boolean sharesUnsatCores(Double satDelta, Expression expr, SortedSet<IntVariable> setOfVars) {
-		/*
-		 * Strategy: Check if SAT-Delta is in table If in table -> test if shares unsat
-		 * cores If not take next (k) closest SAT-Delta If not sharing unsat core, call
-		 * solver
-		 */
+	private Boolean findSharedCore(Expression expr, SortedSet<IntVariable> setOfVars) {
+		log.trace("looking for shared cores");
+		unsatRepoMissCount++; // Assume that we won't find a model.
+		Boolean result = null;
 		if (unsatRepo.size() != 0) {
-
-			Entry[] temp = unsatRepo.extract(satDelta, setOfVars, ks);
-			boolean shares;
-
-			if (temp[0] == null) {
-				unsatCacheMissCount++;
-				return false;
-			}
-
+			long startTime = System.currentTimeMillis();
+			Entry[] cores = unsatRepo.extract(expr.satDelta, setOfVars, K);
+			coreExtractionTimeConsumption += (System.currentTimeMillis() - startTime);
+			log.trace("found {} close models", cores.length);
+			startTime = System.currentTimeMillis();
 			String exprStr = expr.toString();
-			for (Entry entry : temp) {
-				// extract expression
-				if (entry == null) {
+			for (Entry core : cores) {
+				if (core == null) {
 					break;
 				}
-
-				Set<Expression> core = ((UnsatEntry) entry).getSolution();
-				if (core.size() != 0) {
-					shares = true;
-					for (Expression clause : core) {
-						if (!exprStr.contains(clause.toString())) {
-							shares = false;
-							break;
-						}
+				long startTime0 = System.currentTimeMillis();
+				Set<Expression> unsatCore = ((UnsatEntry) core).getSolution();
+				boolean shared = (unsatCore.size() > 0);
+				for (Expression clause : unsatCore) {
+					if (!exprStr.contains(clause.toString())) {
+						shared = false;
+						break;
 					}
-					if (shares) {
-						sharesUnsatCoresCount++;
-						unsatCount++;
-						// totUnsatCount++;
-						// totUnsatCoresCount++;
-						unsatCacheHitCount++;
-						return true;
-					} else {
-						unsatCoresTested++;
-					}
-//				} else {
-//                    log.log(Level.WARN, "Core with no entry found");
+				}
+				coreEvaluationTimeConsumption += (System.currentTimeMillis() - startTime0);
+				if (shared) {
+					log.trace("found subsuming core");
+					result = false;
+					repoCoreHitCount++;
+					unsatRepoMissCount--; // Initial assumption was false.
+					break;
+				} else {
+					repoCoreFailCount++;
 				}
 			}
-		} // else :: repo empty -> call solver
-
-		unsatCacheMissCount++;
-		return false;
+			sharedCoreTimeConsumption += (System.currentTimeMillis() - startTime);
+		}
+		log.trace("result: {}", result);
+		return result;
 	}
 
-	/**
-	 * Calls the model checker to solve the Expression. If the Expression could be
-	 * satisfied, its model and SATDelta value is stored.
-	 *
-	 * @param satDelta the SATDelta value to store as key.
-	 * @param expr     the Expression to store
-	 * @return SAT - if the Expression could be satisfied.
-	 */
-	private Boolean callSolver(Double satDelta, Expression expr) {
-		// Get model for formula
-		Boolean isSat;
-		Instance i = new Instance(null, null, expr);
-		solverCount++;
-
-		mcs.processRequest(i);
-		if (ModelCoreService.isSat(i)) {
-			Map<Variable, Constant> solution = ModelCoreService.getModel(i);
-			SatEntry newEntry = new SatEntry(satDelta, solution);
-
-			satRepo.add(newEntry);
-//			satDeltaValuesInRepo.add(satDelta);
-			satEntryCount++;
-			// totSatCount++;
-			satCount++;
-			isSat = true;
+	@Override
+	public Object allChildrenDone(Instance instance, Object result) {
+		if (instance.getData("SOLVER" + getClass()) != null) {
+			solverCount++;
+			Boolean isSat = ModelCoreService.isSat(instance);
+			double satDelta = instance.getFullExpression().satDelta;
+			log.trace("solver was invoked, isSat: {} satDelta: {}", isSat, satDelta);
+			if (isSat) {
+				Map<Variable, Constant> model = ModelCoreService.getModel(instance);
+				SatEntry newEntry = new SatEntry(satDelta, model);
+				log.trace("adding {} to satRepo", model);
+				satRepo.add(newEntry);
+				satRepoAddCount++;
+				satCount++;
+			} else {
+				Set<Expression> core = ModelCoreService.getCore(instance);
+				UnsatEntry newEntry = new UnsatEntry(satDelta, core);
+				log.trace("adding {} to unsatRepo", core);
+				unsatRepo.add(newEntry);
+				unsatRepoAddCount++;
+				unsatCount++;
+			}
+			return isSat;
 		} else {
-			Set<Expression> core = ModelCoreService.getCore(i);
-			UnsatEntry newEntry = new UnsatEntry(satDelta, core);
-			unsatRepo.add(newEntry);
-			unsatEntryCount++;
-			unsatCount++;
-			isSat = false;
+			return instance.getData(getClass());
 		}
-		return isSat;
-	}
-
-	/**
-	 * Display the list of values as a histogram.
-	 *
-	 * @param reporter the output reporter
-	 * @param list     the list containing values of type Double
-	 */
-	@SuppressWarnings("unused")
-	private void displayAsHistogram(Reporter reporter, ArrayList<Double> list) {
-		HashMap<Double, Integer> histogram = new HashMap<Double, Integer>();
-
-		for (Double x : list) {
-			histogram.merge(x, 1, (a, b) -> a + b);
-		}
-
-		reporter.reportMessage(histogram.toString());
-	}
-
-	/**
-	 * Display histogram array of values
-	 * 
-	 * @param reporter
-	 * @param a
-	 */
-	@SuppressWarnings("unused")
-	private void displayAsHistogram(Reporter reporter, int[] a) {
-		StringBuilder s = new StringBuilder();
-		s.append("{");
-		int n = ks - 1;
-		for (int i = 0; i < n; i++) {
-			s.append(i + 1).append("=").append(a[i]).append(", ");
-		}
-		s.append(ks + "=").append(a[n]).append("}");
-		reporter.reportMessage(s.toString());
-	}
-
-	/**
-	 * Calculates the distribution of the SATDelta values, for the reporter.
-	 * 
-	 * @param reporter the reporter
-	 * @param list     SATDelta values
-	 */
-	@SuppressWarnings("unused")
-	private void distribution(Reporter reporter, ArrayList<Double> list) {
-		Double avg = 0.0;
-		Collections.sort(list);
-
-		reporter.report("minSATDelta", list.get(0));
-		reporter.report("maxSATDelta", list.get(list.size() - 1));
-
-		for (Double x : list) {
-			avg += x;
-		}
-
-		avg = avg / list.size();
-
-		reporter.report("meanSATDelta", avg);
-
-		Double sum = 0.0;
-
-		for (Double x : list) {
-			sum += Math.pow((x - avg), 2);
-		}
-
-		Double sigma = sum / (list.size() - 1);
-		sigma = Math.sqrt(sigma);
-
-		reporter.report("standard deviation of SATDelta", sigma);
-
-		Double cv = sigma / avg;
-
-		reporter.report("coefficient of variation of SATDelta", cv);
-
 	}
 
 	@Override
 	public void report(Reporter reporter) {
+		super.report(reporter);
 		reporter.setContext(getClass().getSimpleName());
-		mcs.report(reporter);
-		reporter.report("invocations", invocationCount);
-//        reporter.reportZZ("totalVariables", totalVariableCount);
-//        reporter.reportZZ("totalNewVariables", newVariableCount);
-//        reporter.reportZZ("totalOldVariables", (totalVariableCount-newVariableCount));
-//		reporter.reportZZ("total SAT queries", totSatCount);
-		reporter.report("satQueries", satCount);
-		reporter.report("unsatQueries", unsatCount);
-		reporter.report("satCacheHitCount", satCacheHitCount);
-		reporter.report("satCacheMissCount", satCacheMissCount);
-		reporter.report("unsatCacheHitCount", unsatCacheHitCount);
-		reporter.report("unsatCacheMissCount", unsatCacheMissCount);
-		reporter.report("solverCalls", solverCount);
-		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("satTimeConsumption", satTimeConsumption);
-		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
-//		reporter.reportZZ("total Models reused", totSatModelCount);
-		/*
-		 * if (false) { // Sat delta values reporter.report(getClass().getSimpleName(),
-		 * "totalSatDeltaValues distribution: "); distribution(reporter,
-		 * satDeltaValues); reporter.report(getClass().getSimpleName(),
-		 * "SatDeltaValues in Repo distribution: "); distribution(reporter,
-		 * satDeltaValuesInRepo);
-		 * 
-		 * reporter.report(getClass().getSimpleName(),
-		 * "Display SAT-Delta as histogram: "); displayAsHistogram(reporter,
-		 * satDeltaValues); reporter.report(getClass().getSimpleName(),
-		 * "Display SAT-Delta (in repo) as histogram: "); displayAsHistogram(reporter,
-		 * satDeltaValuesInRepo); }
-		 * 
-		 * if (false) { // Model numbers reporter.report(getClass().getSimpleName(),
-		 * "Display ModelNumbers as histogram: "); displayAsHistogram(reporter,
-		 * modelNumbers); }
-		 */
-		reporter.report("cacheLoadTime", cacheLoadTimeConsumption);
-		reporter.report("models_tested", modelsTested);
-		reporter.report("models_reused", satModelCount);
-		reporter.report("unsatCores_tested", unsatCoresTested);
-		reporter.report("unsatCores_reused", sharesUnsatCoresCount);
-		reporter.report("satEntries added to cache", satEntryCount);
-		reporter.report("unsatEntries added to cache", unsatEntryCount);
-		reporter.report("K_Model_extractTime", timeOfModelsExtraction);
-//		reporter.reportZZ("K Model Extract count", count_of_models_extraction);
-		reporter.report("K_Model_testingTime", timeOfModelsTesting);
-		reporter.report("model_evaluationTime", timeOfModelEval);
-		reporter.report("count_of_0_satdelta ", countOf0Sd);
-		reporter.report("satDelta_computationTime", timeOfSatdeltaCalculation);
-		reporter.report("satCache_checkTime", timeOfSatCache);
-		reporter.report("unsatCache_checkTime", timeOfUnsatCache);
-		reporter.report("solverCallTime", timeOfSolver);
 
+		// Counters
+		reporter.report("passedToSolverCount", passedToSolverCount);
+		reporter.report("zeroSatDeltaCount", zeroSatDeltaCount);
+		reporter.report("repoModelHitCount", repoModelHitCount);
+		reporter.report("satRepoMissCount", satRepoMissCount);
+		reporter.report("repoModelFailCount", repoModelFailCount);
+		reporter.report("repoCoreHitCount", repoCoreHitCount);
+		reporter.report("unsatRepoMissCount", unsatRepoMissCount);
+		reporter.report("repoCoreFailCount", repoCoreFailCount);
+		reporter.report("solverCount", solverCount);
+		reporter.report("satRepoAddCount", satRepoAddCount);
+		reporter.report("unsatRepoAddCount", unsatRepoAddCount);
+
+		// Time consumption
+		reporter.report("repoLoadTimeConsumption", repoLoadTimeConsumption);
+		reporter.report("variableSetTimeConsumption", variableSetTimeConsumption);
+		reporter.report("satDeltaTimeConsumption", satDeltaTimeConsumption);
+		reporter.report("satRepoTimeConsumption", satRepoTimeConsumption);
+		reporter.report("unsatRepoTimeConsumption", unsatRepoTimeConsumption);
+		reporter.report("modelExtractionTimeConsumption", modelExtractionTimeConsumption);
+		reporter.report("modelEvaluationTimeConsumption", modelEvaluationTimeConsumption);
+		reporter.report("sharedModelTimeConsumption", sharedModelTimeConsumption);
+		reporter.report("coreExtractionTimeConsumption", coreExtractionTimeConsumption);
+		reporter.report("coreEvaluationTimeConsumption", coreEvaluationTimeConsumption);
+		reporter.report("sharedCoreTimeConsumption", sharedCoreTimeConsumption);
 	}
 
-	private static class ExprVisitor extends Visitor {
+	// ======================================================================
+	//
+	// VISITOR TO COLLECT VARIABLES
+	//
+	// ======================================================================
+
+	private static class ExpressionVisitor extends Visitor {
 
 		private SortedSet<IntVariable> variableSet;
 
@@ -772,7 +574,7 @@ public class GruliaService extends SATService1 {
 
 		private boolean linearInteger;
 
-		ExprVisitor() {
+		ExpressionVisitor() {
 			variableSet = new TreeSet<IntVariable>();
 			unsatisfiable = false;
 			linearInteger = true;
@@ -794,66 +596,84 @@ public class GruliaService extends SATService1 {
 		}
 	}
 
+	// ======================================================================
+	//
+	// VISITOR TO CALCULATE SATDELTA
+	//
+	// ======================================================================
+
+	/**
+	 * Visitor to compute the SatDelta value for an expressions given a reference
+	 * value.
+	 */
 	private static class GruliaVisitor extends Visitor {
 
-		/*
-		 * Local stack to calculate the SAT-Delta value
+		/**
+		 * Local stack to calculate the SatDelta value
 		 */
-		private Stack<Integer> stack = new Stack<Integer>();
+		private final Stack<Integer> stack = new Stack<Integer>();
 
-		private Integer[] referenceSolution;
-		private int index;
+		/**
+		 * Value used for all variables.
+		 */
+		private Integer referenceValue = null;
 
-		public void setRefSol(Integer[] models) {
-			referenceSolution = models;
-		}
+		/**
+		 * Result of computation. We "cache" it so that we can call {@link #getResult()}
+		 * more than once.
+		 */
+		private Double result = null;
 
-		public void setRefIndex(int index) {
-			this.index = index;
+		/**
+		 * Clear the stack and set the reference value in preparation for a run of the
+		 * visitor.
+		 * 
+		 * @param referenceValue the new reference value
+		 */
+		public void setReferenceValue(int referenceValue) {
+			stack.clear();
+			result = null;
+			this.referenceValue = referenceValue;
 		}
 
 		/**
-		 * @return x - SAT-Delta value
+		 * Return the SatDelta value of the expression for the reference solution
+		 * specified by {@link #referenceValue}.
+		 * 
+		 * @return the SatDelta value
 		 */
-		public Double getResult() {
-			Double x = 0.0;
-			x += stack.pop();
-			return x;
+		public double getResult() {
+			if (result == null) {
+				result = 0.0 + stack.pop();
+			}
+			return result;
 		}
 
-		@Override
-		public void postVisit(Expression expression) throws VisitorException {
-			super.postVisit(expression);
-		}
-
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Variable)
+		 */
 		@Override
 		public void postVisit(Variable variable) throws VisitorException {
-			super.postVisit(variable);
-
-//		if (!GruliaService.newVariables.contains((IntVariable) variable)) {
-//			GruliaService.newVariables.add((IntVariable) variable);
-//			GruliaService.newVariableCount++;
-//		}
-
-			Integer value = referenceSolution[index];
-			stack.push(value);
+			stack.push(referenceValue);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+		 * IntConstant)
+		 */
 		@Override
 		public void postVisit(IntConstant constant) throws VisitorException {
-			super.postVisit(constant);
 			stack.push(constant.getValue());
 		}
 
-		@Override
-		public void postVisit(Operation operation) throws VisitorException {
-			super.postVisit(operation);
-			SATDelta(operation, stack);
-		}
-
 		/**
-		 * Calculates the SAT-Delta value for a given operation and pushes the result to
-		 * a given stack.
+		 * Calculates the SatDelta value for a given operation and pushes the result
+		 * onto the stack.
 		 *
 		 * The distance of an expression from a set of reference models is called
 		 * "SatDelta" and is defined in the paper: "Heuristically Matching Formula
@@ -863,81 +683,51 @@ public class GruliaService extends SATService1 {
 		 *
 		 * @param operation the current operation working with
 		 * @param stack     the stack to push the result to
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 		 */
-		private void SATDelta(Operation operation, Stack<Integer> stack) {
-			Integer l = null;
-			Integer r = null;
-
-			int arity = operation.getOperator().getArity();
-			if (arity == 2) {
-				if (!stack.isEmpty()) {
-					r = stack.pop();
-				}
-				if (!stack.isEmpty()) {
-					l = stack.pop();
-				}
+		@Override
+		public void postVisit(Operation operation) throws VisitorException {
+			Integer left = null, right = null;
+			assert (operation.getOperator().getArity() == 2);
+			if (!stack.isEmpty()) {
+				right = stack.pop();
 			}
-
-			Operation.Operator op = operation.getOperator();
-			assert (l != null);
-			assert (r != null);
-
-			switch (op) {
+			if (!stack.isEmpty()) {
+				left = stack.pop();
+			}
+			assert (left != null) && (right != null);
+			switch (operation.getOperator()) {
 			case LT:
-				if (l >= r) {
-					stack.push((l - r) + 1);
-				} else {
-					stack.push(0);
-				}
+				stack.push(left >= right ? left - right + 1 : 0);
 				break;
 			case LE:
-				if (l > r) {
-					stack.push(l - r);
-				} else {
-					stack.push(0);
-				}
+				stack.push(left > right ? left - right : 0);
 				break;
 			case ADD:
 			case OR:
 			case AND:
-				stack.push(l + r);
+				stack.push(left + right);
 				break;
 			case GT:
-				if (l <= r) {
-					stack.push((r - l) + 1);
-				} else {
-					stack.push(0);
-				}
+				stack.push(left <= right ? right - left + 1 : 0);
 				break;
 			case GE:
-				if (l < r) {
-					stack.push(r - l);
-				} else {
-					stack.push(0);
-				}
+				stack.push(left < right ? right - left : 0);
 				break;
 			case EQ:
-				if (!l.equals(r)) {
-					stack.push(Math.abs(l - r));
-				} else {
-					stack.push(0);
-				}
+				stack.push(!left.equals(right) ? Math.abs(left - right) : 0);
 				break;
 			case NE:
-				if (l.equals(r)) {
-					stack.push(1);
-				} else {
-					stack.push(0);
-				}
+				stack.push(left.equals(right) ? 1 : 0);
 				break;
 			case MUL:
-				stack.push(l * r);
+				stack.push(left * right);
 				break;
 			case SUB:
-				stack.push(Math.abs(Math.abs(r) - Math.abs(l)));
+				stack.push(Math.abs(Math.abs(right) - Math.abs(left)));
 				break;
 			case MOD:
-				stack.push(Math.floorMod(l, r));
+				stack.push(Math.floorMod(left, right));
 				break;
 			default:
 				stack.push(0);
@@ -947,180 +737,138 @@ public class GruliaService extends SATService1 {
 
 	}
 
+	// ======================================================================
+	//
+	// VISITOR TO CHECK IF VARIABLE ASSIGNMENT SATISFIES AN EPXRESSION
+	//
+	// ======================================================================
+
+	/**
+	 * Visitor to compute expression values for a given variable assignment.
+	 */
 	private static class GruliaExpressionEvaluator extends Visitor {
 
-		/*
+		/**
 		 * Local stack for the evaluation of the expression.
 		 */
-		private Stack<Object> evalStack = new Stack<Object>();
-
-		private Map<Variable, Constant> modelMap;
+		private final Stack<Object> evalStack = new Stack<Object>();
 
 		/**
-		 * Public method to get the satisfiability status of the expression.
-		 *
-		 * @return SAT - true if the expression is satisfied, - false otherwise
+		 * Mapping from variables to values.
 		 */
-		public Boolean isSat() {
-			return (Boolean) evalStack.pop();
-		}
+		private final Map<Variable, Constant> modelMap;
 
-		public void setModelMap(Map<Variable, Constant> modelMap) {
+		GruliaExpressionEvaluator(Map<Variable, Constant> modelMap) {
+			super();
 			this.modelMap = modelMap;
 		}
 
-		@Override
-		public void postVisit(Expression expression) throws VisitorException {
-			super.postVisit(expression);
+		/**
+		 * Return the satisfiability status of the expression.
+		 *
+		 * @return {@code true} if the expression is satisfied, otherwise {@code false}
+		 */
+		public Boolean isSat() {
+			if (evalStack.isEmpty()) {
+				return false;
+			}
+			Object top = evalStack.pop();
+			return (top instanceof Boolean) && (Boolean) top;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Variable)
+		 */
 		@Override
 		public void postVisit(Variable variable) throws VisitorException {
-			super.postVisit(variable);
 			Constant val = modelMap.get(variable);
-			Integer value = -1;
-			if (val == null) {
-				value = 0;
-			} else if (val instanceof IntConstant) {
-				value = ((IntConstant) val).getValue();
+			if ((val != null) && (val instanceof IntConstant)) {
+				evalStack.push(((IntConstant) val).getValue());
 			} else {
-				value = 0;
+				evalStack.push(0);
 			}
-			evalStack.push(value);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+		 * IntConstant)
+		 */
 		@Override
 		public void postVisit(IntConstant constant) throws VisitorException {
-			super.postVisit(constant);
 			evalStack.push(constant.getValue());
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
+		 */
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
-			super.postVisit(operation);
-
-			Boolean isSat = false;
-			Object l = null;
-			Object r = null;
-
+			Object left = null, right = null;
 			int arity = operation.getOperator().getArity();
 			if (arity == 2) {
 				if (!evalStack.isEmpty()) {
-					r = evalStack.pop();
+					right = evalStack.pop();
 				}
 				if (!evalStack.isEmpty()) {
-					l = evalStack.pop();
+					left = evalStack.pop();
 				}
+				assert (left != null) && (right != null);
 			} else if (arity == 1) {
 				if (!evalStack.isEmpty()) {
-					l = evalStack.pop();
+					left = evalStack.pop();
 				}
+				assert (left != null);
 			}
-
-			Operation.Operator op = operation.getOperator();
-
-			// Vars for casting
-			Integer leftI, rightI;
-			Boolean leftB, rightB;
-
-			// test sat
-			switch (op) {
+			switch (operation.getOperator()) {
 			case LE:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				isSat = (leftI <= rightI);
-				evalStack.push(isSat);
+				evalStack.push((Integer) left <= (Integer) right);
 				break;
 			case LT:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				isSat = (leftI < rightI);
-				evalStack.push(isSat);
+				evalStack.push((Integer) left < (Integer) right);
 				break;
 			case AND:
-				leftB = (Boolean) l;
-				rightB = (Boolean) r;
-				assert (leftB != null && rightB != null);
-
-				isSat = (leftB && rightB);
-				evalStack.push(isSat);
+				evalStack.push((Boolean) left && (Boolean) right);
 				break;
 			case ADD:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				evalStack.push(leftI + rightI);
+				evalStack.push((Integer) left + (Integer) right);
 				break;
 			case SUB:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				evalStack.push(leftI - rightI);
+				evalStack.push((Integer) left - (Integer) right);
 				break;
 			case EQ:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				isSat = (leftI.equals(rightI));
-				evalStack.push(isSat);
+				evalStack.push(left.equals(right));
 				break;
 			case GE:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				isSat = (leftI >= rightI);
-				evalStack.push(isSat);
+				evalStack.push((Integer) left >= (Integer) right);
 				break;
 			case GT:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				isSat = (leftI > rightI);
-				evalStack.push(isSat);
+				evalStack.push((Integer) left > (Integer) right);
 				break;
 			case MUL:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				evalStack.push(leftI * rightI);
+				evalStack.push((Integer) left * (Integer) right);
 				break;
 			case OR:
-				leftB = (Boolean) l;
-				rightB = (Boolean) r;
-				assert (leftB != null && rightB != null);
-
-				isSat = (leftB || rightB);
-				evalStack.push(isSat);
+				evalStack.push((Boolean) left || (Boolean) right);
 				break;
 			case NE:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				isSat = (!leftI.equals(rightI));
-				evalStack.push(isSat);
+				evalStack.push(!left.equals(right));
 				break;
 			case MOD:
-				leftI = (Integer) l;
-				rightI = (Integer) r;
-				assert (leftI != null && rightI != null);
-
-				evalStack.push(Math.floorMod(leftI, rightI));
+				evalStack.push((Integer) left % (Integer) right);
 				break;
 			default:
 				break;
 			}
 		}
+
 	}
 
 }

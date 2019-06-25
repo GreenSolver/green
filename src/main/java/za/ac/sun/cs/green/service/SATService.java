@@ -19,10 +19,32 @@ public abstract class SATService extends BasicService {
 	 */
 	protected static final String SERVICE_KEY = "SAT:";
 
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
+
 	/**
 	 * Number of times this service has been invoked.
 	 */
 	protected int invocationCount = 0;
+
+	/**
+	 * Number of SAT answers returned.
+	 * 
+	 * {@link #satCount} + {@link #unsatCount} <= {@link #invocationCount}
+	 * 
+	 * {@link #satHitCount} + {@link #satMissCount} = {@link #satCount}
+	 */
+	protected int satCount = 0;
+
+	/**
+	 * Number of UNSAT answers returned.
+	 * 
+	 * {@link #unsatHitCount} + {@link #unsatMissCount} = {@link #unsatCount}
+	 */
+	protected int unsatCount = 0;
 
 	/**
 	 * Number of times the answer was found in the store.
@@ -58,36 +80,41 @@ public abstract class SATService extends BasicService {
 	 */
 	protected int unsatMissCount = 0;
 
-	/**
-	 * Number of SAT answers returned.
-	 * 
-	 * {@link #satCount} + {@link #unsatCount} <= {@link #invocationCount}
-	 * 
-	 * {@link #satHitCount} + {@link #satMissCount} = {@link #satCount}
-	 */
-	protected int satCount = 0;
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
 
 	/**
-	 * Number of UNSAT answers returned.
-	 * 
-	 * {@link #unsatHitCount} + {@link #unsatMissCount} = {@link #unsatCount}
+	 * Milliseconds spent to process requests.
 	 */
-	protected int unsatCount = 0;
-
+	protected long serviceTimeConsumption = 0;
+	
 	/**
-	 * Milliseconds spent to compute SAT/UNSAT, excluding store lookups.
+	 * Milliseconds spent to process requests that are SAT.
 	 */
-	protected long timeConsumption = 0;
-
+	protected long satTimeConsumption = 0;
+	
+	/**
+	 * Milliseconds spent to process requests that are UNSAT.
+	 */
+	protected long unsatTimeConsumption = 0;
+	
 	/**
 	 * Milliseconds spent to compute SAT/UNSAT, including store lookups.
 	 */
 	protected long fullTimeConsumption = 0;
+	
+	/**
+	 * Milliseconds spent to compute SAT/UNSAT, excluding store lookups.
+	 */
+	protected long innerTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent on computing store keys.
 	 */
-	protected long keyComputationTime = 0;
+	protected long keyTimeConsumption = 0;
 
 	/**
 	 * Construct an instance of a SAT service.
@@ -108,17 +135,20 @@ public abstract class SATService extends BasicService {
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
 		reporter.report("invocationCount", invocationCount);
+		reporter.report("satCount", satCount);
+		reporter.report("unsatCount", unsatCount);
 		reporter.report("cacheHitCount", cacheHitCount);
 		reporter.report("satHitCount", satHitCount);
 		reporter.report("unsatHitCount", unsatHitCount);
 		reporter.report("cacheMissCount", cacheMissCount);
 		reporter.report("satMissCount", satMissCount);
 		reporter.report("unsatMissCount", unsatMissCount);
-		reporter.report("satCount", satCount);
-		reporter.report("unsatCount", unsatCount);
-		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("serviceTimeConsumption", serviceTimeConsumption);
+		reporter.report("satTimeConsumption", satTimeConsumption);
+		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
 		reporter.report("fullTimeConsumption", fullTimeConsumption);
-		reporter.report("keyComputationTime", keyComputationTime);
+		reporter.report("innerTimeConsumption", innerTimeConsumption);
+		reporter.report("keyTimeConsumption", keyTimeConsumption);
 	}
 
 	/*
@@ -142,6 +172,7 @@ public abstract class SATService extends BasicService {
 	 */
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
+		long startTime = System.currentTimeMillis();
 		Object result = instance.getData(getClass());
 		if (result == null) {
 			result = solve0(instance);
@@ -152,10 +183,13 @@ public abstract class SATService extends BasicService {
 		if ((result != null) && (result instanceof Boolean)) {
 			if ((Boolean) result) {
 				satCount++;
+				satTimeConsumption += (System.currentTimeMillis() - startTime);
 			} else {
 				unsatCount++;
+				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
 			}
 		}
+		serviceTimeConsumption += (System.currentTimeMillis() - startTime);
 		return null;
 	}
 
@@ -171,10 +205,10 @@ public abstract class SATService extends BasicService {
 	 *         mean UNSAT
 	 */
 	protected Boolean solve0(Instance instance) {
+		long startTime = System.currentTimeMillis();
 		invocationCount++;
-		long start = System.currentTimeMillis();
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
-		keyComputationTime += (System.currentTimeMillis() - start);
+		keyTimeConsumption += (System.currentTimeMillis() - startTime);
 		Boolean result = store.getBoolean(key);
 
 		if (result == null) {
@@ -196,7 +230,7 @@ public abstract class SATService extends BasicService {
 				unsatHitCount++;
 			}
 		}
-		fullTimeConsumption += (System.currentTimeMillis() - start);
+		fullTimeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
@@ -213,7 +247,7 @@ public abstract class SATService extends BasicService {
 	protected Boolean solve1(Instance instance) {
 		long startTime = System.currentTimeMillis();
 		Boolean result = solve(instance);
-		timeConsumption += System.currentTimeMillis() - startTime;
+		innerTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
