@@ -271,7 +271,7 @@ public class Green {
 				keyValueList.add(new Pair<>(key, value));
 			}
 		});
-		
+
 		// Now write the report
 		StringBuilder sb = new StringBuilder();
 		for (String context : messages.keySet()) {

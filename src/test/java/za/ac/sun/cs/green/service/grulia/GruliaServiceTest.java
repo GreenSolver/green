@@ -33,8 +33,9 @@ public class GruliaServiceTest {
 		solver = new Green();
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
-		props.setProperty("green.service.sat", "(grulia)");
+		props.setProperty("green.service.sat", "(grulia z3)");
 		props.setProperty("green.service.sat.grulia", "za.ac.sun.cs.green.service.grulia.GruliaService");
+		props.setProperty("green.service.sat.z3", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}
@@ -49,6 +50,21 @@ public class GruliaServiceTest {
 		Instance i = new Instance(solver, null, expression);
 		Object result = i.request("sat");
 		assertTrue(((result.toString()).equals(expected)));
+	}
+
+	/*
+	 * Input:
+	 * a = 0
+	 * 
+	 * Solution: SAT
+	 * 
+	 * Notes: Reference solution is expected to hit input.
+	 */
+	@Test
+	public void testJG00() {
+		IntVariable v1 = new IntVariable("a", -10, 10);
+		Operation o1 = new Operation(Operation.Operator.EQ, v1, Operation.ZERO);
+		check(o1, "true");
 	}
 
 	@Test

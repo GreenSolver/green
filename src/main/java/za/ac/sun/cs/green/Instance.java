@@ -181,7 +181,6 @@ public class Instance {
 		if (expression == null) {
 			return 0;
 		} else {
-//			return expression.getString().hashCode();
 			return expression.hashCode();
 		}
 	}
@@ -191,7 +190,9 @@ public class Instance {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null) {
 			return false;
 		} else if (!(obj instanceof Instance)) {
 			return false;

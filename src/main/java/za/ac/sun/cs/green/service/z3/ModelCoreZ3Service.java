@@ -46,6 +46,7 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	@Override
 	protected ModelCore solve0(String smtQuery, Map<Variable, String> variables,
 			Map<String, Expression> coreClauseMapping) {
+		log.trace("smtQuery: {}", smtQuery);
 		long startTime = System.currentTimeMillis();
 		try {
 			Process process = Runtime.getRuntime().exec(z3Command);
