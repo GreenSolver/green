@@ -12,6 +12,8 @@ import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.SATService1;
+import za.ac.sun.cs.green.service.grulia.repository.Entry;
+import za.ac.sun.cs.green.service.grulia.repository.Repository;
 import za.ac.sun.cs.green.service.z3.ModelCoreZ3JavaService;
 import za.ac.sun.cs.green.util.Reporter;
 
@@ -89,11 +91,11 @@ public class GruliaBVService extends SATService1 {
 	/**
 	 * Stores data of satisfiable formulas.
 	 */
-	private Repo satRepo;
+	private Repository satRepo;
 	/**
 	 * Stores data of unsatisfiable formulas.
 	 */
-	private Repo unsatRepo;
+	private Repository unsatRepo;
 
 	/**
 	 * Instance of model checker.

@@ -1,6 +1,7 @@
 package za.ac.sun.cs.green.service.grulia;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -19,6 +20,12 @@ import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.SATService;
+import za.ac.sun.cs.green.service.grulia.repository.BinaryRepository;
+import za.ac.sun.cs.green.service.grulia.repository.CoreEntry;
+import za.ac.sun.cs.green.service.grulia.repository.Entry;
+import za.ac.sun.cs.green.service.grulia.repository.LinearRepository;
+import za.ac.sun.cs.green.service.grulia.repository.ModelEntry;
+import za.ac.sun.cs.green.service.grulia.repository.Repository;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
@@ -68,13 +75,16 @@ public class GruliaService extends SATService {
 	/**
 	 * Stores data of satisfiable formulas.
 	 */
-	private final Repo satRepo = BINARY_TREE_REPO ? new SatRepoB(solver, DEFAULT_ZERO) : new SatRepoA(DEFAULT_ZERO);
+	private final Repository<ModelEntry> satRepo = BINARY_TREE_REPO ? new BinaryRepository<ModelEntry>()
+			: new LinearRepository<ModelEntry>();
+//	private final Repository satRepo = BINARY_TREE_REPO ? new SatRepoB(solver, DEFAULT_ZERO) : new SatRepoA(DEFAULT_ZERO);
 
 	/**
 	 * Stores data of unsatisfiable formulas.
 	 */
-	private final Repo unsatRepo = BINARY_TREE_REPO ? new UnsatRepoB(solver, DEFAULT_ZERO)
-			: new UnsatRepoA(DEFAULT_ZERO);
+	private final Repository<CoreEntry> unsatRepo = BINARY_TREE_REPO ? new BinaryRepository<CoreEntry>()
+			: new LinearRepository<CoreEntry>();
+//	private final Repository unsatRepo = BINARY_TREE_REPO ? new UnsatRepoB(solver, DEFAULT_ZERO) : new UnsatRepoA(DEFAULT_ZERO);
 
 	// ======================================================================
 	//
@@ -223,11 +233,11 @@ public class GruliaService extends SATService {
 		super(solver);
 		long start = System.currentTimeMillis();
 		for (String key : solver.getStore().keySet()) {
-			Object val = solver.getStore().get(key);
-			if (val instanceof SatEntry) {
-				satRepo.add((SatEntry) val);
-			} else if (val instanceof UnsatEntry) {
-				unsatRepo.add((UnsatEntry) val);
+			Object entry = solver.getStore().get(key);
+			if (entry instanceof ModelEntry) {
+				satRepo.add((ModelEntry) entry);
+			} else if (entry instanceof CoreEntry) {
+				unsatRepo.add((CoreEntry) entry);
 			}
 		}
 		repoLoadTimeConsumption += (System.currentTimeMillis() - start);
@@ -408,20 +418,21 @@ public class GruliaService extends SATService {
 	private Boolean findSharedModel(Expression expr, SortedSet<IntVariable> setOfVars) {
 		log.trace("looking for shared models");
 		satRepoMissCount++; // Assume that we won't find a model.
+		ModelEntry anchorModel = new ModelEntry(expr.satDelta, null, setOfVars.size());
 		Boolean result = null;
 		if (satRepo.size() != 0) {
 			long startTime = System.currentTimeMillis();
-			Entry[] models = satRepo.extract(expr.satDelta, setOfVars, K);
+			List<ModelEntry> models = satRepo.getEntries(K, anchorModel);
 			modelExtractionTimeConsumption += (System.currentTimeMillis() - startTime);
-			log.trace("found {} close models", models.length);
+			log.trace("found {} close models", models.size());
 			startTime = System.currentTimeMillis();
-			for (Entry model : models) {
+			for (ModelEntry model : models) {
 				if (model == null) {
 					break;
 				}
 				log.trace("investigating model {}", model);
 				long startTime0 = System.currentTimeMillis();
-				GruliaExpressionEvaluator satCheck = new GruliaExpressionEvaluator(((SatEntry) model).getSolution());
+				GruliaExpressionEvaluator satCheck = new GruliaExpressionEvaluator(model.getModel());
 				try {
 					expr.accept(satCheck);
 				} catch (VisitorException x) {
@@ -462,12 +473,13 @@ public class GruliaService extends SATService {
 	private Boolean findSharedCore(Expression expr, SortedSet<IntVariable> setOfVars) {
 		log.trace("looking for shared cores");
 		unsatRepoMissCount++; // Assume that we won't find a model.
+		CoreEntry anchorCore = new CoreEntry(expr.satDelta, null);
 		Boolean result = null;
 		if (unsatRepo.size() != 0) {
 			long startTime = System.currentTimeMillis();
-			Entry[] cores = unsatRepo.extract(expr.satDelta, setOfVars, K);
+			List<CoreEntry> cores = unsatRepo.getEntries(K, anchorCore);
 			coreExtractionTimeConsumption += (System.currentTimeMillis() - startTime);
-			log.trace("found {} close models", cores.length);
+			log.trace("found {} close models", cores.size());
 			startTime = System.currentTimeMillis();
 			String exprStr = expr.toString();
 			for (Entry core : cores) {
@@ -475,7 +487,7 @@ public class GruliaService extends SATService {
 					break;
 				}
 				long startTime0 = System.currentTimeMillis();
-				Set<Expression> unsatCore = ((UnsatEntry) core).getSolution();
+				Set<Expression> unsatCore = ((CoreEntry) core).getCore();
 				boolean shared = (unsatCore.size() > 0);
 				for (Expression clause : unsatCore) {
 					if (!exprStr.contains(clause.toString())) {
@@ -509,14 +521,14 @@ public class GruliaService extends SATService {
 			log.trace("solver was invoked, isSat: {} satDelta: {}", isSat, satDelta);
 			if (isSat) {
 				Map<Variable, Constant> model = ModelCoreService.getModel(instance);
-				SatEntry newEntry = new SatEntry(satDelta, model);
+				ModelEntry newEntry = new ModelEntry(satDelta, model);
 				log.trace("adding {} to satRepo", model);
 				satRepo.add(newEntry);
 				satRepoAddCount++;
 				satCount++;
 			} else {
 				Set<Expression> core = ModelCoreService.getCore(instance);
-				UnsatEntry newEntry = new UnsatEntry(satDelta, core);
+				CoreEntry newEntry = new CoreEntry(satDelta, core);
 				log.trace("adding {} to unsatRepo", core);
 				unsatRepo.add(newEntry);
 				unsatRepoAddCount++;
@@ -784,9 +796,9 @@ public class GruliaService extends SATService {
 		 */
 		@Override
 		public void postVisit(Variable variable) throws VisitorException {
-			Constant val = modelMap.get(variable);
-			if ((val != null) && (val instanceof IntConstant)) {
-				evalStack.push(((IntConstant) val).getValue());
+			Constant value = (Constant) modelMap.get(variable);
+			if ((value != null) && (value instanceof IntConstant)) {
+				evalStack.push(((IntConstant) value).getValue());
 			} else {
 				evalStack.push(0);
 			}
