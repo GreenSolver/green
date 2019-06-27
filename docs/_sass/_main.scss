@@ -61,7 +61,37 @@ main {
 		}
 
 		h3 {
+			font-size: 1.875rem;
+			font-weight: 800;
 			text-align: center;
+		}
+
+		p {
+			font-size: 1.05rem;
+			text-align: center;
+		}
+
+		code {
+			font-size: 1.05rem;
+			background-color: #c2d938;
+			border-radius: 0.4rem;
+			margin-left: 1rem;
+		}
+
+		code:first-child {
+			margin-left: 0;
+		}
+
+		.other1 h3 {
+			color: #f414ff;
+		}
+
+		.other2 h3 {
+			color: #0a5ea3;
+		}
+
+		.other3 h3 {
+			color: #6e0aa3;
 		}
 
 		svg {

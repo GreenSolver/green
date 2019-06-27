@@ -22,24 +22,60 @@ permalink: /
 <section class="frontpage-section other"><div class="wrapper">
 	<div class="gridboxes">
 		<div class="gridbox3">
-			{% include svg/clipboard.svg %}
-			<h3>Reduce</h3>
+			<h3>REDUCE</h3>
 			<p>
-				COASTAL can generate a test suite to test software up to a desired level of coverage in situations where a complete and executable specification of correct behaviour is not available.  A test suite that covers all behaviour is useful for regression testing and when migrating from legacy to new code.
+				Incoming constraints are factorized into unrelated subconstraints:
+			</p>
+			<p>
+				<code>(A=B)&(B<10)</code>
+				<code>(D<=5)</code>
+			</p>
+			<p>
+				In further steps, the factors are processed independently.
 			</p>
 		</div>
 		<div class="gridbox3">
-			{% include svg/bug.svg %}
-			<h3>Reuse</h3>
+			<h3>REUSE</h3>
 			<p>
-				Null pointer exceptions.
+				Constraints are "canonized" with simple rewrite rules and renaming variables.
+			</p>
+			<p class="other4">
+				<code>(V1-V2=0)&(V2<10)</code>
+				<code>(V3<6)</code>
+			</p>
+			<p>
+				Even though canonization is not perfect, the quick-and-dirty normal form can boost reuse significantly.
 			</p>
 		</div>
 		<div class="gridbox3">
-			{% include svg/pie-chart.svg %}
-			<h3>Recycle</h3>
+			<h3>RECYCLE</h3>
 			<p>
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+				Results from all steps are cached in a shared persistent store.
+			</p>
+			<p>
+				This allows results from different users and tools to be re-used and shared.
+				When stored results are not available an external solver is invoked.
+			</p>
+		</div>
+	</div>
+	<div class="gridboxes">
+		<div class="gridbox3 other1">
+			<h3>DISTRIBUTION</h3>
+			<p>
+				A powerful configuration language is used to describe query pipelines.
+				Execution is automatically distributed to available processing nodes.
+			</p>
+		</div>
+		<div class="gridbox3 other2">
+			<h3>STORES</h3>
+			<p>
+				The "store" can be configured as local or distributed, as private or public, and can use a variety of databases, for example organized in a hierarchy.
+			</p>
+		</div>
+		<div class="gridbox3 other3">
+			<h3>PORTFOLIO</h3>
+			<p>
+				GREEN processes queries with a variety of established solvers: Choco, STP, Z3, CVC4, OpenSMT, Yices, LattE, Barvinok.
 			</p>
 		</div>
 	</div>

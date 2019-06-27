@@ -38,13 +38,16 @@ $c-header-nav-hover-fg-color: #ffffff;
 $c-header-uses-fg-color: $c-green-dark-green;
 
 // HERO
-$c-hero-bg-color: #303030;
+// $c-hero-bg-color: #f0f0f0;
+// $c-hero-fg-color: #303030;
 $c-hero-fg-color: #f0f0f0;
+$c-hero-bg-color: #1f352b;
 $c-hero-padding-top: 1.5rem;
 $c-hero-padding-bottom: 3rem;
 $c-hero-diver-size: 10rem;
 $c-hero-diver-padding: 1.5rem;
 $c-hero-heading-font-size: 3.5rem;
+$c-hero-heading-font-weight: 800;
 $c-hero-heading-line-height: 3.5rem;
 $c-hero-heading-padding-bottom: 2rem;
 $c-hero-subheading-font-size: 2.5rem;

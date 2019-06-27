@@ -1,6 +1,8 @@
 main {
 	.hero {
 		background-color: $c-hero-bg-color;
+		// background-image: url($site_baseurl + "/assets/images/greenback.jpg");
+		// background-size: cover;
 		color: $c-hero-fg-color;
 		padding: $c-hero-padding-top 0 $c-hero-padding-bottom;
 
@@ -15,6 +17,7 @@ main {
 
 		h1 {
 			font-size: $c-hero-heading-font-size;
+			font-weight: $c-hero-heading-font-weight;
 			line-height: $c-hero-heading-line-height;
 			text-align: center;
 			padding-bottom: $c-hero-heading-padding-bottom;
