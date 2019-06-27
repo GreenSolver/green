@@ -37,12 +37,12 @@ import za.ac.sun.cs.green.util.Reporter;
  * Julia (Java version of Utopia Linear Integer Arithmetic) re-implemented to
  * improve GREEN. Julia is implemented as a service in GREEN -- Grulia.
  *
- * @date (last updated): 04/02/2019
- * @author: JH Taljaard (USnr 18509193)
- * @author: Willem Visser (2018, 2019) (supervisor)
- * @author: Jaco Geldenhuys (2017) (supervisor)
+ * @author JH Taljaard (USnr 18509193)
+ * @author Willem Visser (2018, 2019) (supervisor)
+ * @author Jaco Geldenhuys (2017) (supervisor)
  */
-public class GruliaService extends SATService {
+@SuppressWarnings("unused")
+class GruliaService extends SATService {
 
 	// ======================================================================
 	//
@@ -75,15 +75,15 @@ public class GruliaService extends SATService {
 	/**
 	 * Stores data of satisfiable formulas.
 	 */
-	private final Repository<ModelEntry> satRepo = BINARY_TREE_REPO ? new BinaryRepository<ModelEntry>()
-			: new LinearRepository<ModelEntry>();
+	private final Repository<ModelEntry> satRepo = BINARY_TREE_REPO ? new BinaryRepository<>()
+			: new LinearRepository<>();
 //	private final Repository satRepo = BINARY_TREE_REPO ? new SatRepoB(solver, DEFAULT_ZERO) : new SatRepoA(DEFAULT_ZERO);
 
 	/**
 	 * Stores data of unsatisfiable formulas.
 	 */
-	private final Repository<CoreEntry> unsatRepo = BINARY_TREE_REPO ? new BinaryRepository<CoreEntry>()
-			: new LinearRepository<CoreEntry>();
+	private final Repository<CoreEntry> unsatRepo = BINARY_TREE_REPO ? new BinaryRepository<>()
+			: new LinearRepository<>();
 //	private final Repository unsatRepo = BINARY_TREE_REPO ? new UnsatRepoB(solver, DEFAULT_ZERO) : new UnsatRepoA(DEFAULT_ZERO);
 
 	// ======================================================================
@@ -126,7 +126,7 @@ public class GruliaService extends SATService {
 	private int repoCoreHitCount = 0;
 
 	/**
-	 * Number of times {@link #findSharedCore(Expression, SortedSet)} found no core
+	 * Number of times {@link #findSharedCore(Expression)} found no core
 	 * in the UNSAT repo to subsume an expression.
 	 */
 	private int unsatRepoMissCount = 0;
@@ -225,7 +225,7 @@ public class GruliaService extends SATService {
 	/**
 	 * Constructor for the Grulia service.
 	 * 
-	 * GuliaService recommends to run with Factorizer and Renamer.
+	 * GruliaService recommends to run with Factorizer and Renamer.
 	 *
 	 * @param solver the {@link Green} solver this service will be added to
 	 */
@@ -292,6 +292,7 @@ public class GruliaService extends SATService {
 			assert (result instanceof Set<?>);
 			returnValue = (Set<Instance>) result;
 		}
+		//noinspection ConstantConditions
 		if (returnValue instanceof Set<?>) {
 			log.trace("delegating to solver");
 			instance.setData("SOLVER" + getClass(), Boolean.TRUE);
@@ -356,14 +357,14 @@ public class GruliaService extends SATService {
 		if (result == null) {
 			startTime0 = System.currentTimeMillis();
 			result = findSharedModel(fullExpr, setOfVariables);
-			satRepoTimeConsumption += (System.currentTimeMillis() - startTime);
+			satRepoTimeConsumption += (System.currentTimeMillis() - startTime0);
 		}
 
 		// Try to find a core in the UNSAT repo contained in the expression.
 		if (result == null) {
 			startTime0 = System.currentTimeMillis();
-			result = findSharedCore(fullExpr, setOfVariables);
-			unsatRepoTimeConsumption += (System.currentTimeMillis() - startTime);
+			result = findSharedCore(fullExpr);
+			unsatRepoTimeConsumption += (System.currentTimeMillis() - startTime0);
 		}
 
 		// If result is still null, we have to pass the instance on to whatever
@@ -467,10 +468,9 @@ public class GruliaService extends SATService {
 	 * </ol>
 	 *
 	 * @param expr      expression to subsume
-	 * @param setOfVars variables in expression, passed to repo
 	 * @return {@code false} if a subsuming core was found, otherwise {@code null}
 	 */
-	private Boolean findSharedCore(Expression expr, SortedSet<IntVariable> setOfVars) {
+	private Boolean findSharedCore(Expression expr) {
 		log.trace("looking for shared cores");
 		unsatRepoMissCount++; // Assume that we won't find a model.
 		CoreEntry anchorCore = new CoreEntry(expr.satDelta, null);
@@ -578,27 +578,25 @@ public class GruliaService extends SATService {
 	//
 	// ======================================================================
 
+	@SuppressWarnings("unused")
 	private static class ExpressionVisitor extends Visitor {
 
-		private SortedSet<IntVariable> variableSet;
-
-		private boolean unsatisfiable;
+		private final SortedSet<IntVariable> variableSet;
 
 		private boolean linearInteger;
 
 		ExpressionVisitor() {
-			variableSet = new TreeSet<IntVariable>();
-			unsatisfiable = false;
+			variableSet = new TreeSet<>();
 			linearInteger = true;
 		}
 
-		public SortedSet<IntVariable> getVariableSet() {
+		SortedSet<IntVariable> getVariableSet() {
 			return variableSet;
 		}
 
 		@Override
 		public void postVisit(Variable variable) {
-			if (linearInteger && !unsatisfiable) {
+			if (linearInteger) {
 				if (variable instanceof IntVariable) {
 					variableSet.add((IntVariable) variable);
 				} else {
@@ -618,12 +616,13 @@ public class GruliaService extends SATService {
 	 * Visitor to compute the SatDelta value for an expressions given a reference
 	 * value.
 	 */
+	@SuppressWarnings("unused")
 	private static class GruliaVisitor extends Visitor {
 
 		/**
 		 * Local stack to calculate the SatDelta value
 		 */
-		private final Stack<Integer> stack = new Stack<Integer>();
+		private final Stack<Integer> stack = new Stack<>();
 
 		/**
 		 * Value used for all variables.
@@ -642,7 +641,7 @@ public class GruliaService extends SATService {
 		 * 
 		 * @param referenceValue the new reference value
 		 */
-		public void setReferenceValue(int referenceValue) {
+		void setReferenceValue(int referenceValue) {
 			stack.clear();
 			result = null;
 			this.referenceValue = referenceValue;
@@ -654,7 +653,7 @@ public class GruliaService extends SATService {
 		 * 
 		 * @return the SatDelta value
 		 */
-		public double getResult() {
+		double getResult() {
 			if (result == null) {
 				result = 0.0 + stack.pop();
 			}
@@ -668,7 +667,7 @@ public class GruliaService extends SATService {
 		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Variable)
 		 */
 		@Override
-		public void postVisit(Variable variable) throws VisitorException {
+		public void postVisit(Variable variable) {
 			stack.push(referenceValue);
 		}
 
@@ -679,7 +678,7 @@ public class GruliaService extends SATService {
 		 * IntConstant)
 		 */
 		@Override
-		public void postVisit(IntConstant constant) throws VisitorException {
+		public void postVisit(IntConstant constant) {
 			stack.push(constant.getValue());
 		}
 
@@ -694,11 +693,10 @@ public class GruliaService extends SATService {
 		 * Giovanni Denaro and Mauro Pezze'.
 		 *
 		 * @param operation the current operation working with
-		 * @param stack     the stack to push the result to
 		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 		 */
 		@Override
-		public void postVisit(Operation operation) throws VisitorException {
+		public void postVisit(Operation operation) {
 			Integer left = null, right = null;
 			assert (operation.getOperator().getArity() == 2);
 			if (!stack.isEmpty()) {
@@ -758,12 +756,13 @@ public class GruliaService extends SATService {
 	/**
 	 * Visitor to compute expression values for a given variable assignment.
 	 */
+	@SuppressWarnings("unused")
 	private static class GruliaExpressionEvaluator extends Visitor {
 
 		/**
 		 * Local stack for the evaluation of the expression.
 		 */
-		private final Stack<Object> evalStack = new Stack<Object>();
+		private final Stack<Object> evalStack = new Stack<>();
 
 		/**
 		 * Mapping from variables to values.
@@ -780,7 +779,7 @@ public class GruliaService extends SATService {
 		 *
 		 * @return {@code true} if the expression is satisfied, otherwise {@code false}
 		 */
-		public Boolean isSat() {
+		Boolean isSat() {
 			if (evalStack.isEmpty()) {
 				return false;
 			}
@@ -795,9 +794,9 @@ public class GruliaService extends SATService {
 		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Variable)
 		 */
 		@Override
-		public void postVisit(Variable variable) throws VisitorException {
-			Constant value = (Constant) modelMap.get(variable);
-			if ((value != null) && (value instanceof IntConstant)) {
+		public void postVisit(Variable variable) {
+			Constant value = modelMap.get(variable);
+			if (value instanceof IntConstant) {
 				evalStack.push(((IntConstant) value).getValue());
 			} else {
 				evalStack.push(0);
@@ -811,7 +810,7 @@ public class GruliaService extends SATService {
 		 * IntConstant)
 		 */
 		@Override
-		public void postVisit(IntConstant constant) throws VisitorException {
+		public void postVisit(IntConstant constant) {
 			evalStack.push(constant.getValue());
 		}
 
@@ -821,8 +820,9 @@ public class GruliaService extends SATService {
 		 * @see
 		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 		 */
+		@SuppressWarnings("ConstantConditions")
 		@Override
-		public void postVisit(Operation operation) throws VisitorException {
+		public void postVisit(Operation operation) {
 			Object left = null, right = null;
 			int arity = operation.getOperator().getArity();
 			if (arity == 2) {
@@ -841,7 +841,7 @@ public class GruliaService extends SATService {
 			}
 			switch (operation.getOperator()) {
 			case LE:
-				evalStack.push((Integer) left <= (Integer) right);
+				evalStack.push(((Integer) left) <= ((Integer) right));
 				break;
 			case LT:
 				evalStack.push((Integer) left < (Integer) right);

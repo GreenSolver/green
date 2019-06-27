@@ -43,7 +43,7 @@ public class ModelEntry extends Entry {
 	public ModelEntry(Double satDelta, Map<Variable, Constant> model, int size) {
 		super(satDelta);
 		this.model = model;
-		this.modelSize = model.size();
+		this.modelSize = size;
 	}
 
 	/**
