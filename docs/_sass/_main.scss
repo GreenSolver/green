@@ -49,9 +49,45 @@ main {
 		}
 	}
 
+	.features {
+		.gridbox2 {
+			padding: 2rem 6rem;
+
+			> img {
+				display: block;
+				width: 20rem;
+				height: 15rem;
+				margin: 1rem auto 0;
+			}
+		}
+
+		h3 {
+			font-size: 1.4rem;
+			font-weight: 800;
+		}
+
+		.grid {
+			display: block;
+			width: 24rem;
+			height: 18rem;
+			margin: 1rem auto 0;
+			font-size: 1rem;
+			* {
+				font-size: 1rem;
+			}
+		}
+	}
+
 	.other {
 		.gridboxes {
 			padding-top: 1rem;
+		}
+
+		.gridbox3 > img {
+			display: block;
+			width: 20rem;
+			height: 15rem;
+			margin: 1rem auto 0;
 		}
 
 		h2 {
@@ -82,17 +118,17 @@ main {
 			margin-left: 0;
 		}
 
-		.other1 h3 {
-			color: #f414ff;
-		}
-
-		.other2 h3 {
-			color: #0a5ea3;
-		}
-
+		.other1 h3,
+		.other2 h3,
 		.other3 h3 {
-			color: #6e0aa3;
+			color: #0e3c0b;
 		}
+
+		/*
+		.other1 h3 { color: #f414ff; }
+		.other2 h3 { color: #0a5ea3; }
+		.other3 h3 { color: #6e0aa3; }
+		*/
 
 		svg {
 			display: block;
