@@ -1,0 +1,93 @@
+<svg viewBox="0 0 960.0 720.0">
+<g font-weight="800" font-family="sans-serif" font-size="52px">
+<defs><clipPath id="cp_store"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g clip-path="url(#cp_store)">
+<rect x="0" y="0" width="960" height="720" fill="#8d6e63"/>
+<polygon points="480,390  920,545  480,700  40,545" fill="#ffebee"/>
+<polygon points="40,235  40,545  480,390  480,80" fill="#e57373"/>
+<polygon points="480,390  480,80  920,235  920,545" fill="#ef9a9a"/>
+<line x1="480" y1="80" x2="920" y2="235" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="40" y1="235" x2="480" y2="80" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="480" y1="390" x2="920" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="920" y1="545" x2="480" y2="700" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="480" y1="700" x2="40" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="40" y1="545" x2="480" y2="390" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="40" y1="235" x2="40" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="920" y1="235" x2="920" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="480" y1="80" x2="480" y2="390" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(340, 170)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(620, 170)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(170, 370)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(790, 370)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(370, 470)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(590, 470)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="286.0" y1="324.0" x2="217.0" y2="386.0"/>
+<polyline points="235.0,387.0 217.0,386.0 218.0,368.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="350.0" y1="344.0" x2="369.0" y2="465.0"/>
+<polyline points="379.6,450.5 369.0,465.0 354.5,454.4" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="659.0" y1="324.0" x2="742.0" y2="387.0"/>
+<polyline points="739.6,369.2 742.0,387.0 724.2,389.4" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="630.0" y1="344.0" x2="591.0" y2="465.0"/>
+<polyline points="607.0,456.8 591.0,465.0 582.8,449.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="399.0" y1="80.0" x2="424.0" y2="96.0"/>
+<polyline points="420.1,78.4 424.0,96.0 406.4,99.9" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="423.0" y1="107.0" x2="386.0" y2="185.0"/>
+<polyline points="403.0,179.0 386.0,185.0 380.0,168.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="433.0" y1="107.0" x2="571.0" y2="187.0"/>
+<polyline points="566.4,169.6 571.0,187.0 553.6,191.6" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<path d="M196 70 Q 312 24 399 80" stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121"/>
+<rect x="108" y="70" width="176" height="100" transform="translate(-88.0,-50.0)" stroke-width="6" fill="#2e7d32" stroke-linecap="round" stroke="none"/>
+<text x="108" y="70" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#b2ffb6" stroke-linecap="round" stroke="none">result</text>
+</g><!-- store -->
+</g>
+</svg>

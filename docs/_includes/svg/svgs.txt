@@ -1,0 +1,304 @@
+font-size 52px
+font-family sans-serif
+font-weight 800
+*G
+
+#===============================================================================
+*PIC factorizer 960 720
+	fill #dce775
+	*RECT 0 0 960 720
+
+	rx 10
+	fill #4caf50
+	*C_RECT 480 180 570 90
+	*C_RECT 290 520 370 90
+	*C_RECT 770 520 190 90
+
+	stroke #a0a0a0
+	stroke-width 5
+	fill none
+	*C_RECT 480 180 570 90
+	*C_RECT 290 520 370 90
+	*C_RECT 770 520 190 90
+
+	stroke none
+	stroke-width 0
+	fill #212121
+	*C_TEXT 480 180 (A=C)&amp;(B&lt;=5)&amp;(C&lt;10)
+	*C_TEXT 290 520 (A=C)&amp;(C&lt;10)
+	*C_TEXT 770 520 (B&lt;=5)
+
+	stroke #0277bd
+	stroke-width 11
+	*ARROW 395 240 290 460 35
+	*ARROW 665 240 770 460 35
+*ENDPIC
+
+#===============================================================================
+*PIC canonizer 960 720
+	#fill #a5d6a7
+	fill #9090a0
+	*RECT 0 0 960 720
+
+	rx 10
+	fill #4caf50
+	*C_RECT 330 180 490 90
+	*C_RECT 750 180 230 90
+	fill #d4e157
+	*C_RECT 330 520 490 90
+	*C_RECT 750 520 230 90
+
+	stroke #b0b0b0
+	stroke-width 5
+	fill none
+	*C_RECT 330 180 490 90
+	*C_RECT 750 180 230 90
+	*C_RECT 330 520 490 90
+	*C_RECT 750 520 230 90
+
+	stroke none
+	stroke-width 0
+	fill #212121
+	*C_TEXT 330 180 (A=C)&amp;(C&lt;10)
+	*C_TEXT 750 180 (B&lt;=5)
+	*C_TEXT 330 520 (V1–V2=0)&amp;(V2&lt;10)
+	*C_TEXT 750 520 (V1&lt;6)
+
+	#stroke #0277bd
+	stroke #c62828
+	stroke-width 11
+	*ARROW 330 240 330 460 35
+	*ARROW 750 240 750 460 35
+*ENDPIC
+
+#===============================================================================
+*DEF storebox
+	transform translate(_x_, _y_)
+	*G
+		fill #ff8a80
+		*POLYGON 0,0  88,41  0,82  -88,41
+		fill #f44336
+		*POLYGON -88,41  -88,123  0,164  0,82
+		fill #c62828
+		*POLYGON 0,82  0,164  88,123  88,41
+	*ENDG
+*ENDDEF
+
+*PIC store 960 720
+	fill #8d6e63
+	*RECT 0 0 960 720
+
+	fill #ffebee
+	*POLYGON 480,390  920,545  480,700  40,545
+	fill #e57373
+	*POLYGON 40,235  40,545  480,390  480,80
+	fill #ef9a9a
+	*POLYGON 480,390  480,80  920,235  920,545
+	stroke rgba(128,0,0,0.5)
+	stroke-width 6
+	fill none
+	stroke-linecap round
+	*LINE 480  80 920 235
+	*LINE  40 235 480  80
+	*LINE 480 390 920 545
+	*LINE 920 545 480 700
+	*LINE 480 700  40 545
+	*LINE  40 545 480 390
+	*LINE  40 235  40 545
+	*LINE 920 235 920 545
+	*LINE 480  80 480 390
+
+	stroke none
+	*CALL storebox | _x_ 340 | _y_ 170
+	*CALL storebox | _x_ 620 | _y_ 170
+	*CALL storebox | _x_ 170 | _y_ 370
+	*CALL storebox | _x_ 790 | _y_ 370
+	*CALL storebox | _x_ 370 | _y_ 470
+	*CALL storebox | _x_ 590 | _y_ 470
+
+	fill none
+	stroke #212121
+	stroke-width 6
+	*ARROW 286 324 217 386 18
+	*ARROW 350 344 369 465 18
+	*ARROW 659 324 742 387 18
+	*ARROW 630 344 591 465 18
+	*ARROW 399 80 424 96 18
+	*ARROW 423 107 386 185 18
+	*ARROW 433 107 571 187 18
+	*PATH M196 70 Q 312 24 399 80
+
+	stroke none
+	fill #2e7d32
+	*C_RECT 108 70 176 100
+	stroke none
+	stroke-width 0
+	fill #b2ffb6
+	*C_TEXT 108 70 result
+*ENDPIC
+
+#===============================================================================
+*DEF input
+	transform translate(_x_, _y_)
+	*G
+		fill _ca_
+		*C_RECT 0 0 266 100
+		fill _cb_
+		*C_RECT 0 -26 172 24
+		fill _cc_
+		*C_TEXT 0 14 _a_
+		fill #b2dfdb
+		*POLYGON -64,-176  40,-176  64,-143  64,-24  -64,-24
+		fill #80cbc4
+		*POLYGON 40,-176  40,-143  64,-143
+		fill #b2dfdb
+		*POLYGON -64,-24  -70,-18  58,-18  64,-24
+		fill #80cbc4
+		*G
+			font-size 24px
+			*TEXT -54 -136 _b_
+			*TEXT -54 -109 _c_
+			*TEXT -54  -82 _d_
+			*TEXT -54  -55 _e_
+		*ENDG
+	*ENDG
+*ENDDEF
+
+*PIC share 960 720
+	fill #7e57c2
+	*RECT 0 0 960 720
+
+	*GREEN 328 247 0.5
+	*GREEN 632 247 0.5
+	*GREEN 148 497 0.5
+	*GREEN 812 497 0.5
+
+	*CALL input | _x_ 328 | _y_ 206 | _a_ symbc | _b_ public | _c_ static | _d_ void main | _e_ () {... | _ca_ #0277bd | _cb_ #e1f5fe | _cc_ #29b6f6
+	*CALL input | _x_ 632 | _y_ 206 | _a_ KLEE  | _b_ #ifdef | _c_ void main | _d_ (argc) {... | _e_ &#173; | _ca_ #ef6c00 | _cb_ #fff3e0 | _cc_ #ffa726
+	*CALL input | _x_ 148 | _y_ 456 | _a_ COASTAL  | _b_ public | _c_ static | _d_ void main | _e_ () {... | _ca_ #283593 | _cb_ #e8eaf6 | _cc_ #9fa8da
+	*CALL input | _x_ 812 | _y_ 456 | _a_ DART  | _b_ public | _c_ static | _d_ void main | _e_ () {... | _ca_ #ad1457 | _cb_ #fce4ec | _cc_ #f48fb1
+
+	stroke none
+	*CALL storebox | _x_ 480 | _y_ 500
+
+	fill none
+	stroke #212121
+	stroke-width 6
+	*ARROW 348 384 398 495 16
+	*ARROW 612 384 561 495 16
+	*ARROW 262 568 365 568 16
+	*ARROW 698 568 594 568 16
+*ENDPIC
+
+#===============================================================================
+*PIC portfolio 960 720
+	fill #ffd54f
+	*RECT 0 0 960 720
+
+	fill #f4511e
+	*C_RECT 410 250 250 55
+	*C_RECT 410 320 250 55
+	*C_RECT 410 390 250 55
+	*C_RECT 410 460 250 55
+	*C_RECT 410 530 250 55
+	*C_RECT 410 600 250 55
+	*C_RECT 410 670 250 55
+
+	stroke none
+	stroke-width 0
+	fill #e0e0e0
+	font-size 42px
+	*C_TEXT 410 250 CVC4
+	*C_TEXT 410 320 Choco
+	*C_TEXT 410 390 OpenSMT
+	*C_TEXT 410 460 STP
+	*C_TEXT 410 530 Z3
+	*C_TEXT 410 600 LattE
+	*C_TEXT 410 670 Barvinok
+
+	fill none
+	stroke #212121
+	stroke-width 5
+	*ARROW 200 250 280 250 16
+	*ARROW 200 320 280 320 16
+	*ARROW 200 390 280 390 16
+	*ARROW 200 460 280 460 16
+	*ARROW 200 530 280 530 16
+	*ARROW 200 600 280 600 16
+	*ARROW 200 670 280 670 16
+
+	stroke-linecap round
+	*LINE 200 670 200 150
+	*ARROW 760 460 760 167 17
+	*LINE 760 460 680 460
+	*LINE 670 460 662 460
+	*LINE 650 460 642 460
+	*LINE 630 460 622 460
+
+	*GREEN 480 -160 2.1
+*ENDPIC
+
+#===============================================================================
+*PIC pipeline 960 720
+	fill #8787ff
+	*RECT 0 0 960 720
+
+	rx 40
+	fill #e0e0e0
+	*C_RECT 270 100 275 80
+	*C_RECT 690 100 275 80
+	*C_RECT 270 270 275 80
+	*C_RECT 690 270 275 80
+	*C_RECT 480 440 275 80
+	*C_RECT 480 610 275 80
+
+	stroke #c0c0e0
+	stroke-width 6
+	fill none
+	*C_RECT 270 100 275 80
+	*C_RECT 690 100 275 80
+	*C_RECT 270 270 275 80
+	*C_RECT 690 270 275 80
+	*C_RECT 480 440 275 80
+	*C_RECT 480 610 275 80
+
+	stroke none
+	stroke-width 0
+	fill #903030
+	font-size 48px
+	*C_TEXT 270 100 Bounder
+	*C_TEXT 690 100 Factorizer
+	*C_TEXT 270 270 Grulia
+	*C_TEXT 690 270 Canonizer
+	*C_TEXT 480 440 Z3
+	*C_TEXT 480 610 Choco
+
+	fill none
+	stroke #602040
+	stroke-width 8
+	stroke-linecap round
+	*ARROW  40 100 125 100 20
+	*ARROW 415 100 545 100 20
+	*LINE  835 100 890 100
+	*LINE  920 130 920 240
+	*ARROW 890 270 835 270 20
+	*ARROW 545 270 415 270 20
+	*LINE  125 270  70 270
+	*LINE   40 300  40 495
+	*LINE   70 525 200 525
+	*LINE  230 495 230 470
+	*ARROW 260 440 335 440 20
+	*LINE  230 555 230 580
+	*ARROW 260 610 335 610 20
+	*PATH M 890 100 A 30 30 0 0 1 920 130
+	*PATH M 920 240 A 30 30 0 0 1 890 270
+	*PATH M  70 270 A 30 30 0 0 0  40 300
+	*PATH M  40 495 A 30 30 0 0 0  70 525
+	*PATH M 200 525 A 30 30 0 0 0 230 495
+	*PATH M 200 525 A 30 30 0 0 1 230 555
+	*PATH M 230 470 A 30 30 0 0 1 260 440
+	*PATH M 230 580 A 30 30 0 0 0 260 610
+*ENDPIC
+
+*ENDG
+*END

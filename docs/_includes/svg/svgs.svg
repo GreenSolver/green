@@ -1,0 +1,946 @@
+<?xml version="1.0" ?>
+<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg height="4420px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+<g font-weight="800" font-family="sans-serif" font-size="52px">
+
+
+<!-- ======================================================================== -->
+<!-- factorizer -->
+<defs><clipPath id="cp_factorizer"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g transform="translate(0,0)" clip-path="url(#cp_factorizer)">
+<rect x="0" y="0" width="960" height="720" fill="#dce775"/>
+<rect x="480" y="180" width="570" height="90" transform="translate(-285.0,-45.0)" rx="10" fill="#4caf50"/>
+<rect x="290" y="520" width="370" height="90" transform="translate(-185.0,-45.0)" rx="10" fill="#4caf50"/>
+<rect x="770" y="520" width="190" height="90" transform="translate(-95.0,-45.0)" rx="10" fill="#4caf50"/>
+<rect x="480" y="180" width="570" height="90" transform="translate(-285.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
+<rect x="290" y="520" width="370" height="90" transform="translate(-185.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
+<rect x="770" y="520" width="190" height="90" transform="translate(-95.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
+<text x="480" y="180" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(A=C)&amp;(B&lt;=5)&amp;(C&lt;10)</text>
+<text x="290" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(A=C)&amp;(C&lt;10)</text>
+<text x="770" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(B&lt;=5)</text>
+<g rx="10" stroke-width="11" fill="#212121" stroke="#0277bd">
+<line x1="395.0" y1="240.0" x2="290.0" y2="460.0"/>
+<polyline points="323.0,448.3 290.0,460.0 278.3,427.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g rx="10" stroke-width="11" fill="#212121" stroke="#0277bd">
+<line x1="665.0" y1="240.0" x2="770.0" y2="460.0"/>
+<polyline points="781.7,427.0 770.0,460.0 737.0,448.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+</g><!-- factorizer -->
+
+
+<!-- ======================================================================== -->
+<!-- canonizer -->
+<defs><clipPath id="cp_canonizer"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g transform="translate(0,740)" clip-path="url(#cp_canonizer)">
+<rect x="0" y="0" width="960" height="720" fill="#9090a0"/>
+<rect x="330" y="180" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" fill="#4caf50"/>
+<rect x="750" y="180" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" fill="#4caf50"/>
+<rect x="330" y="520" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" fill="#d4e157"/>
+<rect x="750" y="520" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" fill="#d4e157"/>
+<rect x="330" y="180" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="750" y="180" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="330" y="520" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="750" y="520" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<text x="330" y="180" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(A=C)&amp;(C&lt;10)</text>
+<text x="750" y="180" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(B&lt;=5)</text>
+<text x="330" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(V1–V2=0)&amp;(V2&lt;10)</text>
+<text x="750" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(V1&lt;6)</text>
+<g rx="10" stroke-width="11" fill="#212121" stroke="#c62828">
+<line x1="330.0" y1="240.0" x2="330.0" y2="460.0"/>
+<polyline points="354.7,435.3 330.0,460.0 305.3,435.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g rx="10" stroke-width="11" fill="#212121" stroke="#c62828">
+<line x1="750.0" y1="240.0" x2="750.0" y2="460.0"/>
+<polyline points="774.7,435.3 750.0,460.0 725.3,435.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+</g><!-- canonizer -->
+
+
+<!-- ======================================================================== -->
+<!-- store -->
+<defs><clipPath id="cp_store"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g transform="translate(0,1480)" clip-path="url(#cp_store)">
+<rect x="0" y="0" width="960" height="720" fill="#8d6e63"/>
+<polygon points="480,390  920,545  480,700  40,545" fill="#ffebee"/>
+<polygon points="40,235  40,545  480,390  480,80" fill="#e57373"/>
+<polygon points="480,390  480,80  920,235  920,545" fill="#ef9a9a"/>
+<line x1="480" y1="80" x2="920" y2="235" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="40" y1="235" x2="480" y2="80" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="480" y1="390" x2="920" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="920" y1="545" x2="480" y2="700" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="480" y1="700" x2="40" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="40" y1="545" x2="480" y2="390" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="40" y1="235" x2="40" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="920" y1="235" x2="920" y2="545" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<line x1="480" y1="80" x2="480" y2="390" stroke-width="6" fill="none" stroke-linecap="round" stroke="rgba(128,0,0,0.5)"/>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(340, 170)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(620, 170)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(170, 370)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(790, 370)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(370, 470)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="none">
+<g transform="translate(590, 470)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="286.0" y1="324.0" x2="217.0" y2="386.0"/>
+<polyline points="235.0,387.0 217.0,386.0 218.0,368.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="350.0" y1="344.0" x2="369.0" y2="465.0"/>
+<polyline points="379.6,450.5 369.0,465.0 354.5,454.4" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="659.0" y1="324.0" x2="742.0" y2="387.0"/>
+<polyline points="739.6,369.2 742.0,387.0 724.2,389.4" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="630.0" y1="344.0" x2="591.0" y2="465.0"/>
+<polyline points="607.0,456.8 591.0,465.0 582.8,449.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="399.0" y1="80.0" x2="424.0" y2="96.0"/>
+<polyline points="420.1,78.4 424.0,96.0 406.4,99.9" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="423.0" y1="107.0" x2="386.0" y2="185.0"/>
+<polyline points="403.0,179.0 386.0,185.0 380.0,168.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121">
+<line x1="433.0" y1="107.0" x2="571.0" y2="187.0"/>
+<polyline points="566.4,169.6 571.0,187.0 553.6,191.6" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<path d="M196 70 Q 312 24 399 80" stroke-width="6" fill="none" stroke-linecap="round" stroke="#212121"/>
+<rect x="108" y="70" width="176" height="100" transform="translate(-88.0,-50.0)" stroke-width="6" fill="#2e7d32" stroke-linecap="round" stroke="none"/>
+<text x="108" y="70" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#b2ffb6" stroke-linecap="round" stroke="none">result</text>
+</g><!-- store -->
+
+
+<!-- ======================================================================== -->
+<!-- share -->
+<defs><clipPath id="cp_share"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g transform="translate(0,2220)" clip-path="url(#cp_share)">
+<rect x="0" y="0" width="960" height="720" fill="#7e57c2"/>
+<g transform="translate(328.0,247.0)scale(0.5)translate(-180,-153)">
+<g style="transform: translate(0,207)">
+<g style="stroke:none;stroke-width:0;">
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(300,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(160,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(140,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(20,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(320,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(300,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(280,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(260,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(240,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(140,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(20,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(0,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(320,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(300,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(40,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(20,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(0,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(300,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(280,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(240,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(200,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(120,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(100,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(20,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(280,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(260,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(240,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(80,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(60,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(240,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(80,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(60,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(240,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(180,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(160,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(140,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(80,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(180,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(160,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(140,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(120,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(100,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,0)" />
+</g>
+</g>
+</g>
+<g transform="translate(632.0,247.0)scale(0.5)translate(-180,-153)">
+<g style="transform: translate(0,207)">
+<g style="stroke:none;stroke-width:0;">
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(300,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(160,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(140,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(20,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(320,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(300,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(280,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(260,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(240,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(140,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(20,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(0,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(320,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(300,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(40,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(20,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(0,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(300,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(280,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(240,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(200,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(120,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(100,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(20,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(280,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(260,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(240,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(80,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(60,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(240,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(80,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(60,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(240,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(180,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(160,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(140,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(80,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(180,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(160,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(140,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(120,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(100,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,0)" />
+</g>
+</g>
+</g>
+<g transform="translate(148.0,497.0)scale(0.5)translate(-180,-153)">
+<g style="transform: translate(0,207)">
+<g style="stroke:none;stroke-width:0;">
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(300,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(160,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(140,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(20,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(320,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(300,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(280,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(260,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(240,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(140,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(20,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(0,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(320,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(300,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(40,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(20,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(0,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(300,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(280,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(240,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(200,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(120,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(100,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(20,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(280,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(260,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(240,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(80,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(60,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(240,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(80,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(60,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(240,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(180,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(160,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(140,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(80,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(180,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(160,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(140,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(120,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(100,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,0)" />
+</g>
+</g>
+</g>
+<g transform="translate(812.0,497.0)scale(0.5)translate(-180,-153)">
+<g style="transform: translate(0,207)">
+<g style="stroke:none;stroke-width:0;">
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(300,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(160,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(140,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(20,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(320,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(300,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(280,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(260,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(240,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(140,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(20,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(0,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(320,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(300,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(40,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(20,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(0,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(300,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(280,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(240,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(200,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(120,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(100,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(20,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(280,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(260,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(240,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(80,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(60,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(240,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(80,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(60,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(240,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(180,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(160,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(140,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(80,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(180,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(160,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(140,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(120,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(100,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,0)" />
+</g>
+</g>
+</g>
+<g fill="#7e57c2">
+<g transform="translate(328, 206)">
+<rect x="0" y="0" width="266" height="100" transform="translate(-133.0,-50.0)" fill="#0277bd"/>
+<rect x="0" y="-26" width="172" height="24" transform="translate(-86.0,-12.0)" fill="#e1f5fe"/>
+<text x="0" y="14" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" fill="#29b6f6">symbc</text>
+<polygon points="-64,-176  40,-176  64,-143  64,-24  -64,-24" fill="#b2dfdb"/>
+<polygon points="40,-176  40,-143  64,-143" fill="#80cbc4"/>
+<polygon points="-64,-24  -70,-18  58,-18  64,-24" fill="#b2dfdb"/>
+<g fill="#80cbc4">
+<text x="-54" y="-136" font-size="24px">public</text>
+<text x="-54" y="-109" font-size="24px">static</text>
+<text x="-54" y="-82" font-size="24px">void main</text>
+<text x="-54" y="-55" font-size="24px">() {...</text>
+</g>
+</g>
+</g>
+<g fill="#7e57c2">
+<g transform="translate(632, 206)">
+<rect x="0" y="0" width="266" height="100" transform="translate(-133.0,-50.0)" fill="#ef6c00"/>
+<rect x="0" y="-26" width="172" height="24" transform="translate(-86.0,-12.0)" fill="#fff3e0"/>
+<text x="0" y="14" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" fill="#ffa726">KLEE</text>
+<polygon points="-64,-176  40,-176  64,-143  64,-24  -64,-24" fill="#b2dfdb"/>
+<polygon points="40,-176  40,-143  64,-143" fill="#80cbc4"/>
+<polygon points="-64,-24  -70,-18  58,-18  64,-24" fill="#b2dfdb"/>
+<g fill="#80cbc4">
+<text x="-54" y="-136" font-size="24px">#ifdef</text>
+<text x="-54" y="-109" font-size="24px">void main</text>
+<text x="-54" y="-82" font-size="24px">(argc) {...</text>
+<text x="-54" y="-55" font-size="24px">&#173;</text>
+</g>
+</g>
+</g>
+<g fill="#7e57c2">
+<g transform="translate(148, 456)">
+<rect x="0" y="0" width="266" height="100" transform="translate(-133.0,-50.0)" fill="#283593"/>
+<rect x="0" y="-26" width="172" height="24" transform="translate(-86.0,-12.0)" fill="#e8eaf6"/>
+<text x="0" y="14" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" fill="#9fa8da">COASTAL</text>
+<polygon points="-64,-176  40,-176  64,-143  64,-24  -64,-24" fill="#b2dfdb"/>
+<polygon points="40,-176  40,-143  64,-143" fill="#80cbc4"/>
+<polygon points="-64,-24  -70,-18  58,-18  64,-24" fill="#b2dfdb"/>
+<g fill="#80cbc4">
+<text x="-54" y="-136" font-size="24px">public</text>
+<text x="-54" y="-109" font-size="24px">static</text>
+<text x="-54" y="-82" font-size="24px">void main</text>
+<text x="-54" y="-55" font-size="24px">() {...</text>
+</g>
+</g>
+</g>
+<g fill="#7e57c2">
+<g transform="translate(812, 456)">
+<rect x="0" y="0" width="266" height="100" transform="translate(-133.0,-50.0)" fill="#ad1457"/>
+<rect x="0" y="-26" width="172" height="24" transform="translate(-86.0,-12.0)" fill="#fce4ec"/>
+<text x="0" y="14" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" fill="#f48fb1">DART</text>
+<polygon points="-64,-176  40,-176  64,-143  64,-24  -64,-24" fill="#b2dfdb"/>
+<polygon points="40,-176  40,-143  64,-143" fill="#80cbc4"/>
+<polygon points="-64,-24  -70,-18  58,-18  64,-24" fill="#b2dfdb"/>
+<g fill="#80cbc4">
+<text x="-54" y="-136" font-size="24px">public</text>
+<text x="-54" y="-109" font-size="24px">static</text>
+<text x="-54" y="-82" font-size="24px">void main</text>
+<text x="-54" y="-55" font-size="24px">() {...</text>
+</g>
+</g>
+</g>
+<g fill="#7e57c2" stroke="none">
+<g transform="translate(480, 500)">
+<polygon points="0,0  88,41  0,82  -88,41" fill="#ff8a80"/>
+<polygon points="-88,41  -88,123  0,164  0,82" fill="#f44336"/>
+<polygon points="0,82  0,164  88,123  88,41" fill="#c62828"/>
+</g>
+</g>
+<g stroke-width="6" fill="none" stroke="#212121">
+<line x1="348.0" y1="384.0" x2="398.0" y2="495.0"/>
+<polyline points="403.7,480.0 398.0,495.0 383.0,489.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke="#212121">
+<line x1="612.0" y1="384.0" x2="561.0" y2="495.0"/>
+<polyline points="576.0,489.4 561.0,495.0 555.4,480.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke="#212121">
+<line x1="262.0" y1="568.0" x2="365.0" y2="568.0"/>
+<polyline points="353.7,556.7 365.0,568.0 353.7,579.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="6" fill="none" stroke="#212121">
+<line x1="698.0" y1="568.0" x2="594.0" y2="568.0"/>
+<polyline points="605.3,579.3 594.0,568.0 605.3,556.7" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+</g><!-- share -->
+
+
+<!-- ======================================================================== -->
+<!-- portfolio -->
+<defs><clipPath id="cp_portfolio"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g transform="translate(0,2960)" clip-path="url(#cp_portfolio)">
+<rect x="0" y="0" width="960" height="720" fill="#ffd54f"/>
+<rect x="410" y="250" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="320" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="390" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="460" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="530" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="600" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="670" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<text x="410" y="250" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">CVC4</text>
+<text x="410" y="320" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">Choco</text>
+<text x="410" y="390" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">OpenSMT</text>
+<text x="410" y="460" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">STP</text>
+<text x="410" y="530" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">Z3</text>
+<text x="410" y="600" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">LattE</text>
+<text x="410" y="670" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">Barvinok</text>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="250.0" x2="280.0" y2="250.0"/>
+<polyline points="268.7,238.7 280.0,250.0 268.7,261.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="320.0" x2="280.0" y2="320.0"/>
+<polyline points="268.7,308.7 280.0,320.0 268.7,331.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="390.0" x2="280.0" y2="390.0"/>
+<polyline points="268.7,378.7 280.0,390.0 268.7,401.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="460.0" x2="280.0" y2="460.0"/>
+<polyline points="268.7,448.7 280.0,460.0 268.7,471.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="530.0" x2="280.0" y2="530.0"/>
+<polyline points="268.7,518.7 280.0,530.0 268.7,541.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="600.0" x2="280.0" y2="600.0"/>
+<polyline points="268.7,588.7 280.0,600.0 268.7,611.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
+<line x1="200.0" y1="670.0" x2="280.0" y2="670.0"/>
+<polyline points="268.7,658.7 280.0,670.0 268.7,681.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<line x1="200" y1="670" x2="200" y2="150" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
+<g stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121">
+<line x1="760.0" y1="460.0" x2="760.0" y2="167.0"/>
+<polyline points="748.0,179.0 760.0,167.0 772.0,179.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<line x1="760" y1="460" x2="680" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
+<line x1="670" y1="460" x2="662" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
+<line x1="650" y1="460" x2="642" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
+<line x1="630" y1="460" x2="622" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
+<g transform="translate(480.0,-160.0)scale(2.1)translate(-180,-153)">
+<g style="transform: translate(0,207)">
+<g style="stroke:none;stroke-width:0;">
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(300,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(160,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(140,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,272)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(20,272)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(320,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(300,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(280,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(260,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(240,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(140,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(20,238)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(0,238)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(320,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(300,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(280,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(260,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(240,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(80,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(60,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(40,204)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(20,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(0,204)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(300,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(280,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(240,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(200,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(120,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(100,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(80,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(60,170)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(40,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(20,170)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(280,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(260,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(240,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(220,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(200,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(100,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(80,136)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(60,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(40,136)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(260,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(240,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(220,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(180,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(160,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(140,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(120,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(100,102)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(80,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(60,102)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(240,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(220,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(180,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(160,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(140,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(120,68)" />
+<polygon points="20,34  0,0  40,0" style="fill:#3e7bac;" transform="translate(100,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#3b9942;" transform="translate(80,68)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(220,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(200,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(180,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(160,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(140,34)" />
+<polygon points="20,34  0,0  40,0" style="fill:#2a6798;" transform="translate(120,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(100,34)" />
+<polygon points="20,0  0,34  40,34" style="fill:#27852e;" transform="translate(200,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(180,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(160,0)" />
+<polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(140,0)" />
+<polygon points="20,0  0,34  40,34" style="fill:#9dcca0;" transform="translate(120,0)" />
+</g>
+</g>
+</g>
+</g><!-- portfolio -->
+
+
+<!-- ======================================================================== -->
+<!-- pipeline -->
+<defs><clipPath id="cp_pipeline"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<g transform="translate(0,3700)" clip-path="url(#cp_pipeline)">
+<rect x="0" y="0" width="960" height="720" fill="#8787ff"/>
+<rect x="270" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
+<rect x="690" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
+<rect x="270" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
+<rect x="690" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
+<rect x="480" y="440" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
+<rect x="480" y="610" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
+<rect x="270" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="690" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="270" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="690" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="480" y="440" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="480" y="610" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<text x="270" y="100" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Bounder</text>
+<text x="690" y="100" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Factorizer</text>
+<text x="270" y="270" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Grulia</text>
+<text x="690" y="270" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Canonizer</text>
+<text x="480" y="440" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Z3</text>
+<text x="480" y="610" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Choco</text>
+<g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
+<line x1="40.0" y1="100.0" x2="125.0" y2="100.0"/>
+<polyline points="110.9,85.9 125.0,100.0 110.9,114.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
+<line x1="415.0" y1="100.0" x2="545.0" y2="100.0"/>
+<polyline points="530.9,85.9 545.0,100.0 530.9,114.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<line x1="835" y1="100" x2="890" y2="100" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<line x1="920" y1="130" x2="920" y2="240" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
+<line x1="890.0" y1="270.0" x2="835.0" y2="270.0"/>
+<polyline points="849.1,284.1 835.0,270.0 849.1,255.9" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
+<line x1="545.0" y1="270.0" x2="415.0" y2="270.0"/>
+<polyline points="429.1,284.1 415.0,270.0 429.1,255.9" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<line x1="125" y1="270" x2="70" y2="270" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<line x1="40" y1="300" x2="40" y2="495" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<line x1="70" y1="525" x2="200" y2="525" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<line x1="230" y1="495" x2="230" y2="470" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
+<line x1="260.0" y1="440.0" x2="335.0" y2="440.0"/>
+<polyline points="320.9,425.9 335.0,440.0 320.9,454.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<line x1="230" y1="555" x2="230" y2="580" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
+<line x1="260.0" y1="610.0" x2="335.0" y2="610.0"/>
+<polyline points="320.9,595.9 335.0,610.0 320.9,624.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+</g>
+<path d="M 890 100 A 30 30 0 0 1 920 130" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M 920 240 A 30 30 0 0 1 890 270" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M  70 270 A 30 30 0 0 0  40 300" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M  40 495 A 30 30 0 0 0  70 525" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M 200 525 A 30 30 0 0 0 230 495" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M 200 525 A 30 30 0 0 1 230 555" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M 230 470 A 30 30 0 0 1 260 440" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+<path d="M 230 580 A 30 30 0 0 0 260 610" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
+</g><!-- pipeline -->
+</g>
+</svg>
