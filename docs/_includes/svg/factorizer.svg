@@ -1,24 +1,24 @@
-<svg viewBox="0 0 960.0 720.0">
+<svg viewBox="0 0 960.000 720.000">
 <g font-weight="800" font-family="sans-serif" font-size="52px">
-<defs><clipPath id="cp_factorizer"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<defs><clipPath id="cp_factorizer"><rect x="0" y="0" width="960.000" height="720.000"/></clipPath></defs>
 <g clip-path="url(#cp_factorizer)">
 <rect x="0" y="0" width="960" height="720" fill="#dce775"/>
-<rect x="480" y="180" width="570" height="90" transform="translate(-285.0,-45.0)" rx="10" fill="#4caf50"/>
-<rect x="290" y="520" width="370" height="90" transform="translate(-185.0,-45.0)" rx="10" fill="#4caf50"/>
-<rect x="770" y="520" width="190" height="90" transform="translate(-95.0,-45.0)" rx="10" fill="#4caf50"/>
-<rect x="480" y="180" width="570" height="90" transform="translate(-285.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
-<rect x="290" y="520" width="370" height="90" transform="translate(-185.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
-<rect x="770" y="520" width="190" height="90" transform="translate(-95.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
+<rect x="480" y="180" width="570" height="90" transform="translate(-285.000,-45.000)" rx="10" fill="#4caf50"/>
+<rect x="290" y="520" width="370" height="90" transform="translate(-185.000,-45.000)" rx="10" fill="#4caf50"/>
+<rect x="770" y="520" width="190" height="90" transform="translate(-95.000,-45.000)" rx="10" fill="#4caf50"/>
+<rect x="480" y="180" width="570" height="90" transform="translate(-285.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
+<rect x="290" y="520" width="370" height="90" transform="translate(-185.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
+<rect x="770" y="520" width="190" height="90" transform="translate(-95.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#a0a0a0"/>
 <text x="480" y="180" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(A=C)&amp;(B&lt;=5)&amp;(C&lt;10)</text>
 <text x="290" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(A=C)&amp;(C&lt;10)</text>
 <text x="770" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(B&lt;=5)</text>
 <g rx="10" stroke-width="11" fill="#212121" stroke="#0277bd">
-<line x1="395.0" y1="240.0" x2="290.0" y2="460.0"/>
-<polyline points="323.0,448.3 290.0,460.0 278.3,427.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="395.000" y1="240.000" x2="290.000" y2="460.000"/>
+<polyline points="322.996,448.325 290.000,460.000 278.324,427.005" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g rx="10" stroke-width="11" fill="#212121" stroke="#0277bd">
-<line x1="665.0" y1="240.0" x2="770.0" y2="460.0"/>
-<polyline points="781.7,427.0 770.0,460.0 737.0,448.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="665.000" y1="240.000" x2="770.000" y2="460.000"/>
+<polyline points="781.676,427.005 770.000,460.000 737.004,448.325" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 </g><!-- factorizer -->
 </g>

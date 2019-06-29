@@ -1,20 +1,20 @@
-<svg viewBox="0 0 960.0 720.0">
+<svg viewBox="0 0 960.000 720.000">
 <g font-weight="800" font-family="sans-serif" font-size="52px">
-<defs><clipPath id="cp_pipeline"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<defs><clipPath id="cp_pipeline"><rect x="0" y="0" width="960.000" height="720.000"/></clipPath></defs>
 <g clip-path="url(#cp_pipeline)">
 <rect x="0" y="0" width="960" height="720" fill="#8787ff"/>
-<rect x="270" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
-<rect x="690" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
-<rect x="270" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
-<rect x="690" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
-<rect x="480" y="440" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
-<rect x="480" y="610" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" fill="#e0e0e0"/>
-<rect x="270" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
-<rect x="690" y="100" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
-<rect x="270" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
-<rect x="690" y="270" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
-<rect x="480" y="440" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
-<rect x="480" y="610" width="275" height="80" transform="translate(-137.5,-40.0)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="270" y="100" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" fill="#e0e0e0"/>
+<rect x="690" y="100" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" fill="#e0e0e0"/>
+<rect x="270" y="270" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" fill="#e0e0e0"/>
+<rect x="690" y="270" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" fill="#e0e0e0"/>
+<rect x="480" y="440" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" fill="#e0e0e0"/>
+<rect x="480" y="610" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" fill="#e0e0e0"/>
+<rect x="270" y="100" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="690" y="100" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="270" y="270" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="690" y="270" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="480" y="440" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
+<rect x="480" y="610" width="275" height="80" transform="translate(-137.500,-40.000)" rx="40" stroke-width="6" fill="none" stroke="#c0c0e0"/>
 <text x="270" y="100" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Bounder</text>
 <text x="690" y="100" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Factorizer</text>
 <text x="270" y="270" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Grulia</text>
@@ -22,35 +22,35 @@
 <text x="480" y="440" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Z3</text>
 <text x="480" y="610" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="40" stroke-width="0" fill="#903030" font-size="48px" stroke="none">Choco</text>
 <g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
-<line x1="40.0" y1="100.0" x2="125.0" y2="100.0"/>
-<polyline points="110.9,85.9 125.0,100.0 110.9,114.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="40.000" y1="100.000" x2="125.000" y2="100.000"/>
+<polyline points="110.858,85.858 125.000,100.000 110.858,114.142" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
-<line x1="415.0" y1="100.0" x2="545.0" y2="100.0"/>
-<polyline points="530.9,85.9 545.0,100.0 530.9,114.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="415.000" y1="100.000" x2="545.000" y2="100.000"/>
+<polyline points="530.858,85.858 545.000,100.000 530.858,114.142" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <line x1="835" y1="100" x2="890" y2="100" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <line x1="920" y1="130" x2="920" y2="240" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
-<line x1="890.0" y1="270.0" x2="835.0" y2="270.0"/>
-<polyline points="849.1,284.1 835.0,270.0 849.1,255.9" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="890.000" y1="270.000" x2="835.000" y2="270.000"/>
+<polyline points="849.142,284.142 835.000,270.000 849.142,255.858" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
-<line x1="545.0" y1="270.0" x2="415.0" y2="270.0"/>
-<polyline points="429.1,284.1 415.0,270.0 429.1,255.9" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="545.000" y1="270.000" x2="415.000" y2="270.000"/>
+<polyline points="429.142,284.142 415.000,270.000 429.142,255.858" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <line x1="125" y1="270" x2="70" y2="270" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <line x1="40" y1="300" x2="40" y2="495" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <line x1="70" y1="525" x2="200" y2="525" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <line x1="230" y1="495" x2="230" y2="470" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
-<line x1="260.0" y1="440.0" x2="335.0" y2="440.0"/>
-<polyline points="320.9,425.9 335.0,440.0 320.9,454.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="260.000" y1="440.000" x2="335.000" y2="440.000"/>
+<polyline points="320.858,425.858 335.000,440.000 320.858,454.142" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <line x1="230" y1="555" x2="230" y2="580" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <g rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040">
-<line x1="260.0" y1="610.0" x2="335.0" y2="610.0"/>
-<polyline points="320.9,595.9 335.0,610.0 320.9,624.1" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="260.000" y1="610.000" x2="335.000" y2="610.000"/>
+<polyline points="320.858,595.858 335.000,610.000 320.858,624.142" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <path d="M 890 100 A 30 30 0 0 1 920 130" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>
 <path d="M 920 240 A 30 30 0 0 1 890 270" rx="40" stroke-width="8" fill="none" stroke-linecap="round" font-size="48px" stroke="#602040"/>

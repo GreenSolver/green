@@ -1,27 +1,27 @@
-<svg viewBox="0 0 960.0 720.0">
+<svg viewBox="0 0 960.000 720.000">
 <g font-weight="800" font-family="sans-serif" font-size="52px">
-<defs><clipPath id="cp_canonizer"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<defs><clipPath id="cp_canonizer"><rect x="0" y="0" width="960.000" height="720.000"/></clipPath></defs>
 <g clip-path="url(#cp_canonizer)">
 <rect x="0" y="0" width="960" height="720" fill="#9090a0"/>
-<rect x="330" y="180" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" fill="#4caf50"/>
-<rect x="750" y="180" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" fill="#4caf50"/>
-<rect x="330" y="520" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" fill="#d4e157"/>
-<rect x="750" y="520" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" fill="#d4e157"/>
-<rect x="330" y="180" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
-<rect x="750" y="180" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
-<rect x="330" y="520" width="490" height="90" transform="translate(-245.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
-<rect x="750" y="520" width="230" height="90" transform="translate(-115.0,-45.0)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="330" y="180" width="490" height="90" transform="translate(-245.000,-45.000)" rx="10" fill="#4caf50"/>
+<rect x="750" y="180" width="230" height="90" transform="translate(-115.000,-45.000)" rx="10" fill="#4caf50"/>
+<rect x="330" y="520" width="490" height="90" transform="translate(-245.000,-45.000)" rx="10" fill="#d4e157"/>
+<rect x="750" y="520" width="230" height="90" transform="translate(-115.000,-45.000)" rx="10" fill="#d4e157"/>
+<rect x="330" y="180" width="490" height="90" transform="translate(-245.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="750" y="180" width="230" height="90" transform="translate(-115.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="330" y="520" width="490" height="90" transform="translate(-245.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
+<rect x="750" y="520" width="230" height="90" transform="translate(-115.000,-45.000)" rx="10" stroke-width="5" fill="none" stroke="#b0b0b0"/>
 <text x="330" y="180" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(A=C)&amp;(C&lt;10)</text>
 <text x="750" y="180" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(B&lt;=5)</text>
 <text x="330" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(V1–V2=0)&amp;(V2&lt;10)</text>
 <text x="750" y="520" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" rx="10" stroke-width="0" fill="#212121" stroke="none">(V1&lt;6)</text>
 <g rx="10" stroke-width="11" fill="#212121" stroke="#c62828">
-<line x1="330.0" y1="240.0" x2="330.0" y2="460.0"/>
-<polyline points="354.7,435.3 330.0,460.0 305.3,435.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="330.000" y1="240.000" x2="330.000" y2="460.000"/>
+<polyline points="354.749,435.252 330.000,460.000 305.251,435.252" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g rx="10" stroke-width="11" fill="#212121" stroke="#c62828">
-<line x1="750.0" y1="240.0" x2="750.0" y2="460.0"/>
-<polyline points="774.7,435.3 750.0,460.0 725.3,435.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="750.000" y1="240.000" x2="750.000" y2="460.000"/>
+<polyline points="774.749,435.252 750.000,460.000 725.251,435.252" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 </g><!-- canonizer -->
 </g>

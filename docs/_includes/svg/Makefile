@@ -3,7 +3,7 @@
 #===============================================================================
 
 DEST_DIR=../../assets/images
-OUTPUTS=factorizer canonizer store share portfolio pipeline
+OUTPUTS=factorizer canonizer store share portfolio pipeline work-in-progress
 
 #-------------------------------------------------------------------------------
 

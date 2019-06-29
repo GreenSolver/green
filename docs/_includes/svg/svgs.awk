@@ -154,10 +154,10 @@ function processLine(line, q,qq,s,n,x,y,x1,y1,x2,y2,r,a,x3,y3,x4,y4,i,m,nn) {
 		if (picture == "") {
 			addLine(sprintf("\n\n<!-- ======================================================================== -->"))
 			addLine(sprintf("<!-- %s -->", thisPicture))
-			addLine(sprintf("<defs><clipPath id=\"cp_%s\"><rect x=\"0\" y=\"0\" width=\"%.1f\" height=\"%.1f\"/></clipPath></defs>", thisPicture, q[3], q[4]))
+			addLine(sprintf("<defs><clipPath id=\"cp_%s\"><rect x=\"0\" y=\"0\" width=\"%.3f\" height=\"%.3f\"/></clipPath></defs>", thisPicture, q[3], q[4]))
 			addLine(sprintf("<g transform=\"translate(0,%d)\" clip-path=\"url(#cp_%s)\">", height, thisPicture))
 		} else {
-			addLine(sprintf("<defs><clipPath id=\"cp_%s\"><rect x=\"0\" y=\"0\" width=\"%.1f\" height=\"%.1f\"/></clipPath></defs>", thisPicture, q[3], q[4]))
+			addLine(sprintf("<defs><clipPath id=\"cp_%s\"><rect x=\"0\" y=\"0\" width=\"%.3f\" height=\"%.3f\"/></clipPath></defs>", thisPicture, q[3], q[4]))
 			addLine(sprintf("<g clip-path=\"url(#cp_%s)\">", thisPicture))
 		}
 		addHeight(q[4])
@@ -166,12 +166,15 @@ function processLine(line, q,qq,s,n,x,y,x1,y1,x2,y2,r,a,x3,y3,x4,y4,i,m,nn) {
 		addLine(sprintf("</g><!-- %s -->", thisPicture))
 		levelDown()
 		activePic = 1
+	} else if (line ~ /^[ \t]*\*CIRCLE\>/) {
+		split(line, q)
+		addLine(sprintf("<circle cx=\"%s\" cy=\"%s\" r=\"%s\"%s/>", q[2], q[3], q[4], q[5], getAttrs()))
 	} else if (line ~ /^[ \t]*\*RECT\>/) {
 		split(line, q)
 		addLine(sprintf("<rect x=\"%s\" y=\"%s\" width=\"%s\" height=\"%s\"%s/>", q[2], q[3], q[4], q[5], getAttrs()))
 	} else if (line ~ /^[ \t]*\*C_RECT\>/) {
 		split(line, q)
-		addLine(sprintf("<rect x=\"%s\" y=\"%s\" width=\"%s\" height=\"%s\" transform=\"translate(%.1f,%.1f)\"%s/>", q[2], q[3], q[4], q[5], -q[4]*0.5, -q[5]*0.5, getAttrs()))
+		addLine(sprintf("<rect x=\"%s\" y=\"%s\" width=\"%s\" height=\"%s\" transform=\"translate(%.3f,%.3f)\"%s/>", q[2], q[3], q[4], q[5], -q[4]*0.5, -q[5]*0.5, getAttrs()))
 	} else if (line ~ /^[ \t]*\*LINE\>/) {
 		split(line, q)
 		addLine(sprintf("<line x1=\"%s\" y1=\"%s\" x2=\"%s\" y2=\"%s\"%s/>", q[2], q[3], q[4], q[5], getAttrs()))
@@ -185,7 +188,7 @@ function processLine(line, q,qq,s,n,x,y,x1,y1,x2,y2,r,a,x3,y3,x4,y4,i,m,nn) {
 		addLine(sprintf("<path d=\"%s\"%s/>", s, getAttrs()))
 	} else if (line ~ /^[ \t]*\*GREEN\>/) {
 		n = split(line, q)
-		addLine(sprintf("<g transform=\"translate(%.1f,%.1f)scale(%.1f)translate(-180,-153)\">", q[2], q[3], q[4]))
+		addLine(sprintf("<g transform=\"translate(%.3f,%.3f)scale(%.3f)translate(-180,-153)\">", q[2], q[3], q[4]))
 		for (i = 0; i < greenSize; i++) {
 			addLine(greenDef[i])
 		}
@@ -213,8 +216,8 @@ function processLine(line, q,qq,s,n,x,y,x1,y1,x2,y2,r,a,x3,y3,x4,y4,i,m,nn) {
 		y3 = y2 + r * sin(a + 0.78542)
 		x4 = x2 + r * cos(a - 0.78542)
 		y4 = y2 + r * sin(a - 0.78542)
-		addLine(sprintf("<line x1=\"%.1f\" y1=\"%.1f\" x2=\"%.1f\" y2=\"%.1f\"%s/>", x1, y1, x2, y2, getAttrs()))
-		addLine(sprintf("<polyline points=\"%.1f,%.1f %.1f,%.1f %.1f,%.1f\" fill=\"none\" stroke-linecap=\"square\" stroke-linejoin=\"miter\"%s/>", x3, y3, x2, y2, x4, y4, getAttrs()))
+		addLine(sprintf("<line x1=\"%.3f\" y1=\"%.3f\" x2=\"%.3f\" y2=\"%.3f\"%s/>", x1, y1, x2, y2, getAttrs()))
+		addLine(sprintf("<polyline points=\"%.3f,%.3f %.3f,%.3f %.3f,%.3f\" fill=\"none\" stroke-linecap=\"square\" stroke-linejoin=\"miter\"%s/>", x3, y3, x2, y2, x4, y4, getAttrs()))
 		endG()
 	} else if (line ~ /^[ \t]*\*DEF\>/) {
      	inDef++
@@ -374,6 +377,7 @@ function initGreen(i) {
 /^[ \t]*\*ENDG\>/ { processLine($0) ; next }
 /^[ \t]*\*PIC\>/ { processLine($0) ; next }
 /^[ \t]*\*ENDPIC\>/ { processLine($0) ; next }
+/^[ \t]*\*CIRCLE\>/ { processLine($0) ; next }
 /^[ \t]*\*RECT\>/ { processLine($0) ; next }
 /^[ \t]*\*C_RECT\>/ { processLine($0) ; next }
 /^[ \t]*\*LINE\>/ { processLine($0) ; next }
@@ -395,7 +399,7 @@ END {
 		printf("<!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>\n")
 		printf("<svg height=\"%dpx\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:space=\"preserve\">\n", height - GAP)
 	} else {
-		printf("<svg viewBox=\"0 0 %.1f %.1f\">\n", picWidth[picture], picHeight[picture])
+		printf("<svg viewBox=\"0 0 %.3f %.3f\">\n", picWidth[picture], picHeight[picture])
 	}
 	for (i = 0; i < lineCount; i++) {
 		printf("%s\n", lines[i])

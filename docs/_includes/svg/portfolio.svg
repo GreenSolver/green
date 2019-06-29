@@ -1,15 +1,15 @@
-<svg viewBox="0 0 960.0 720.0">
+<svg viewBox="0 0 960.000 720.000">
 <g font-weight="800" font-family="sans-serif" font-size="52px">
-<defs><clipPath id="cp_portfolio"><rect x="0" y="0" width="960.0" height="720.0"/></clipPath></defs>
+<defs><clipPath id="cp_portfolio"><rect x="0" y="0" width="960.000" height="720.000"/></clipPath></defs>
 <g clip-path="url(#cp_portfolio)">
 <rect x="0" y="0" width="960" height="720" fill="#ffd54f"/>
-<rect x="410" y="250" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
-<rect x="410" y="320" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
-<rect x="410" y="390" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
-<rect x="410" y="460" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
-<rect x="410" y="530" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
-<rect x="410" y="600" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
-<rect x="410" y="670" width="250" height="55" transform="translate(-125.0,-27.5)" fill="#f4511e"/>
+<rect x="410" y="250" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
+<rect x="410" y="320" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
+<rect x="410" y="390" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
+<rect x="410" y="460" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
+<rect x="410" y="530" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
+<rect x="410" y="600" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
+<rect x="410" y="670" width="250" height="55" transform="translate(-125.000,-27.500)" fill="#f4511e"/>
 <text x="410" y="250" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">CVC4</text>
 <text x="410" y="320" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">Choco</text>
 <text x="410" y="390" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">OpenSMT</text>
@@ -18,43 +18,43 @@
 <text x="410" y="600" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">LattE</text>
 <text x="410" y="670" text-anchor="middle" transform="translate(0,2.5%)" dominant-baseline="central" stroke-width="0" fill="#e0e0e0" font-size="42px" stroke="none">Barvinok</text>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="250.0" x2="280.0" y2="250.0"/>
-<polyline points="268.7,238.7 280.0,250.0 268.7,261.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="250.000" x2="280.000" y2="250.000"/>
+<polyline points="268.687,238.686 280.000,250.000 268.687,261.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="320.0" x2="280.0" y2="320.0"/>
-<polyline points="268.7,308.7 280.0,320.0 268.7,331.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="320.000" x2="280.000" y2="320.000"/>
+<polyline points="268.687,308.686 280.000,320.000 268.687,331.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="390.0" x2="280.0" y2="390.0"/>
-<polyline points="268.7,378.7 280.0,390.0 268.7,401.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="390.000" x2="280.000" y2="390.000"/>
+<polyline points="268.687,378.686 280.000,390.000 268.687,401.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="460.0" x2="280.0" y2="460.0"/>
-<polyline points="268.7,448.7 280.0,460.0 268.7,471.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="460.000" x2="280.000" y2="460.000"/>
+<polyline points="268.687,448.686 280.000,460.000 268.687,471.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="530.0" x2="280.0" y2="530.0"/>
-<polyline points="268.7,518.7 280.0,530.0 268.7,541.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="530.000" x2="280.000" y2="530.000"/>
+<polyline points="268.687,518.686 280.000,530.000 268.687,541.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="600.0" x2="280.0" y2="600.0"/>
-<polyline points="268.7,588.7 280.0,600.0 268.7,611.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="600.000" x2="280.000" y2="600.000"/>
+<polyline points="268.687,588.686 280.000,600.000 268.687,611.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <g stroke-width="5" fill="none" font-size="42px" stroke="#212121">
-<line x1="200.0" y1="670.0" x2="280.0" y2="670.0"/>
-<polyline points="268.7,658.7 280.0,670.0 268.7,681.3" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="200.000" y1="670.000" x2="280.000" y2="670.000"/>
+<polyline points="268.687,658.686 280.000,670.000 268.687,681.314" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <line x1="200" y1="670" x2="200" y2="150" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
 <g stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121">
-<line x1="760.0" y1="460.0" x2="760.0" y2="167.0"/>
-<polyline points="748.0,179.0 760.0,167.0 772.0,179.0" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
+<line x1="760.000" y1="460.000" x2="760.000" y2="167.000"/>
+<polyline points="747.979,179.021 760.000,167.000 772.021,179.021" fill="none" stroke-linecap="square" stroke-linejoin="miter"/>
 </g>
 <line x1="760" y1="460" x2="680" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
 <line x1="670" y1="460" x2="662" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
 <line x1="650" y1="460" x2="642" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
 <line x1="630" y1="460" x2="622" y2="460" stroke-width="5" fill="none" stroke-linecap="round" font-size="42px" stroke="#212121"/>
-<g transform="translate(480.0,-160.0)scale(2.1)translate(-180,-153)">
+<g transform="translate(480.000,-160.000)scale(2.100)translate(-180,-153)">
 <g style="transform: translate(0,207)">
 <g style="stroke:none;stroke-width:0;">
 <polygon points="20,34  0,0  40,0" style="fill:#9ebdd5;" transform="translate(300,272)" />
