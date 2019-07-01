@@ -144,12 +144,12 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	public void report(Reporter reporter) {
 //        reporter.reportZZ("cacheHitCount", cacheHitCount);
 //        reporter.reportZZ("cacheMissCount", cacheMissCount);
-//        reporter.reportZZ("satCacheHitCount", satHitCount);
-//        reporter.reportZZ("unsatCacheHitCount", unsatHitCount);
-//        reporter.reportZZ("satCacheMissCount", satMissCount);
-//        reporter.reportZZ("unsatCacheMissCount", unsatMissCount);
-//        reporter.reportZZ("satQueries", satCount);
-//        reporter.reportZZ("unsatQueries", unsatCount);
+//        reporter.reportZZ("satCacheHitCount", modelHitCount);
+//        reporter.reportZZ("unsatCacheHitCount", noModelHitCount);
+//        reporter.reportZZ("satCacheMissCount", modelMissCount);
+//        reporter.reportZZ("unsatCacheMissCount", noModelMissCount);
+//        reporter.reportZZ("satQueries", modelCount);
+//        reporter.reportZZ("unsatQueries", noModelCount);
 		reporter.setContext(getClass().getSimpleName());
 		reporter.report("timeConsumption", timeConsumption);
 		reporter.report("satTimeConsumption", satTimeConsumption);

@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.grulia.repository;
+package za.ac.sun.cs.green.service.grulia;
 
 import java.util.List;
 

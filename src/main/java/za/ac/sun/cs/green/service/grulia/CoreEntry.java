@@ -1,6 +1,7 @@
-package za.ac.sun.cs.green.service.grulia.repository;
+package za.ac.sun.cs.green.service.grulia;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 import za.ac.sun.cs.green.expr.Expression;
 
@@ -16,7 +17,7 @@ public class CoreEntry extends Entry {
 
 	/**
 	 * Return the core for this entry.
-	 * 
+	 *
 	 * @return the entry's core
 	 */
 	public Set<Expression> getCore() {
@@ -24,10 +25,10 @@ public class CoreEntry extends Entry {
 	}
 
 	/**
-	 * Construct a new model entry.
-	 * 
+	 * Construct a new core entry.
+	 *
 	 * @param satDelta SatDelta value for the new entry
-	 * @param model    model for the new entry
+	 * @param core     core for the new entry
 	 */
 	public CoreEntry(double satDelta, Set<Expression> core) {
 		super(satDelta);
@@ -36,10 +37,8 @@ public class CoreEntry extends Entry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.grulia.repository.Entry#isValidFor(za.ac.sun.cs.
-	 * green.service.grulia.repository.Entry)
+	 *
+	 * @see za.ac.sun.cs.green.service.grulia.Entry#isValidFor(za.ac.sun.cs.green.service.grulia.Entry)
 	 */
 	@Override
 	public boolean isValidFor(Entry entry) {
@@ -48,15 +47,13 @@ public class CoreEntry extends Entry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
+	 *
+	 * @see java.lang.Object#toString0()
 	 */
 	@Override
-	public String toString() {
+	public String toString0() {
 		StringBuilder s = new StringBuilder();
-		s.append("(satDelta=").append(getSatDelta());
-		s.append(", core=").append(getCore());
-		s.append(')');
+		s.append("model=").append(new TreeSet<>(getCore()));
 		return s.toString();
 	}
 

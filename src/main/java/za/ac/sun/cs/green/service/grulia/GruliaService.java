@@ -20,12 +20,6 @@ import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.SATService;
-import za.ac.sun.cs.green.service.grulia.repository.BinaryRepository;
-import za.ac.sun.cs.green.service.grulia.repository.CoreEntry;
-import za.ac.sun.cs.green.service.grulia.repository.Entry;
-import za.ac.sun.cs.green.service.grulia.repository.LinearRepository;
-import za.ac.sun.cs.green.service.grulia.repository.ModelEntry;
-import za.ac.sun.cs.green.service.grulia.repository.Repository;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
@@ -41,7 +35,6 @@ import za.ac.sun.cs.green.util.Reporter;
  * @author Willem Visser (2018, 2019) (supervisor)
  * @author Jaco Geldenhuys (2017) (supervisor)
  */
-@SuppressWarnings("unused")
 class GruliaService extends SATService {
 
 	// ======================================================================
@@ -61,7 +54,7 @@ class GruliaService extends SATService {
 	private static final boolean DEFAULT_ZERO = false;
 
 	/**
-	 * TreeSet repo or not.
+	 * Tree-based repo or not.
 	 */
 	private static final boolean BINARY_TREE_REPO = true;
 
@@ -77,14 +70,12 @@ class GruliaService extends SATService {
 	 */
 	private final Repository<ModelEntry> satRepo = BINARY_TREE_REPO ? new BinaryRepository<>()
 			: new LinearRepository<>();
-//	private final Repository satRepo = BINARY_TREE_REPO ? new SatRepoB(solver, DEFAULT_ZERO) : new SatRepoA(DEFAULT_ZERO);
 
 	/**
 	 * Stores data of unsatisfiable formulas.
 	 */
 	private final Repository<CoreEntry> unsatRepo = BINARY_TREE_REPO ? new BinaryRepository<>()
 			: new LinearRepository<>();
-//	private final Repository unsatRepo = BINARY_TREE_REPO ? new UnsatRepoB(solver, DEFAULT_ZERO) : new UnsatRepoA(DEFAULT_ZERO);
 
 	// ======================================================================
 	//
@@ -292,7 +283,6 @@ class GruliaService extends SATService {
 			assert (result instanceof Set<?>);
 			returnValue = (Set<Instance>) result;
 		}
-		//noinspection ConstantConditions
 		if (returnValue instanceof Set<?>) {
 			log.trace("delegating to solver");
 			instance.setData("SOLVER" + getClass(), Boolean.TRUE);
@@ -315,7 +305,7 @@ class GruliaService extends SATService {
 		long startTime = System.currentTimeMillis();
 		invocationCount++;
 		Boolean result = solve(instance);
-		fullTimeConsumption += (System.currentTimeMillis() - startTime);
+		solveTimeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
@@ -360,7 +350,7 @@ class GruliaService extends SATService {
 			satRepoTimeConsumption += (System.currentTimeMillis() - startTime0);
 		}
 
-		// Try to find a core in the UNSAT repo contained in the expression.
+		// Try to find a core in the UNSAT repo that subsumes the expression.
 		if (result == null) {
 			startTime0 = System.currentTimeMillis();
 			result = findSharedCore(fullExpr);
@@ -578,7 +568,6 @@ class GruliaService extends SATService {
 	//
 	// ======================================================================
 
-	@SuppressWarnings("unused")
 	private static class ExpressionVisitor extends Visitor {
 
 		private final SortedSet<IntVariable> variableSet;
@@ -616,7 +605,6 @@ class GruliaService extends SATService {
 	 * Visitor to compute the SatDelta value for an expressions given a reference
 	 * value.
 	 */
-	@SuppressWarnings("unused")
 	private static class GruliaVisitor extends Visitor {
 
 		/**
@@ -756,7 +744,6 @@ class GruliaService extends SATService {
 	/**
 	 * Visitor to compute expression values for a given variable assignment.
 	 */
-	@SuppressWarnings("unused")
 	private static class GruliaExpressionEvaluator extends Visitor {
 
 		/**
@@ -820,7 +807,6 @@ class GruliaService extends SATService {
 		 * @see
 		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 		 */
-		@SuppressWarnings("ConstantConditions")
 		@Override
 		public void postVisit(Operation operation) {
 			Object left = null, right = null;

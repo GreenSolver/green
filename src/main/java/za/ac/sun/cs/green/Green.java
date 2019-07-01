@@ -252,7 +252,7 @@ public class Green {
 
 			@Override
 			public void report(String context, String key, String value) {
-				keyValues.computeIfAbsent(context, k -> new ArrayList<>()).add(new Pair<>(key, value))
+				keyValues.computeIfAbsent(context, k -> new ArrayList<>()).add(new Pair<>(key, value));
 			}
 		});
 

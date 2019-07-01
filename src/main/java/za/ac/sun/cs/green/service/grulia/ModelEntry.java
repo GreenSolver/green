@@ -1,6 +1,8 @@
-package za.ac.sun.cs.green.service.grulia.repository;
+package za.ac.sun.cs.green.service.grulia;
 
+import java.io.Serializable;
 import java.util.Map;
+import java.util.TreeMap;
 
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Variable;
@@ -8,7 +10,7 @@ import za.ac.sun.cs.green.expr.Variable;
 /**
  * Entry for models.
  */
-public class ModelEntry extends Entry {
+public class ModelEntry extends Entry implements Serializable {
 
 	/**
 	 * The model stored in this entry.
@@ -22,7 +24,7 @@ public class ModelEntry extends Entry {
 
 	/**
 	 * Construct a new model entry.
-	 * 
+	 *
 	 * @param satDelta SatDelta value for the new entry
 	 * @param model    model for the new entry
 	 */
@@ -35,7 +37,7 @@ public class ModelEntry extends Entry {
 	/**
 	 * Construct a new model entry. This version is used mostly for {@code null}
 	 * models that are used as anchor points when searching for nearby models.
-	 * 
+	 *
 	 * @param satDelta SatDelta value for the new entry
 	 * @param model    model for the new entry
 	 * @param size     size of the model
@@ -48,7 +50,7 @@ public class ModelEntry extends Entry {
 
 	/**
 	 * Return the model for this entry.
-	 * 
+	 *
 	 * @return the entry's model
 	 */
 	public Map<Variable, Constant> getModel() {
@@ -57,28 +59,17 @@ public class ModelEntry extends Entry {
 
 	/**
 	 * Return the model size for this entry.
-	 * 
+	 *
 	 * @return the entry's model size
 	 */
 	public int getModelSize() {
 		return modelSize;
 	}
 
-//	/* (non-Javadoc)
-//	 * @see za.ac.sun.cs.green.service.grulia.repository.Entry#compareTo0(za.ac.sun.cs.green.service.grulia.repository.Entry)
-//	 */
-//	@Override
-//	public int compareTo0(Entry entry) {
-//		// IS THIS CORRECT?  SHOULD WE IGNORE MODELS?
-//		return 0;
-//	}
-
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.grulia.repository.Entry#isValidFor(za.ac.sun.cs.
-	 * green.service.grulia.repository.Entry)
+	 *
+	 * @see za.ac.sun.cs.green.service.grulia.Entry#isValidFor(za.ac.sun.cs.green.service.grulia.Entry)
 	 */
 	@Override
 	public boolean isValidFor(Entry entry) {
@@ -87,16 +78,14 @@ public class ModelEntry extends Entry {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
+	 *
+	 * @see java.lang.Object#toString0()
 	 */
 	@Override
-	public String toString() {
+	public String toString0() {
 		StringBuilder s = new StringBuilder();
-		s.append("(satDelta=").append(getSatDelta());
-		s.append(", model=").append(getModel());
+		s.append("model=").append(new TreeMap<>(getModel()));
 		s.append(", size=").append(getModelSize());
-		s.append(')');
 		return s.toString();
 	}
 
