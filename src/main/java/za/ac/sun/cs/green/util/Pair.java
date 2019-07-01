@@ -4,7 +4,7 @@ package za.ac.sun.cs.green.util;
  * Pair of values.
  *
  * @author: Andrea Aquino
- * @author: Jaco Geldenhuys <geld@sun.ac.za> (contibutor)
+ * @author: Jaco Geldenhuys <geld@sun.ac.za> (contributor)
  */
 public class Pair<L, R> {
 
