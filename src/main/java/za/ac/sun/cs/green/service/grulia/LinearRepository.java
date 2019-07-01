@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.grulia.repository;
+package za.ac.sun.cs.green.service.grulia;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +48,7 @@ public class LinearRepository<E extends Entry> implements Repository<E> {
 	@Override
 	public List<E> getEntries(int limit, E startingPoint) {
 		List<E> selection = new ArrayList<>(limit);
+		int selected = 0;
 		// First we find the closest entry with binary search on SatDelta
 		int size = size();
 		double target = startingPoint.getSatDelta();
@@ -64,7 +65,6 @@ public class LinearRepository<E extends Entry> implements Repository<E> {
 			mid = (lo + hi) >>> 1;
 		}
 		// Now add closest entries, working leftwards and rightwards
-		int selected = 0;
 		int indexL = mid, indexR = mid - 1;
 		E entryL = null, entryR = null;
 		double satDeltaL = 0.0, satDeltaR = 0.0;

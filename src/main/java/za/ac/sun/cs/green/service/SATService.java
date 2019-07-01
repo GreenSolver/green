@@ -8,8 +8,8 @@ import za.ac.sun.cs.green.util.Reporter;
 
 /**
  * Ancestor of all SAT services. These services are expected to, at the least,
- * return a Boolean result to indicate whether the expression given in the
- * {@link Instance is satisfiable or not.} The service might also return
+ * return a {@code Boolean} result to indicate whether the expression given in the
+ * {@link Instance} is satisfiable or not. The service might also return
  * {@code null} if it could not determine the answer.
  */
 public abstract class SATService extends BasicService {
@@ -17,7 +17,7 @@ public abstract class SATService extends BasicService {
 	/**
 	 * Key prefix used for the store (=cache).
 	 */
-	protected static final String SERVICE_KEY = "SAT:";
+	public static final String SERVICE_KEY = "SAT:";
 
 	// ======================================================================
 	//
@@ -32,24 +32,21 @@ public abstract class SATService extends BasicService {
 
 	/**
 	 * Number of SAT answers returned.
-	 * 
-	 * {@link #satCount} + {@link #unsatCount} <= {@link #invocationCount}
-	 * 
-	 * {@link #satHitCount} + {@link #satMissCount} = {@link #satCount}
 	 */
 	protected int satCount = 0;
 
 	/**
 	 * Number of UNSAT answers returned.
-	 * 
-	 * {@link #unsatHitCount} + {@link #unsatMissCount} = {@link #unsatCount}
 	 */
 	protected int unsatCount = 0;
 
 	/**
+	 * Number of no-answers returned.
+	 */
+	protected int noAnswerCount = 0;
+
+	/**
 	 * Number of times the answer was found in the store.
-	 * 
-	 * {@link #cacheHitCount} + {@link #cacheMissCount} <= {@link #invocationCount}
 	 */
 	protected int cacheHitCount = 0;
 
@@ -90,22 +87,27 @@ public abstract class SATService extends BasicService {
 	 * Milliseconds spent to process requests.
 	 */
 	protected long serviceTimeConsumption = 0;
-	
+
 	/**
 	 * Milliseconds spent to process requests that are SAT.
 	 */
 	protected long satTimeConsumption = 0;
-	
+
 	/**
 	 * Milliseconds spent to process requests that are UNSAT.
 	 */
 	protected long unsatTimeConsumption = 0;
-	
+
+	/**
+	 * Milliseconds spent to process requests that return no result.
+	 */
+	protected long noAnswerTimeConsumption = 0;
+
 	/**
 	 * Milliseconds spent to compute SAT/UNSAT, including store lookups.
 	 */
-	protected long fullTimeConsumption = 0;
-	
+	protected long solveTimeConsumption = 0;
+
 	/**
 	 * Milliseconds spent to compute SAT/UNSAT, excluding store lookups.
 	 */
@@ -118,7 +120,7 @@ public abstract class SATService extends BasicService {
 
 	/**
 	 * Construct an instance of a SAT service.
-	 * 
+	 *
 	 * @param solver associated Green solver
 	 */
 	public SATService(Green solver) {
@@ -127,7 +129,7 @@ public abstract class SATService extends BasicService {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see za.ac.sun.cs.green.service.BasicService#report(za.ac.sun.cs.green.util.
 	 * Reporter)
 	 */
@@ -137,23 +139,25 @@ public abstract class SATService extends BasicService {
 		reporter.report("invocationCount", invocationCount);
 		reporter.report("satCount", satCount);
 		reporter.report("unsatCount", unsatCount);
+		reporter.report("noAnswerCount", noAnswerCount);
 		reporter.report("cacheHitCount", cacheHitCount);
-		reporter.report("satHitCount", satHitCount);
-		reporter.report("unsatHitCount", unsatHitCount);
+		reporter.report("  modelHitCount", satHitCount);
+		reporter.report("  noModelHitCount", unsatHitCount);
 		reporter.report("cacheMissCount", cacheMissCount);
-		reporter.report("satMissCount", satMissCount);
-		reporter.report("unsatMissCount", unsatMissCount);
+		reporter.report("  modelMissCount", satMissCount);
+		reporter.report("  noModelMissCount", unsatMissCount);
 		reporter.report("serviceTimeConsumption", serviceTimeConsumption);
-		reporter.report("satTimeConsumption", satTimeConsumption);
-		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
-		reporter.report("fullTimeConsumption", fullTimeConsumption);
+		reporter.report("  satTimeConsumption", satTimeConsumption);
+		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
+		reporter.report("  noAnswerTimeConsumption", noAnswerTimeConsumption);
+		reporter.report("solveTimeConsumption", solveTimeConsumption);
 		reporter.report("innerTimeConsumption", innerTimeConsumption);
 		reporter.report("keyTimeConsumption", keyTimeConsumption);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * za.ac.sun.cs.green.service.BasicService#allChildrenDone(za.ac.sun.cs.green.
 	 * Instance, java.lang.Object)
@@ -165,7 +169,7 @@ public abstract class SATService extends BasicService {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * za.ac.sun.cs.green.service.BasicService#processRequest(za.ac.sun.cs.green.
 	 * Instance)
@@ -180,7 +184,7 @@ public abstract class SATService extends BasicService {
 				instance.setData(getClass(), result);
 			}
 		}
-		if ((result != null) && (result instanceof Boolean)) {
+		if (result instanceof Boolean) {
 			if ((Boolean) result) {
 				satCount++;
 				satTimeConsumption += (System.currentTimeMillis() - startTime);
@@ -188,6 +192,9 @@ public abstract class SATService extends BasicService {
 				unsatCount++;
 				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
 			}
+		} else {
+			noAnswerCount++;
+			noAnswerTimeConsumption += (System.currentTimeMillis() - startTime);
 		}
 		serviceTimeConsumption += (System.currentTimeMillis() - startTime);
 		return null;
@@ -197,12 +204,12 @@ public abstract class SATService extends BasicService {
 	 * Solve a Green instance: in this service, this means that its SAT/UNSAT status
 	 * is computed. This first-level routine first checks if the result is available
 	 * in the store. If so, it is returned. Otherwise, it is computed.
-	 * 
+	 * <p>
 	 * Note that some subclasses modify this behaviour.
-	 * 
+	 *
 	 * @param instance Green instance to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
-	 *         mean UNSAT
+	 * mean UNSAT
 	 */
 	protected Boolean solve0(Instance instance) {
 		long startTime = System.currentTimeMillis();
@@ -210,7 +217,6 @@ public abstract class SATService extends BasicService {
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
 		keyTimeConsumption += (System.currentTimeMillis() - startTime);
 		Boolean result = store.getBoolean(key);
-
 		if (result == null) {
 			cacheMissCount++;
 			result = solve1(instance);
@@ -230,7 +236,7 @@ public abstract class SATService extends BasicService {
 				unsatHitCount++;
 			}
 		}
-		fullTimeConsumption += (System.currentTimeMillis() - startTime);
+		solveTimeConsumption += (System.currentTimeMillis() - startTime);
 		return result;
 	}
 
@@ -239,10 +245,10 @@ public abstract class SATService extends BasicService {
 	 * concurrent computation is used, the answer may appear in the store after this
 	 * method is invoked but before it starts its execution. Since the answer is
 	 * deterministic, this should not cause problems.
-	 * 
+	 *
 	 * @param instance Green instance to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
-	 *         mean UNSAT
+	 * mean UNSAT
 	 */
 	protected Boolean solve1(Instance instance) {
 		long startTime = System.currentTimeMillis();
@@ -254,11 +260,24 @@ public abstract class SATService extends BasicService {
 	/**
 	 * Do the actual work to solve a Green instance.
 	 *
-	 * @param instance
 	 * @param instance Green instance to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
-	 *         mean UNSAT
+	 * mean UNSAT
 	 */
 	protected abstract Boolean solve(Instance instance);
+
+	/**
+	 * Perform some consistency checks.
+	 *
+	 * @see za.ac.sun.cs.green.service.BasicService#shutdown()
+	 */
+	@Override
+	public void shutdown() {
+		assert (invocationCount == satCount + unsatCount + noAnswerCount);
+		assert (invocationCount == cacheHitCount + cacheMissCount);
+		assert (satCount == satHitCount + satMissCount);
+		assert (unsatCount == unsatHitCount + unsatMissCount);
+		super.shutdown();
+	}
 
 }

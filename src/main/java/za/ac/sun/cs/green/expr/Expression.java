@@ -6,8 +6,6 @@ public abstract class Expression implements Comparable<Expression>, Serializable
 
 	private static final long serialVersionUID = -6176524656345471317L;
 
-//	private String stringRep = null;
-
 	private String stringRepresentation = null;
 
 	public abstract void accept(Visitor visitor) throws VisitorException;
@@ -23,8 +21,6 @@ public abstract class Expression implements Comparable<Expression>, Serializable
 
 	@Override
 	public final int compareTo(Expression expression) {
-		// TODO
-//        return getString().compareTo(expression.getString());
 		return toString().compareTo(expression.toString());
 	}
 

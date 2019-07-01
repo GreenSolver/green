@@ -5,24 +5,34 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Variable;
-import za.ac.sun.cs.green.service.grulia.SatEntry;
-import za.ac.sun.cs.green.service.grulia.UnsatEntry;
 import za.ac.sun.cs.green.util.Reporter;
 
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Ancestor of all services that return a model if an instance is satisfiable. These services are expected to
+ * return a {@link ModelCore} object as a result to indicate if the expression given in the
+ * {@link Instance} is satisfiable. The service might also return
+ * {@code null} if it could not determine the answer.
+ */
 public abstract class ModelCoreService extends BasicService {
 
+	/**
+	 * Key prefix used for the store (=cache) for models.
+	 */
 	public static final String SERVICE_KEY = "MODELCORE:";
 
-	public static final String SAT_KEY = SERVICE_KEY + "SAT";
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
 
-	public static final String MODEL_KEY = SERVICE_KEY + "MODEL";
-
-	public static final String CORE_KEY = SERVICE_KEY + "CORE";
-
-	private int invocationCount = 0;
+	/**
+	 * Number of times this service has been invoked.
+	 */
+	protected int invocationCount = 0;
 
 	protected int cacheHitCount = 0;
 	protected int satHitCount = 0;
@@ -161,27 +171,73 @@ public abstract class ModelCoreService extends BasicService {
 		return ((UnsatEntry) instance.getData(CORE_KEY)).getSolution();
 	}
 
+	// ======================================================================
+	//
+	// ENCAPSULATION OF A MODEL / CORE
+	//
+	// ======================================================================
+
+	/**
+	 * Encapsulation of a model or core.  It is expected that all implementing
+	 * services use this object.
+	 */
 	public static class ModelCore {
+
+		/**
+		 * Does this result represent a satisfying solution?
+		 */
 		private final Boolean isSat;
+
+		/**
+		 * The model, if the solution is satisfying.
+		 */
 		private final Map<Variable, Constant> model;
+
+		/**
+		 * The core, if the solution is not satisfying.
+		 */
 		private final Set<Expression> core;
 
+		/**
+		 * Create an instance of a model / core.
+		 *
+		 * @param isSat is this solution satisfying?
+		 * @param model the model for this solution (or {@code null})
+		 * @param core the core for this solution (or {@code null})
+		 */
 		public ModelCore(final Boolean isSat, final Map<Variable, Constant> model, final Set<Expression> core) {
 			this.isSat = isSat;
 			this.model = model;
 			this.core = core;
 		}
 
-		public Boolean getIsSat() {
+		/**
+		 * Return the satisfying flag for this solution.
+		 *
+		 * @return {@code true}/{@code false} to indicate satisfiability
+		 */
+		public boolean getIsSat() {
 			return isSat;
 		}
 
+		/**
+		 * Return the satisfying model or {@code null}.
+		 *
+		 * @return the satisfying model or {@code null}
+		 */
 		public Map<Variable, Constant> getModel() {
 			return model;
 		}
 
+		/**
+		 * Return the core that shows that there is no model.
+		 *
+		 * @return the unsatisfying code or {@code null}
+		 */
 		public Set<Expression> getCore() {
 			return core;
 		}
+
 	}
+
 }
