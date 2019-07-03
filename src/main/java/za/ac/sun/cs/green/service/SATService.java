@@ -8,8 +8,8 @@ import za.ac.sun.cs.green.util.Reporter;
 
 /**
  * Ancestor of all SAT services. These services are expected to, at the least,
- * return a {@code Boolean} result to indicate whether the expression given in the
- * {@link Instance} is satisfiable or not. The service might also return
+ * return a {@code Boolean} result to indicate whether the expression given in
+ * the {@link Instance} is satisfiable or not. The service might also return
  * {@code null} if it could not determine the answer.
  */
 public abstract class SATService extends BasicService {
@@ -106,12 +106,12 @@ public abstract class SATService extends BasicService {
 	/**
 	 * Milliseconds spent to compute SAT/UNSAT, including store lookups.
 	 */
-	protected long solveTimeConsumption = 0;
+	protected long innerTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent to compute SAT/UNSAT, excluding store lookups.
 	 */
-	protected long innerTimeConsumption = 0;
+	protected long solveTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent on computing store keys.
@@ -137,22 +137,23 @@ public abstract class SATService extends BasicService {
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
 		reporter.report("invocationCount", invocationCount);
-		reporter.report("satCount", satCount);
-		reporter.report("unsatCount", unsatCount);
-		reporter.report("noAnswerCount", noAnswerCount);
+		reporter.report("  satCount", satCount);
+		reporter.report("  unsatCount", unsatCount);
+		reporter.report("  noAnswerCount", noAnswerCount);
 		reporter.report("cacheHitCount", cacheHitCount);
 		reporter.report("  modelHitCount", satHitCount);
-		reporter.report("  noModelHitCount", unsatHitCount);
+		reporter.report("  unsatHitCount", unsatHitCount);
 		reporter.report("cacheMissCount", cacheMissCount);
 		reporter.report("  modelMissCount", satMissCount);
-		reporter.report("  noModelMissCount", unsatMissCount);
+		reporter.report("  unsatMissCount", unsatMissCount);
 		reporter.report("serviceTimeConsumption", serviceTimeConsumption);
 		reporter.report("  satTimeConsumption", satTimeConsumption);
 		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
 		reporter.report("  noAnswerTimeConsumption", noAnswerTimeConsumption);
-		reporter.report("solveTimeConsumption", solveTimeConsumption);
 		reporter.report("innerTimeConsumption", innerTimeConsumption);
+		reporter.report("solveTimeConsumption", solveTimeConsumption);
 		reporter.report("keyTimeConsumption", keyTimeConsumption);
+		super.report(reporter);
 	}
 
 	/*
@@ -187,16 +188,16 @@ public abstract class SATService extends BasicService {
 		if (result instanceof Boolean) {
 			if ((Boolean) result) {
 				satCount++;
-				satTimeConsumption += (System.currentTimeMillis() - startTime);
+				satTimeConsumption += System.currentTimeMillis() - startTime;
 			} else {
 				unsatCount++;
-				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
+				unsatTimeConsumption += System.currentTimeMillis() - startTime;
 			}
 		} else {
 			noAnswerCount++;
-			noAnswerTimeConsumption += (System.currentTimeMillis() - startTime);
+			noAnswerTimeConsumption += System.currentTimeMillis() - startTime;
 		}
-		serviceTimeConsumption += (System.currentTimeMillis() - startTime);
+		serviceTimeConsumption += System.currentTimeMillis() - startTime;
 		return null;
 	}
 
@@ -209,13 +210,13 @@ public abstract class SATService extends BasicService {
 	 *
 	 * @param instance Green instance to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
-	 * mean UNSAT
+	 *         mean UNSAT
 	 */
 	protected Boolean solve0(Instance instance) {
 		long startTime = System.currentTimeMillis();
 		invocationCount++;
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
-		keyTimeConsumption += (System.currentTimeMillis() - startTime);
+		keyTimeConsumption += System.currentTimeMillis() - startTime;
 		Boolean result = store.getBoolean(key);
 		if (result == null) {
 			cacheMissCount++;
@@ -236,7 +237,7 @@ public abstract class SATService extends BasicService {
 				unsatHitCount++;
 			}
 		}
-		solveTimeConsumption += (System.currentTimeMillis() - startTime);
+		innerTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -248,12 +249,12 @@ public abstract class SATService extends BasicService {
 	 *
 	 * @param instance Green instance to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
-	 * mean UNSAT
+	 *         mean UNSAT
 	 */
 	protected Boolean solve1(Instance instance) {
 		long startTime = System.currentTimeMillis();
 		Boolean result = solve(instance);
-		innerTimeConsumption += System.currentTimeMillis() - startTime;
+		solveTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -262,7 +263,7 @@ public abstract class SATService extends BasicService {
 	 *
 	 * @param instance Green instance to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
-	 * mean UNSAT
+	 *         mean UNSAT
 	 */
 	protected abstract Boolean solve(Instance instance);
 

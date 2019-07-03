@@ -11,14 +11,37 @@ import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.service.smtlib.SATSMTLIBService;
 import za.ac.sun.cs.green.util.Reporter;
 
+/**
+ * Z3 command-line SAT service.
+ */
 public class SATZ3Service extends SATSMTLIBService {
 
-	private final String z3Command;
+	/**
+	 * The command to invoke Z3.
+	 */
+	protected final String z3Command;
 
-	private long timeConsumption = 0;
-	private long satTimeConsumption = 0;
-	private long unsatTimeConsumption = 0;
+	/**
+	 * Milliseconds spent by this service.
+	 */
+	protected long timeConsumption = 0;
 
+	/**
+	 * Milliseconds used to compute a SAT result.
+	 */
+	protected long satTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to compute an UNSAT result.
+	 */
+	protected long unsatTimeConsumption = 0;
+
+	/**
+	 * Construct an instance of the Z3 command-line service.
+	 * 
+	 * @param solver     associated Green solver
+	 * @param properties properties used to construct the service
+	 */
 	public SATZ3Service(Green solver, Properties properties) {
 		super(solver);
 		String p = properties.getProperty("green.z3.path");
@@ -26,8 +49,30 @@ public class SATZ3Service extends SATSMTLIBService {
 		z3Command = p + ' ' + a;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.service.smtlib.SATSMTLIBService#report(za.ac.sun.cs.green.
+	 * util.Reporter)
+	 */
 	@Override
-	protected Boolean solve0(String smtQuery) {
+	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("  satTimeConsumption", satTimeConsumption);
+		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
+		super.report(reporter);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.service.smtlib.SATSMTLIBService#resolve(java.lang.String)
+	 */
+	@Override
+	protected Boolean resolve(String smtQuery) {
 		long startTime = System.currentTimeMillis();
 		String output = "";
 		try {
@@ -44,36 +89,17 @@ public class SATZ3Service extends SATSMTLIBService {
 		} catch (IOException x) {
 			log.fatal(x.getMessage(), x);
 		}
-		long a = System.currentTimeMillis() - startTime;
-		timeConsumption += a;
-		if (output.equals("sat")) {
-			satTimeConsumption += a;
+		timeConsumption += System.currentTimeMillis() - startTime;
+		if ((output != null) && output.equals("sat")) {
+			satTimeConsumption += System.currentTimeMillis() - startTime;
 			return true;
-		} else if (output.equals("unsat")) {
-			unsatTimeConsumption += a;
+		} else if ((output != null) && output.equals("unsat")) {
+			unsatTimeConsumption += System.currentTimeMillis() - startTime;
 			return false;
 		} else {
-			log.fatal("Z3 returned a null {}", output);
+			log.fatal("Z3 returned a null: {}", output);
 			return null;
 		}
 	}
 
-	@Override
-	public void report(Reporter reporter) {
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("cacheHitCount", cacheHitCount);
-		reporter.report("cacheMissCount", cacheMissCount);
-		reporter.report("satCacheHitCount", satHitCount);
-		reporter.report("unsatCacheHitCount", unsatHitCount);
-		reporter.report("satCacheMissCount", satMissCount);
-		reporter.report("unsatCacheMissCount", unsatMissCount);
-		reporter.report("satQueries", satCount);
-		reporter.report("unsatQueries", unsatCount);
-		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("satTimeConsumption", satTimeConsumption);
-		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
-		reporter.report("translationTimeConsumption", translationTimeConsumption);
-		reporter.report("conjunctCount", conjunctCount);
-		reporter.report("varCount", varCount);
-	}
 }

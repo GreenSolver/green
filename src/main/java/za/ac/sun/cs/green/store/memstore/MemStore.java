@@ -8,69 +8,110 @@ import java.util.Properties;
 import java.util.Set;
 
 import za.ac.sun.cs.green.Green;
-import za.ac.sun.cs.green.service.grulia.Entry;
 import za.ac.sun.cs.green.store.BasicStore;
 import za.ac.sun.cs.green.store.redis.RedisStore;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis
- * (<code>http://www.redis.io</code>).
- *
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
+ * Implementation of a {@link BasicStore} that caches its results in memory and
+ * falls back on a {@link RedisStore}. At the end of Green's use, the cached
+ * results are flushed back to redis.
  */
 public class MemStore extends BasicStore {
 
 	/**
-	 * Number of times <code>get(...)</code> was called.
+	 * The in-memory cache.
 	 */
-	private int retrievalCount = 0;
+	protected final Map<String, Object> db = new HashMap<String, Object>();
 
 	/**
-	 * Number of times <code>put(...)</code> was called.
+	 * The redis store to fall back on.
 	 */
-	private int insertionCount = 0;
+	protected final RedisStore redisStore;
 
 	/**
-	 * The Memory Store
-	 *
+	 * Cached status of this store.
 	 */
-	private Map<String, Object> db;
-	private RedisStore redisStore;
+	protected Boolean isSet = null;
 
-	private long timePut = 0;
-	private long timeGet = 0;
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
+
+	/**
+	 * Number of times {@code get()} is called.
+	 */
+	private int getCount = 0;
+
+	/**
+	 * Number of times {@code put()} is called.
+	 */
+	private int putCount = 0;
+
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
+
+	/**
+	 * Milliseconds spent on operations.
+	 */
 	private long timeConsumption = 0;
 
 	/**
+	 * Milliseconds spent on {@code get()} operations.
+	 */
+	private long getTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent on {@code put()} operations.
+	 */
+	private long putTimeConsumption = 0;
+
+	/**
 	 * Constructor to create memory store
+	 *
+	 * @param solver     associated Green solver
+	 * @param properties properties used to construct the store
 	 */
 	public MemStore(Green solver, Properties properties) {
 		super(solver);
-		db = new HashMap<String, Object>();
 		redisStore = new RedisStore(solver, "localhost", 6379);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#report(za.ac.sun.cs.green.util.Reporter)
+	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
-		reporter.report("retrievalCount", retrievalCount);
-		reporter.report("insertionCount", insertionCount);
+		reporter.report("getCount", getCount);
+		reporter.report("putCount", putCount);
 		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("getTime", timeGet);
-		reporter.report("putTime", timePut);
+		reporter.report("  getTimeConsumption", getTimeConsumption);
+		reporter.report("  putTimeConsumption", putTimeConsumption);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#get(java.lang.String)
+	 */
 	@Override
 	public synchronized Object get(String key) {
-		long start = System.currentTimeMillis();
-		retrievalCount++;
+		long startTime = System.currentTimeMillis();
+		getCount++;
 		Object s = db.get(key);
 		if (s == null) {
 			// Greedy approach:
-			// if the solution is not in the memstore,
+			// if the solution is not in the in-memory cache,
 			// look for it in redis (persistent store)
-			// and add to memstore
+			// and add to cache
 			if (redisStore.isSet()) {
 				s = redisStore.get(key);
 				if (s != null) {
@@ -78,21 +119,32 @@ public class MemStore extends BasicStore {
 				}
 			}
 		}
-		timeGet += (System.currentTimeMillis() - start);
-		timeConsumption += (System.currentTimeMillis() - start);
+		getTimeConsumption += System.currentTimeMillis() - startTime;
+		timeConsumption += System.currentTimeMillis() - startTime;
 		return s;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#put(java.lang.String,
+	 * java.io.Serializable)
+	 */
 	@Override
 	public synchronized void put(String key, Serializable value) {
-		long start = System.currentTimeMillis();
-		insertionCount++;
+		long startTime = System.currentTimeMillis();
+		putCount++;
 		// Unnecessary to convert to Base64 string
 		db.put(key, value);
-		timePut += (System.currentTimeMillis() - start);
-		timeConsumption += (System.currentTimeMillis() - start);
+		putTimeConsumption += System.currentTimeMillis() - startTime;
+		timeConsumption += System.currentTimeMillis() - startTime;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#keySet()
+	 */
 	@Override
 	public Set<String> keySet() {
 		if (db.keySet().isEmpty()) {
@@ -106,47 +158,57 @@ public class MemStore extends BasicStore {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#flushAll()
+	 */
 	@Override
 	public void flushAll() {
-		long start = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 		flushAllToRedis();
-		timeConsumption += (System.currentTimeMillis() - start);
+		timeConsumption += System.currentTimeMillis() - startTime;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#clear()
+	 */
 	@Override
 	public void clear() {
-		long start = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 		db.clear();
 		if (redisStore.isSet()) {
 			redisStore.clear();
 		}
-		timeConsumption += (System.currentTimeMillis() - start);
+		timeConsumption += System.currentTimeMillis() - startTime;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.store.Store#isSet()
+	 */
 	@Override
 	public boolean isSet() {
-		try {
-			db.get("foo");
-			return true;
-		} catch (Exception e) {
-			return false;
+		if (isSet == null) {
+			try {
+				db.get("foo");
+				isSet = true;
+			} catch (Exception e) {
+				isSet = false;
+			}
 		}
+		return isSet;
 	}
 
-	private void flushAllToRedis() {
+	/**
+	 * Write all of the entries in the in-memory cache to the redis store.
+	 */
+	protected void flushAllToRedis() {
 		if (redisStore.isSet()) {
-			for (String key : db.keySet()) {
-				Object e = db.get(key);
-				if (e instanceof String) {
-					redisStore.put(key, (String) e);
-				} else if (e instanceof Boolean) {
-					redisStore.put(key, (Boolean) e);
-				} else if (e instanceof Entry) {
-					redisStore.put(key, (Entry) e);
-				} else {
-					solver.getLogger().warn("Object not catered for.");
-				}
-			}
+			db.forEach((k, v) -> redisStore.put(k, (Serializable) v));
 		}
 	}
 

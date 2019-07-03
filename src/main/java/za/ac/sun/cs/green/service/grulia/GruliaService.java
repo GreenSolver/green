@@ -19,6 +19,7 @@ import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
+import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
 import za.ac.sun.cs.green.service.SATService;
 import za.ac.sun.cs.green.util.Reporter;
 
@@ -222,7 +223,7 @@ class GruliaService extends SATService {
 	 */
 	public GruliaService(Green solver) {
 		super(solver);
-		long start = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 		for (String key : solver.getStore().keySet()) {
 			Object entry = solver.getStore().get(key);
 			if (entry instanceof ModelEntry) {
@@ -231,7 +232,7 @@ class GruliaService extends SATService {
 				unsatRepo.add((CoreEntry) entry);
 			}
 		}
-		repoLoadTimeConsumption += (System.currentTimeMillis() - start);
+		repoLoadTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 	/**
@@ -274,10 +275,10 @@ class GruliaService extends SATService {
 			instance.setData(getClass(), result);
 			if ((Boolean) result) {
 				satCount++;
-				satTimeConsumption += (System.currentTimeMillis() - startTime);
+				satTimeConsumption += System.currentTimeMillis() - startTime;
 			} else {
 				unsatCount++;
-				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
+				unsatTimeConsumption += System.currentTimeMillis() - startTime;
 			}
 		} else {
 			assert (result instanceof Set<?>);
@@ -287,7 +288,7 @@ class GruliaService extends SATService {
 			log.trace("delegating to solver");
 			instance.setData("SOLVER" + getClass(), Boolean.TRUE);
 		}
-		serviceTimeConsumption += (System.currentTimeMillis() - startTime);
+		serviceTimeConsumption += System.currentTimeMillis() - startTime;
 		log.trace("returning {}", returnValue);
 		return returnValue;
 	}
@@ -305,7 +306,7 @@ class GruliaService extends SATService {
 		long startTime = System.currentTimeMillis();
 		invocationCount++;
 		Boolean result = solve(instance);
-		solveTimeConsumption += (System.currentTimeMillis() - startTime);
+		solveTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -331,7 +332,7 @@ class GruliaService extends SATService {
 			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
 		SortedSet<IntVariable> setOfVariables = expressionVisitor.getVariableSet();
-		variableSetTimeConsumption += (System.currentTimeMillis() - startTime0);
+		variableSetTimeConsumption += System.currentTimeMillis() - startTime0;
 		log.trace("set of variables: {}", () -> setOfVariables);
 
 		// Compute SatDelta
@@ -347,21 +348,21 @@ class GruliaService extends SATService {
 		if (result == null) {
 			startTime0 = System.currentTimeMillis();
 			result = findSharedModel(fullExpr, setOfVariables);
-			satRepoTimeConsumption += (System.currentTimeMillis() - startTime0);
+			satRepoTimeConsumption += System.currentTimeMillis() - startTime0;
 		}
 
 		// Try to find a core in the UNSAT repo that subsumes the expression.
 		if (result == null) {
 			startTime0 = System.currentTimeMillis();
 			result = findSharedCore(fullExpr);
-			unsatRepoTimeConsumption += (System.currentTimeMillis() - startTime0);
+			unsatRepoTimeConsumption += System.currentTimeMillis() - startTime0;
 		}
 
 		// If result is still null, we have to pass the instance on to whatever
 		// solver sits "below" this service. We don't have to "do" anything
 		// about that here: returning null is sufficient.
 
-		innerTimeConsumption += (System.currentTimeMillis() - startTime);
+		innerTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -387,7 +388,7 @@ class GruliaService extends SATService {
 		} catch (VisitorException x) {
 			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
-		satDeltaTimeConsumption += (System.currentTimeMillis() - startTime);
+		satDeltaTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -414,7 +415,7 @@ class GruliaService extends SATService {
 		if (satRepo.size() != 0) {
 			long startTime = System.currentTimeMillis();
 			List<ModelEntry> models = satRepo.getEntries(K, anchorModel);
-			modelExtractionTimeConsumption += (System.currentTimeMillis() - startTime);
+			modelExtractionTimeConsumption += System.currentTimeMillis() - startTime;
 			log.trace("found {} close models", models.size());
 			startTime = System.currentTimeMillis();
 			for (ModelEntry model : models) {
@@ -429,7 +430,7 @@ class GruliaService extends SATService {
 				} catch (VisitorException x) {
 					log.fatal("encountered an exception -- this should not be happening!", x);
 				}
-				modelEvaluationTimeConsumption += (System.currentTimeMillis() - startTime0);
+				modelEvaluationTimeConsumption += System.currentTimeMillis() - startTime0;
 				if (satCheck.isSat()) {
 					log.trace("found satisfying model");
 					result = true;
@@ -440,7 +441,7 @@ class GruliaService extends SATService {
 					repoModelFailCount++;
 				}
 			}
-			sharedModelTimeConsumption += (System.currentTimeMillis() - startTime);
+			sharedModelTimeConsumption += System.currentTimeMillis() - startTime;
 		}
 		log.trace("result: {}", result);
 		return result;
@@ -468,7 +469,7 @@ class GruliaService extends SATService {
 		if (unsatRepo.size() != 0) {
 			long startTime = System.currentTimeMillis();
 			List<CoreEntry> cores = unsatRepo.getEntries(K, anchorCore);
-			coreExtractionTimeConsumption += (System.currentTimeMillis() - startTime);
+			coreExtractionTimeConsumption += System.currentTimeMillis() - startTime;
 			log.trace("found {} close models", cores.size());
 			startTime = System.currentTimeMillis();
 			String exprStr = expr.toString();
@@ -485,7 +486,7 @@ class GruliaService extends SATService {
 						break;
 					}
 				}
-				coreEvaluationTimeConsumption += (System.currentTimeMillis() - startTime0);
+				coreEvaluationTimeConsumption += System.currentTimeMillis() - startTime0;
 				if (shared) {
 					log.trace("found subsuming core");
 					result = false;
@@ -496,7 +497,7 @@ class GruliaService extends SATService {
 					repoCoreFailCount++;
 				}
 			}
-			sharedCoreTimeConsumption += (System.currentTimeMillis() - startTime);
+			sharedCoreTimeConsumption += System.currentTimeMillis() - startTime;
 		}
 		log.trace("result: {}", result);
 		return result;
@@ -504,20 +505,21 @@ class GruliaService extends SATService {
 
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
-		if (instance.getData("SOLVER" + getClass()) != null) {
+		Object modelCore = instance.getData(ModelCoreService.SERVICE_KEY + getClass()); 
+		if (modelCore instanceof ModelCore) {
 			solverCount++;
-			Boolean isSat = ModelCoreService.isSat(instance);
+			boolean isSat = ((ModelCore) modelCore).isSat();
 			double satDelta = instance.getFullExpression().satDelta;
 			log.trace("solver was invoked, isSat: {} satDelta: {}", isSat, satDelta);
 			if (isSat) {
-				Map<Variable, Constant> model = ModelCoreService.getModel(instance);
+				Map<Variable, Constant> model = ((ModelCore) modelCore).getModel();
 				ModelEntry newEntry = new ModelEntry(satDelta, model);
 				log.trace("adding {} to satRepo", model);
 				satRepo.add(newEntry);
 				satRepoAddCount++;
 				satCount++;
 			} else {
-				Set<Expression> core = ModelCoreService.getCore(instance);
+				Set<Expression> core = ((ModelCore) modelCore).getCore();
 				CoreEntry newEntry = new CoreEntry(satDelta, core);
 				log.trace("adding {} to unsatRepo", core);
 				unsatRepo.add(newEntry);
@@ -532,7 +534,6 @@ class GruliaService extends SATService {
 
 	@Override
 	public void report(Reporter reporter) {
-		super.report(reporter);
 		reporter.setContext(getClass().getSimpleName());
 
 		// Counters
@@ -560,6 +561,8 @@ class GruliaService extends SATService {
 		reporter.report("coreExtractionTimeConsumption", coreExtractionTimeConsumption);
 		reporter.report("coreEvaluationTimeConsumption", coreEvaluationTimeConsumption);
 		reporter.report("sharedCoreTimeConsumption", sharedCoreTimeConsumption);
+
+		super.report(reporter);
 	}
 
 	// ======================================================================

@@ -144,13 +144,13 @@ public class RedisStore extends BasicStore {
 	}
 
 	public boolean isSet() {
-		try {
-			if (set == null) {
+		if (set == null) {
+			try {
 				db.get("foo");
 				set = true;
+			} catch (Exception e) {
+				set = false;
 			}
-		} catch (Exception e) {
-			set = false;
 		}
 		return set;
 	}

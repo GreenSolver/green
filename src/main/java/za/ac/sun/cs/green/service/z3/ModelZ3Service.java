@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.Level;
-
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.IntConstant;
@@ -22,17 +20,42 @@ import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService;
 import za.ac.sun.cs.green.util.Reporter;
 
+/**
+ * Z3 command-line model service.
+ */
 public class ModelZ3Service extends ModelSMTLIBService {
 
-	private final String z3Command;
+	/**
+	 * The command to invoke Z3.
+	 */
+	protected final String z3Command;
 
 	/**
-	 * Execution Time of the service.
+	 * Milliseconds spent by this service.
 	 */
-	private long timeConsumption = 0;
-	private long satTimeConsumption = 0;
-	private long unsatTimeConsumption = 0;
+	protected long timeConsumption = 0;
 
+	/**
+	 * Milliseconds used to compute a SAT result (including time to extra model).
+	 */
+	protected long satTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to compute an UNSAT result.
+	 */
+	protected long unsatTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to extract the model (if any).
+	 */
+	protected long modelParseTimeConsumption = 0;
+
+	/**
+	 * Construct an instance of the Z3 command-line service.
+	 * 
+	 * @param solver     associated Green solver
+	 * @param properties properties used to construct the service
+	 */
 	public ModelZ3Service(Green solver, Properties properties) {
 		super(solver);
 		String p = properties.getProperty("green.z3.path");
@@ -40,8 +63,25 @@ public class ModelZ3Service extends ModelSMTLIBService {
 		z3Command = p + ' ' + a;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService#report(za.ac.sun.cs.
+	 * green.util.Reporter)
+	 */
 	@Override
-	protected Map<Variable, Object> solve0(String smtQuery, Map<Variable, String> variables) {
+	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("  satTimeConsumption", satTimeConsumption);
+		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
+		reporter.report("modelParseTimeConsumption", modelParseTimeConsumption);
+		super.report(reporter);
+	}
+
+	@Override
+	protected Model resolve(String smtQuery, Map<Variable, String> variables) {
 		long startTime = System.currentTimeMillis();
 		try {
 			Process process = Runtime.getRuntime().exec(z3Command);
@@ -53,19 +93,19 @@ public class ModelZ3Service extends ModelSMTLIBService {
 			stdin.flush();
 			String output = outReader.readLine();
 
-			if (output.equals("unsat")) {
-				long a = System.currentTimeMillis() - startTime;
-				timeConsumption += a;
-				unsatTimeConsumption += a;
+			if ((output != null) && output.equals("unsat")) {
 				stdin.close();
 				stdout.close();
 				process.destroy();
-				return null;
-			} else if (!output.equals("sat")) {
-				log.fatal("Z3 returned a null: " + output);
+				unsatTimeConsumption += System.currentTimeMillis() - startTime;
+				timeConsumption += System.currentTimeMillis() - startTime;
+				return new Model(false, null);
+			} else if ((output == null) || !output.equals("sat")) {
+				log.fatal("Z3 returned a null: {}", output);
 				stdin.close();
 				stdout.close();
 				process.destroy();
+				timeConsumption += System.currentTimeMillis() - startTime;
 				return null;
 			}
 
@@ -76,18 +116,26 @@ public class ModelZ3Service extends ModelSMTLIBService {
 			stdout.close();
 			process.destroy();
 
-			long a = System.currentTimeMillis() - startTime;
-			timeConsumption += a;
-			Map<Variable, Object> tmp = retrieveModel(output, variables);
-			satTimeConsumption += a;
-			return tmp;
+			long startTime0 = System.currentTimeMillis();
+			Map<Variable, Constant> model = parseModel(output, variables);
+			modelParseTimeConsumption += System.currentTimeMillis() - startTime0;
+			satTimeConsumption += System.currentTimeMillis() - startTime;
+			timeConsumption += System.currentTimeMillis() - startTime;
+			return new Model(true, model);
 		} catch (IOException x) {
-			log.log(Level.FATAL, x.getMessage(), x);
+			log.fatal(x.getMessage(), x);
 		}
 		return null;
 	}
 
-	private Map<Variable, Object> retrieveModel(String output, Map<Variable, String> variables) {
+	/**
+	 * Parse the output of Z3 and reconstruct a variable assignment.
+	 * 
+	 * @param output    Z3 output
+	 * @param variables mapping of variables to variables names
+	 * @return the variable value assignment
+	 */
+	private Map<Variable, Constant> parseModel(String output, Map<Variable, String> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
 		output = output.replaceAll("\\(define-fun\\s+([\\w-]+)\\s*\\(\\)\\s*[\\w]+\\s+([^@]+)\\s*\\)@", "$1 == $2 ;; ");
@@ -100,7 +148,7 @@ public class ModelZ3Service extends ModelSMTLIBService {
 			}
 		}
 
-		HashMap<Variable, Object> model = new HashMap<>();
+		Map<Variable, Constant> model = new HashMap<>();
 		for (Map.Entry<Variable, String> entry : variables.entrySet()) {
 			Variable var = entry.getKey();
 			String name = entry.getValue();
@@ -119,14 +167,6 @@ public class ModelZ3Service extends ModelSMTLIBService {
 			}
 		}
 		return model;
-	}
-
-	@Override
-	public void report(Reporter reporter) {
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("satTimeConsumption", satTimeConsumption);
-		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
 	}
 
 }

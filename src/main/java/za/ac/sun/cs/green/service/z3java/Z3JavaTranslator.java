@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.z3;
+package za.ac.sun.cs.green.service.z3java;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,6 +22,7 @@ import za.ac.sun.cs.green.expr.RealVariable;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
+import za.ac.sun.cs.green.service.smtlib.TranslatorUnsupportedOperation;
 
 public class Z3JavaTranslator extends Visitor {
 

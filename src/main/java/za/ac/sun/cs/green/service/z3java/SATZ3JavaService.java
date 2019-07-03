@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.z3;
+package za.ac.sun.cs.green.service.z3java;
 
 import java.util.HashMap;
 import java.util.Properties;

@@ -11,10 +11,10 @@ import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Ancestor of all services that return a model if an instance is satisfiable. These services are expected to
- * return a {@link Model} object as a result to indicate if the expression given in the
- * {@link Instance} is satisfiable. The service might also return
- * {@code null} if it could not determine the answer.
+ * Ancestor of all services that return a model if an instance is satisfiable.
+ * These services are expected to return a {@link Model} object as a result to
+ * indicate if the expression given in the {@link Instance} is satisfiable. The
+ * service might also return {@code null} if it could not determine the answer.
  */
 public abstract class ModelService extends BasicService {
 
@@ -51,8 +51,6 @@ public abstract class ModelService extends BasicService {
 
 	/**
 	 * Number of times the answer was found in the store.
-	 * <p>
-	 * {@link #cacheHitCount} + {@link #cacheMissCount} <= {@link #invocationCount}
 	 */
 	protected int cacheHitCount = 0;
 
@@ -64,7 +62,7 @@ public abstract class ModelService extends BasicService {
 	/**
 	 * Number of times no model was found in the store.
 	 */
-	protected int noModelHitCount = 0;
+	protected int unsatHitCount = 0;
 
 	/**
 	 * Number of times an answer was NOT found in the store.
@@ -77,9 +75,10 @@ public abstract class ModelService extends BasicService {
 	protected int modelMissCount = 0;
 
 	/**
-	 * Number of times an answer was NOT found in the store and no model was found either.
+	 * Number of times an answer was NOT found in the store and no model was found
+	 * either.
 	 */
-	protected int noModelMissCount = 0;
+	protected int unsatMissCount = 0;
 
 	// ======================================================================
 	//
@@ -100,7 +99,12 @@ public abstract class ModelService extends BasicService {
 	/**
 	 * Milliseconds spent to process requests that eventually produce no model.
 	 */
-	protected long noModelTimeConsumption = 0;
+	protected long unsatTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent to process requests that do not produce an answer.
+	 */
+	protected long noAnswerTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent to compute models, including store lookups.
@@ -136,20 +140,23 @@ public abstract class ModelService extends BasicService {
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
 		reporter.report("invocationCount", invocationCount);
-		reporter.report("modelCount", modelCount);
-		reporter.report("unsatCount", unsatCount);
+		reporter.report("  modelCount", modelCount);
+		reporter.report("  unsatCount", unsatCount);
+		reporter.report("  noAnswerCount", noAnswerCount);
 		reporter.report("cacheHitCount", cacheHitCount);
 		reporter.report("  modelHitCount", modelHitCount);
-		reporter.report("  noModelHitCount", noModelHitCount);
+		reporter.report("  unsatHitCount", unsatHitCount);
 		reporter.report("cacheMissCount", cacheMissCount);
 		reporter.report("  modelMissCount", modelMissCount);
-		reporter.report("  noModelMissCount", noModelMissCount);
+		reporter.report("  noModelMissCount", unsatMissCount);
 		reporter.report("serviceTimeConsumption", serviceTimeConsumption);
 		reporter.report("  modelTimeConsumption", modelTimeConsumption);
-		reporter.report("  noModelTimeConsumption", noModelTimeConsumption);
+		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
+		reporter.report("  noAnswerTimeConsumption", noAnswerTimeConsumption);
 		reporter.report("solveTimeConsumption", solveTimeConsumption);
 		reporter.report("innerTimeConsumption", innerTimeConsumption);
 		reporter.report("keyTimeConsumption", keyTimeConsumption);
+		super.report(reporter);
 	}
 
 	/*
@@ -184,23 +191,24 @@ public abstract class ModelService extends BasicService {
 		if (result instanceof Model) {
 			if (((Model) result).isSat()) {
 				modelCount++;
-				modelTimeConsumption += (System.currentTimeMillis() - startTime);
+				modelTimeConsumption += System.currentTimeMillis() - startTime;
 			} else {
 				unsatCount++;
-				noModelTimeConsumption += (System.currentTimeMillis() - startTime);
+				unsatTimeConsumption += System.currentTimeMillis() - startTime;
 			}
 		} else {
 			noAnswerCount++;
-			noAnswerTimeConsumption += (System.currentTimeMillis() - startTime);
+			noAnswerTimeConsumption += System.currentTimeMillis() - startTime;
 		}
-		serviceTimeConsumption += (System.currentTimeMillis() - startTime);
+		serviceTimeConsumption += System.currentTimeMillis() - startTime;
 		return null;
 	}
 
 	/**
 	 * Solve a Green instance: in this service, this means that its SAT/UNSAT status
-	 * is computed and, if it is SAT, a model is returned. This first-level routine first checks if the result is available
-	 * in the store. If so, it is returned. Otherwise, it is computed.
+	 * is computed and, if it is SAT, a model is returned. This first-level routine
+	 * first checks if the result is available in the store. If so, it is returned.
+	 * Otherwise, it is computed.
 	 * <p>
 	 * Note that some subclasses modify this behaviour.
 	 *
@@ -211,26 +219,28 @@ public abstract class ModelService extends BasicService {
 		long startTime = System.currentTimeMillis();
 		invocationCount++;
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
-		keyTimeConsumption += (System.currentTimeMillis() - startTime);
+		keyTimeConsumption += System.currentTimeMillis() - startTime;
 		Model result = (Model) store.get(key);
 		if (result == null) {
 			cacheMissCount++;
 			result = solve1(instance);
 			if (result != null) {
-				modelMissCount++;
+				if (result.isSat()) {
+					modelMissCount++;
+				} else {
+					unsatMissCount++;
+				}
 				store.put(key, result);
-			} else {
-				noModelMissCount++;
 			}
 		} else {
 			cacheHitCount++;
 			if (result.isSat()) {
 				modelHitCount++;
 			} else {
-				noModelHitCount++;
+				unsatHitCount++;
 			}
 		}
-		solveTimeConsumption += (System.currentTimeMillis() - startTime);
+		innerTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -246,7 +256,7 @@ public abstract class ModelService extends BasicService {
 	protected Model solve1(Instance instance) {
 		long startTime = System.currentTimeMillis();
 		Model result = model(instance);
-		innerTimeConsumption += System.currentTimeMillis() - startTime;
+		solveTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
 
@@ -260,23 +270,28 @@ public abstract class ModelService extends BasicService {
 
 	// ======================================================================
 	//
-	// ENCAPSULATION OF A MODEL / CORE
+	// ENCAPSULATION OF A MODEL
 	//
 	// ======================================================================
 
 	/**
-	 * Encapsulation of a model.  It is expected that all implementing
-	 * services use this object.
+	 * Encapsulation of a model. It is expected that all implementing services use
+	 * this object.
 	 */
 	public static class Model implements Serializable {
 
 		/**
-		 * Does this result represent a satisfying solution?
+		 * Generate serial ID for serialization.
 		 */
-		private final Boolean isSat;
+		private static final long serialVersionUID = 6279584222682123539L;
 
 		/**
-		 * The model, if the solution is satisfying.
+		 * Does this result represent a satisfying solution?
+		 */
+		private final boolean isSat;
+
+		/**
+		 * The model, if {@link #isSat} is {@code true}. Otherwise, {@code null}.
 		 */
 		private final Map<Variable, Constant> model;
 
@@ -286,7 +301,7 @@ public abstract class ModelService extends BasicService {
 		 * @param isSat is this solution satisfying?
 		 * @param model the model for this solution (or {@code null})
 		 */
-		public Model(final Boolean isSat, final Map<Variable, Constant> model) {
+		public Model(final boolean isSat, final Map<Variable, Constant> model) {
 			this.isSat = isSat;
 			this.model = model;
 		}

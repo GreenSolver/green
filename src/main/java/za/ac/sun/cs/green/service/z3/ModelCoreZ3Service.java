@@ -12,8 +12,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.Level;
-
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
@@ -25,17 +23,47 @@ import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.service.smtlib.ModelCoreSMTLIBService;
 import za.ac.sun.cs.green.util.Reporter;
 
+/**
+ * Z3 command-line model service.
+ */
 public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
-	private final String z3Command;
+	/**
+	 * The command to invoke Z3.
+	 */
+	protected final String z3Command;
 
 	/**
-	 * Execution Time of the service.
+	 * Milliseconds spent by this service.
 	 */
-	private long timeConsumption = 0;
-	private long satTimeConsumption = 0;
-	private long unsatTimeConsumption = 0;
+	protected long timeConsumption = 0;
 
+	/**
+	 * Milliseconds used to compute a SAT result (including time to extra model).
+	 */
+	protected long satTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to compute an UNSAT result.
+	 */
+	protected long unsatTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to extract the model (if any).
+	 */
+	protected long modelParseTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to extract the core (if any).
+	 */
+	protected long coreParseTimeConsumption = 0;
+
+	/**
+	 * Construct an instance of the Z3 command-line service.
+	 * 
+	 * @param solver     associated Green solver
+	 * @param properties properties used to construct the service
+	 */
 	public ModelCoreZ3Service(Green solver, Properties properties) {
 		super(solver);
 		String p = properties.getProperty("green.z3.path");
@@ -43,8 +71,33 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 		z3Command = p + ' ' + a;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService#report(za.ac.sun.cs.
+	 * green.util.Reporter)
+	 */
 	@Override
-	protected ModelCore solve0(String smtQuery, Map<Variable, String> variables,
+	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("  satTimeConsumption", satTimeConsumption);
+		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
+		reporter.report("modelParseTimeConsumption", modelParseTimeConsumption);
+		reporter.report("coreParseTimeConsumption", coreParseTimeConsumption);
+		super.report(reporter);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.service.smtlib.ModelCoreSMTLIBService#resolve(java.lang.
+	 * String, java.util.Map, java.util.Map)
+	 */
+	@Override
+	protected ModelCore resolve(String smtQuery, Map<Variable, String> variables,
 			Map<String, Expression> coreClauseMapping) {
 		log.trace("smtQuery: {}", smtQuery);
 		long startTime = System.currentTimeMillis();
@@ -57,16 +110,21 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 			stdin.flush();
 			String output = outReader.readLine();
 
-			boolean issat = false;
-			switch (output) {
-			case "sat":
-				smtQuery = "(get-model)";
-				issat = true;
-				break;
-			case "unsat":
-				smtQuery = "(get-unsat-core)";
-				break;
-			default:
+			boolean isSat = false;
+			if (output != null) {
+				switch (output) {
+				case "sat":
+					smtQuery = "(get-model)";
+					isSat = true;
+					break;
+				case "unsat":
+					smtQuery = "(get-unsat-core)";
+					break;
+				default:
+					log.fatal("Z3 returned a null: " + output);
+					return null;
+				}
+			} else {
 				log.fatal("Z3 returned a null: " + output);
 				return null;
 			}
@@ -78,23 +136,35 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 			stdout.close();
 			process.destroy();
 
-			ModelCore tmp;
-			if (issat) {
-				tmp = retrieveModel(output, variables);
-				satTimeConsumption += (System.currentTimeMillis() - startTime);
+			Map<Variable, Constant> model = null;
+			Set<Expression> core = null;
+			if (isSat) {
+				long startTime0 = System.currentTimeMillis();
+				model = parseModel(output, variables);
+				modelParseTimeConsumption += System.currentTimeMillis() - startTime0;
+				satTimeConsumption += System.currentTimeMillis() - startTime;
 			} else {
-				tmp = retrieveCore(output, coreClauseMapping);
+				long startTime0 = System.currentTimeMillis();
+				core = parseCore(output, coreClauseMapping);
+				coreParseTimeConsumption += System.currentTimeMillis() - startTime0;
 				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
 			}
 			timeConsumption += (System.currentTimeMillis() - startTime);
-			return tmp;
+			return new ModelCore(isSat, model, core);
 		} catch (IOException x) {
-			log.log(Level.FATAL, x.getMessage(), x);
+			log.fatal(x.getMessage(), x);
 		}
 		return null;
 	}
 
-	private ModelCore retrieveModel(String output, Map<Variable, String> variables) {
+	/**
+	 * Parse the output of Z3 and reconstruct a variable assignment.
+	 * 
+	 * @param output    Z3 output
+	 * @param variables mapping of variables to variables names
+	 * @return the variable value assignment
+	 */
+	private Map<Variable, Constant> parseModel(String output, Map<Variable, String> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
 		output = output.replaceAll("\\(define-fun\\s+([\\w-]+)\\s*\\(\\)\\s*[\\w]+\\s+([^@]+)\\s*\\)@", "$1 == $2 ;; ");
@@ -107,7 +177,7 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 			}
 		}
 
-		HashMap<Variable, Constant> model = new HashMap<>();
+		Map<Variable, Constant> model = new HashMap<>();
 		for (Map.Entry<Variable, String> entry : variables.entrySet()) {
 			Variable var = entry.getKey();
 			String name = entry.getValue();
@@ -125,10 +195,17 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 				}
 			}
 		}
-		return new ModelCore(true, model, null);
+		return model;
 	}
 
-	private ModelCore retrieveCore(String output, Map<String, Expression> coreClauseMapping) {
+	/**
+	 * Parse the output of Z3 and reconstruct an unsatisfiable core.
+	 * 
+	 * @param output            Z3 output
+	 * @param coreClauseMapping mapping from clause names to Green expressions
+	 * @return the set of expressions that form an unsatisfiable core
+	 */
+	private Set<Expression> parseCore(String output, Map<String, Expression> coreClauseMapping) {
 		String[] clauseNames = output.replaceAll("^\\s*\\(\\s*([^\\s].*[^\\s]*)\\s*\\)\\s*$", "$1").split("\\s+");
 		Set<Expression> clauses = new HashSet<>();
 		for (String namedClause : clauseNames) {
@@ -137,26 +214,7 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 				clauses.add(realClause);
 			}
 		}
-		return new ModelCore(false, null, clauses);
+		return clauses;
 	}
 
-	@Override
-	public void report(Reporter reporter) {
-//        reporter.reportZZ("cacheHitCount", cacheHitCount);
-//        reporter.reportZZ("cacheMissCount", cacheMissCount);
-//        reporter.reportZZ("satCacheHitCount", modelHitCount);
-//        reporter.reportZZ("unsatCacheHitCount", noModelHitCount);
-//        reporter.reportZZ("satCacheMissCount", modelMissCount);
-//        reporter.reportZZ("unsatCacheMissCount", noModelMissCount);
-//        reporter.reportZZ("satQueries", modelCount);
-//        reporter.reportZZ("unsatQueries", noModelCount);
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("satTimeConsumption", satTimeConsumption);
-		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
-		reporter.report("storageTimeConsumption", storageTimeConsumption);
-		reporter.report("translationTimeConsumption", translationTimeConsumption);
-		reporter.report("conjunctCount", conjunctCount);
-		reporter.report("varCount", varCount);
-	}
 }
