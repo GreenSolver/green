@@ -22,7 +22,7 @@ public class MemStore extends BasicStore {
 	/**
 	 * The in-memory cache.
 	 */
-	protected final Map<String, Object> db = new HashMap<String, Object>();
+	protected final Map<String, Object> db = new HashMap<>();
 
 	/**
 	 * The redis store to fall back on.
