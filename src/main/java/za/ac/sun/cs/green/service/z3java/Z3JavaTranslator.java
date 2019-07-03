@@ -22,133 +22,208 @@ import za.ac.sun.cs.green.expr.RealVariable;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
-import za.ac.sun.cs.green.service.smtlib.TranslatorUnsupportedOperation;
 
+/**
+ * Visitor to translate a Green expression to calls to the Z3 Java library.
+ */
 public class Z3JavaTranslator extends Visitor {
 
-	private Context context = null;
-	private Stack<Expr> stack = null;
-	private List<BoolExpr> domains = null;
-	private Map<Expression, BoolExpr> asserts = null; // maps the Green expressions to Context expressions
-	private Map<BoolExpr, Expression> coreClauseMapping; // maps the Context names to Green expressions
-	private Map<Variable, Expr> v2e = null; // maps Green variables to Context format
-	private int counter = 0; // counter for the predicate names
+	/**
+	 * Prefix used for naming clauses.
+	 */
+	protected static final String CLAUSE_PREFIX = "q";
 
+	/**
+	 * Context of the Z3 solver.
+	 */
+	protected final Context z3Context;
+
+	/**
+	 * Stack of operands.
+	 */
+	protected final Stack<Expr> stack = new Stack<>();
+
+	/**
+	 * List of variable lower and upper bounds as Z3 expressions.
+	 */
+	protected final List<BoolExpr> variableBounds = new LinkedList<>();
+
+	/**
+	 * Mapping of Green expressions to Z3 expressions.
+	 */
+	protected final Map<Expression, BoolExpr> assertions = new HashMap<>();
+
+	/**
+	 * Mapping of Z3 expressions to Green expressions.
+	 */
+	protected final Map<BoolExpr, Expression> coreClauseMapping = new HashMap<>();
+
+	/**
+	 * Mapping of Green variables to corresponding Z3 variables.
+	 */
+	protected final Map<Variable, Expr> variableMapping = new HashMap<>();
+
+	/**
+	 * Counter for the number of predicates.
+	 */
+	protected int counter = 0;
+
+	/**
+	 * Create an instance of the translator.
+	 * 
+	 * @param context Z3 context
+	 */
+	public Z3JavaTranslator(Context context) {
+		this.z3Context = context;
+	}
+
+	/**
+	 * Return the number of variables in the last translation.
+	 * 
+	 * @return number of variables in the last translation
+	 */
 	public int getVariableCount() {
-		return v2e.size();
+		return variableMapping.size();
 	}
 
-	public Map<Expression, BoolExpr> getAsserts() {
-		return asserts;
+	/**
+	 * Return the variable mapping.
+	 * 
+	 * @return variable mapping
+	 */
+	public Map<Variable, Expr> getVariableMap() {
+		return variableMapping;
 	}
 
-	public Z3JavaTranslator(Context c) {
-		this.context = c;
-		stack = new Stack<Expr>();
-		v2e = new HashMap<Variable, Expr>();
-		domains = new LinkedList<>();
-		asserts = new HashMap<>();
-		coreClauseMapping = new HashMap<>();
+	/**
+	 * Return the mapping of Green expressions to Z3 expressions.
+	 * 
+	 * @return mapping of Green expressions to Z3 expressions
+	 */
+	public Map<Expression, BoolExpr> getAssertions() {
+		return assertions;
 	}
 
+	/**
+	 * Return the conjunction of the Green expression translation and the variable
+	 * bounds.
+	 * 
+	 * @return conjoined Z3 expression
+	 */
 	public BoolExpr getTranslation() {
 		BoolExpr result = (BoolExpr) stack.pop();
-		/* not required due to Bounder being used */
-		/*
-		 * not sure why this was commented out, it is clearly wrong, with or without
-		 * bounder
-		 */
-		for (BoolExpr expr : domains) {
+		for (BoolExpr expr : variableBounds) {
 			try {
-				result = context.mkAnd(result, expr);
+				result = z3Context.mkAnd(result, expr);
 			} catch (Z3Exception e) {
 				e.printStackTrace();
 			}
 		}
-		/* was end of old comment */
 		return result;
 	}
 
-	public Map<BoolExpr, Expression> getCoreMappings() {
-		// TBD: Optimise
-		for (Expression e : asserts.keySet()) {
-			BoolExpr px = context.mkBoolConst("q" + counter++);
-			// px is the predicate name (in Context object)
-			// e is the Green expression of the assertion/clause
-			coreClauseMapping.put(px, e);
-		}
+	/**
+	 * Return the mapping of Z3 expressions to Green expressions.
+	 * 
+	 * @return mapping of Z3 expressions to Green expressions
+	 */
+	public Map<BoolExpr, Expression> getCoreClauseMappings() {
+		assertions.forEach((k, v) -> coreClauseMapping.put(z3Context.mkBoolConst(CLAUSE_PREFIX + counter++), k));
 		return coreClauseMapping;
 	}
 
-	public Map<Variable, Expr> getVariableMap() {
-		return v2e;
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * IntConstant)
+	 */
 	@Override
 	public void postVisit(IntConstant constant) {
 		try {
-			stack.push(context.mkInt(constant.getValue()));
+			stack.push(z3Context.mkInt(constant.getValue()));
 		} catch (Z3Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * RealConstant)
+	 */
 	@Override
 	public void postVisit(RealConstant constant) {
 		try {
-			stack.push(context.mkReal(Double.toString(constant.getValue())));
+			stack.push(z3Context.mkReal(Double.toString(constant.getValue())));
 		} catch (Z3Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * IntVariable)
+	 */
 	@Override
 	public void postVisit(IntVariable variable) {
-		Expr v = v2e.get(variable);
-		if (v == null) {
-			Integer lower = variable.getLowerBound();
-			Integer upper = variable.getUpperBound();
+		Expr var = variableMapping.get(variable);
+		if (var == null) {
+			int lower = variable.getLowerBound();
+			int upper = variable.getUpperBound();
 			try {
-				v = context.mkIntConst(variable.getName());
-				// now add bounds
-				BoolExpr low = context.mkGe((ArithExpr) v, (ArithExpr) context.mkInt(lower));
-				Operation eLow = new Operation(Operation.Operator.GE, variable, new IntConstant(lower));
-				asserts.put(eLow, low);
-				BoolExpr high = context.mkLe((ArithExpr) v, (ArithExpr) context.mkInt(upper));
-				Operation eHigh = new Operation(Operation.Operator.GE, variable, new IntConstant(upper));
-				asserts.put(eHigh, high);
-				BoolExpr domain = context.mkAnd(low, high);
-				domains.add(domain);
-				asserts.put(new Operation(Operation.Operator.AND, eLow, eHigh), domain); // This one is needed
+				var = z3Context.mkIntConst(variable.getName());
+				BoolExpr lowerBound = z3Context.mkGe((ArithExpr) var, (ArithExpr) z3Context.mkInt(lower));
+				Operation low = new Operation(Operation.Operator.GE, variable, new IntConstant(lower));
+				assertions.put(low, lowerBound);
+				BoolExpr upperBound = z3Context.mkLe((ArithExpr) var, (ArithExpr) z3Context.mkInt(upper));
+				Operation upp = new Operation(Operation.Operator.GE, variable, new IntConstant(upper));
+				assertions.put(upp, upperBound);
+				BoolExpr bounds = z3Context.mkAnd(lowerBound, upperBound);
+				variableBounds.add(bounds);
+				assertions.put(new Operation(Operation.Operator.AND, low, upp), bounds); // This one is needed
 			} catch (Z3Exception e) {
 				e.printStackTrace();
 			}
-			v2e.put(variable, v);
+			variableMapping.put(variable, var);
 		}
-		stack.push(v);
+		stack.push(var);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * RealVariable)
+	 */
 	@Override
 	public void postVisit(RealVariable variable) {
-		Expr v = v2e.get(variable);
+		Expr v = variableMapping.get(variable);
 		if (v == null) {
 			int lower = (int) (double) variable.getLowerBound();
 			int upper = (int) (double) variable.getUpperBound();
 			try {
-				// TODO Add Asserts
-				v = context.mkRealConst(variable.getName());
-				// now add bounds
-				BoolExpr low = context.mkGe((ArithExpr) v, (ArithExpr) context.mkReal(lower));
-				BoolExpr high = context.mkLe((ArithExpr) v, (ArithExpr) context.mkReal(upper));
-				domains.add(context.mkAnd(low, high));
+				v = z3Context.mkRealConst(variable.getName());
+				BoolExpr low = z3Context.mkGe((ArithExpr) v, (ArithExpr) z3Context.mkReal(lower));
+				BoolExpr high = z3Context.mkLe((ArithExpr) v, (ArithExpr) z3Context.mkReal(upper));
+				variableBounds.add(z3Context.mkAnd(low, high));
 			} catch (Z3Exception e) {
 				e.printStackTrace();
 			}
-			v2e.put(variable, v);
+			variableMapping.put(variable, v);
 		}
 		stack.push(v);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
+	 */
 	@Override
 	public void postVisit(Operation operation) throws VisitorException {
 		Expr l = null;
@@ -169,73 +244,74 @@ public class Z3JavaTranslator extends Visitor {
 		try {
 			switch (operation.getOperator()) {
 			case NOT:
-				BoolExpr not = context.mkNot((BoolExpr) l);
-				asserts.put(operation, not);
+				BoolExpr not = z3Context.mkNot((BoolExpr) l);
+				assertions.put(operation, not);
 				stack.push(not);
 				break;
 			case EQ:
-				BoolExpr eq = context.mkEq(l, r);
-				asserts.put(operation, eq);
+				BoolExpr eq = z3Context.mkEq(l, r);
+				assertions.put(operation, eq);
 				stack.push(eq);
 				break;
 			case NE:
-				BoolExpr ne = context.mkNot(context.mkEq(l, r));
-				asserts.put(operation, ne);
+				BoolExpr ne = z3Context.mkNot(z3Context.mkEq(l, r));
+				assertions.put(operation, ne);
 				stack.push(ne);
 				break;
 			case LT:
-				BoolExpr lt = context.mkLt((ArithExpr) l, (ArithExpr) r);
-				asserts.put(operation, lt);
+				BoolExpr lt = z3Context.mkLt((ArithExpr) l, (ArithExpr) r);
+				assertions.put(operation, lt);
 				stack.push(lt);
 				break;
 			case LE:
-				BoolExpr le = context.mkLe((ArithExpr) l, (ArithExpr) r);
-				asserts.put(operation, le);
+				BoolExpr le = z3Context.mkLe((ArithExpr) l, (ArithExpr) r);
+				assertions.put(operation, le);
 				stack.push(le);
 				break;
 			case GT:
-				BoolExpr gt = context.mkGt((ArithExpr) l, (ArithExpr) r);
-				asserts.put(operation, gt);
+				BoolExpr gt = z3Context.mkGt((ArithExpr) l, (ArithExpr) r);
+				assertions.put(operation, gt);
 				stack.push(gt);
 				break;
 			case GE:
-				BoolExpr ge = context.mkGe((ArithExpr) l, (ArithExpr) r);
-				asserts.put(operation, ge);
+				BoolExpr ge = z3Context.mkGe((ArithExpr) l, (ArithExpr) r);
+				assertions.put(operation, ge);
 				stack.push(ge);
 				break;
 			case AND:
-				BoolExpr and = context.mkAnd((BoolExpr) l, (BoolExpr) r);
-				asserts.put(operation, and);
+				BoolExpr and = z3Context.mkAnd((BoolExpr) l, (BoolExpr) r);
+				assertions.put(operation, and);
 				stack.push(and);
 				break;
 			case OR:
-				BoolExpr or = context.mkOr((BoolExpr) l, (BoolExpr) r);
-				asserts.put(operation, or);
+				BoolExpr or = z3Context.mkOr((BoolExpr) l, (BoolExpr) r);
+				assertions.put(operation, or);
 				stack.push(or);
 				break;
 			case IMPLIES:
-				stack.push(context.mkImplies((BoolExpr) l, (BoolExpr) r));
+				stack.push(z3Context.mkImplies((BoolExpr) l, (BoolExpr) r));
 				break;
 			case ADD:
-				stack.push(context.mkAdd((ArithExpr) l, (ArithExpr) r));
+				stack.push(z3Context.mkAdd((ArithExpr) l, (ArithExpr) r));
 				break;
 			case SUB:
-				stack.push(context.mkSub((ArithExpr) l, (ArithExpr) r));
+				stack.push(z3Context.mkSub((ArithExpr) l, (ArithExpr) r));
 				break;
 			case MUL:
-				stack.push(context.mkMul((ArithExpr) l, (ArithExpr) r));
+				stack.push(z3Context.mkMul((ArithExpr) l, (ArithExpr) r));
 				break;
 			case DIV:
-				stack.push(context.mkDiv((ArithExpr) l, (ArithExpr) r));
+				stack.push(z3Context.mkDiv((ArithExpr) l, (ArithExpr) r));
 				break;
 			case MOD:
-				stack.push(context.mkMod((IntExpr) l, (IntExpr) r));
+				stack.push(z3Context.mkMod((IntExpr) l, (IntExpr) r));
 				break;
 			default:
-				throw new TranslatorUnsupportedOperation("unsupported operation " + operation.getOperator());
+				throw new Z3JavaTranslatorUnsupportedOperation("unsupported operation " + operation.getOperator());
 			}
 		} catch (Z3Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 }

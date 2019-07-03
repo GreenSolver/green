@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.z3java;
+package za.ac.sun.cs.green.service.z3javabv;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -97,14 +97,14 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
 			log.log(Level.WARN, "Error in translation to Z3" + e1.getMessage());
 		}
 		// get context out of the translator
-		Map<BoolExpr, Expression> namedAsserts = translator.getCoreMappings();
+		Map<BoolExpr, Expression> namedAsserts = translator.getCoreClauseMappings();
 		// model should now be in ctx
 		try {
 			z3Solver = ctx.mkSolver(LOGIC); // create clean instance
 			for (BoolExpr px : namedAsserts.keySet()) {
 				// px is the Predicate name
 				// assert and track each predicate/assertion
-				z3Solver.assertAndTrack(translator.getAsserts().get(namedAsserts.get(px)), px);
+				z3Solver.assertAndTrack(translator.getAssertions().get(namedAsserts.get(px)), px);
 			}
 		} catch (Z3Exception e1) {
 			log.log(Level.WARN, "Error in Z3" + e1.getMessage());
