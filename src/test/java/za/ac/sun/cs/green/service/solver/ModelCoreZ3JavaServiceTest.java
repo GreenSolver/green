@@ -1,5 +1,8 @@
 package za.ac.sun.cs.green.service.solver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
@@ -15,6 +18,7 @@ import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.service.ModelCoreService;
+import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
 import za.ac.sun.cs.green.util.Configuration;
 
 /**
@@ -50,23 +54,24 @@ public class ModelCoreZ3JavaServiceTest {
 		solver.getStore().flushAll();
 	}
 
-	private void check(Expression expression, String expected) {
+	private void checkSat(Expression expression, String expected) {
 		Instance i = new Instance(solver, null, expression);
 		assertTrue(i != null);
-		Object result = i.request("model");
-		if (ModelCoreService.isSat((Instance) result).toString().equals(expected)) {
-			// false
-			System.out.println(ModelCoreService.getCore((Instance) result));
-			assertTrue(ModelCoreService.isSat((Instance) result).toString().equals(expected));
-		} else {
-			// model
-			System.out.println(ModelCoreService.getModel((Instance) result));
-			assertTrue(((ModelCoreService.getModel((Instance) result).toString()).equals(expected)));
-
-		}
-//        assertTrue(((result.toString()).equals(expected)));
+		ModelCore result = (ModelCore) i.request("model");
+		assertNotNull(result);
+		assertTrue(result.isSat());
+		assertEquals(expected, result.getModel().toString());
 	}
 
+	private void checkUnsat(Expression expression, String expected) {
+		Instance i = new Instance(solver, null, expression);
+		assertTrue(i != null);
+		ModelCore result = (ModelCore) i.request("model");
+		assertNotNull(result);
+		assertFalse(result.isSat());
+		assertEquals(expected, result.getCore().toString());
+	}
+	
 	@Test
 	public void test01() {
 		// example: "(aa==0)&&(bb!=1)" => "1*v==0", "1*v+-1!=0" => 0 & 2
@@ -81,7 +86,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o3 = new Operation(Operation.Operator.NE, o2, c2);
 		Operation o4 = new Operation(Operation.Operator.AND, o1, o3);
 
-		check(o4, "{v0=0, v1=4294967288}");
+		checkSat(o4, "{v0=0, v1=4294967288}");
 	}
 
 	@Test
@@ -96,7 +101,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o2 = new Operation(Operation.Operator.ADD, o1, c1);
 		Operation o3 = new Operation(Operation.Operator.LE, o2, c2);
 
-		check(o3, "{v0=4294967216, v1=66}");
+		checkSat(o3, "{v0=4294967216, v1=66}");
 	}
 
 	@Test
@@ -109,7 +114,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o1 = new Operation(Operation.Operator.MUL, c1, v1);
 		Operation o2 = new Operation(Operation.Operator.LT, o1, v2);
 
-		check(o2, "{aa=0, bb=41}");
+		checkSat(o2, "{aa=0, bb=41}");
 	}
 
 	@Test
@@ -128,7 +133,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o4 = new Operation(Operation.Operator.ADD, o3, c3);
 		Operation o5 = new Operation(Operation.Operator.LE, o4, c4);
 
-		check(o5, "{v0=6, v1=32}");
+		checkSat(o5, "{v0=6, v1=32}");
 	}
 
 	@Test
@@ -157,7 +162,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o9 = new Operation(Operation.Operator.AND, o3, o6);
 		Operation o10 = new Operation(Operation.Operator.AND, o9, o8);
 
-		check(o10, "{v0=6, v1=7}");
+		checkSat(o10, "{v0=6, v1=7}");
 	}
 
 	@Test
@@ -177,7 +182,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
 		Operation o5 = new Operation(Operation.Operator.AND, o4, o3);
 
-		check(o5, "false");
+		checkUnsat(o5, "false");
 	}
 
 	@Test
@@ -196,7 +201,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
 		Operation o5 = new Operation(Operation.Operator.AND, o4, o3);
 
-		check(o5, "{x=6, y=7}");
+		checkSat(o5, "{x=6, y=7}");
 	}
 
 	@Test
@@ -206,7 +211,7 @@ public class ModelCoreZ3JavaServiceTest {
 
 		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
 
-		check(o1, "{v=7}");
+		checkSat(o1, "{v=7}");
 	}
 
 	@Test
@@ -216,7 +221,7 @@ public class ModelCoreZ3JavaServiceTest {
 
 		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
 
-		check(o1, "{v=7}");
+		checkSat(o1, "{v=7}");
 	}
 
 	@Test
@@ -238,7 +243,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o6 = new Operation(Operation.Operator.LE, v3, o5);
 		Operation o7 = new Operation(Operation.Operator.AND, o4, o6);
 
-		check(o7, "{x=7, y=8, z=6}");
+		checkSat(o7, "{x=7, y=8, z=6}");
 	}
 
 	@Test
@@ -260,7 +265,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o6 = new Operation(Operation.Operator.LT, v3, o5);
 		Operation o7 = new Operation(Operation.Operator.AND, o4, o6);
 
-		check(o7, "{x=7, y=8, z=16}");
+		checkSat(o7, "{x=7, y=8, z=16}");
 	}
 
 	@Test
@@ -272,7 +277,7 @@ public class ModelCoreZ3JavaServiceTest {
 
 		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
 
-		check(o4, "false");
+		checkUnsat(o4, "false");
 	}
 
 	@Test
@@ -283,7 +288,7 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o2 = new Operation(Operation.Operator.GT, v1, c1);
 		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
 
-		check(o3, "false");
+		checkUnsat(o3, "false");
 	}
 
 	@Test
@@ -295,6 +300,6 @@ public class ModelCoreZ3JavaServiceTest {
 		Operation o3 = new Operation(Operation.Operator.GT, v1, c1);
 		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
 		Operation o5 = new Operation(Operation.Operator.AND, o4, o3);
-		check(o5, "false");
+		checkUnsat(o5, "false");
 	}
 }
