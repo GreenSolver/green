@@ -12,6 +12,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.FPExpr;
+import com.microsoft.z3.FPNum;
 import com.microsoft.z3.Z3Exception;
 
 import za.ac.sun.cs.green.expr.Expression;
@@ -23,171 +24,237 @@ import za.ac.sun.cs.green.expr.RealVariable;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
-import za.ac.sun.cs.green.service.smtlib.TranslatorUnsupportedOperation;
 
+/**
+ * Visitor to translate a Green expression to calls to the Z3 Java library.
+ * Expressions are translated to bitvector operations.
+ */
 public class Z3JavaBVTranslator extends Visitor {
 
-	private Context context = null;
-	private Stack<Expr> stack = null;
-	private List<BoolExpr> domains = null;
-	private Map<Expression, Expr> asserts = null; // maps the Green expressions to Context expressions
-	private Map<BoolExpr, Expression> coreClauseMapping; // maps the Context names to Green expressions
-	private Map<Variable, Expr> v2e = null; // maps Green variables to Context format
-	private int counter = 0; // counter for the predicate names
-	private int size = Integer.SIZE; // Default Bitvector size
+	/**
+	 * Prefix used for naming clauses.
+	 */
+	protected static final String CLAUSE_PREFIX = "q";
 
-	public Z3JavaBVTranslator(Context c) {
-		this.context = c;
-		stack = new Stack<Expr>();
-		v2e = new HashMap<Variable, Expr>();
-		domains = new LinkedList<BoolExpr>();
-		asserts = new HashMap<>();
-		coreClauseMapping = new HashMap<>();
+	/**
+	 * Context of the Z3 solver.
+	 */
+	protected final Context z3Context;
+
+	/**
+	 * Stack of operands.
+	 */
+	protected final Stack<Expr> stack = new Stack<>();
+
+	/**
+	 * List of variable lower and upper bounds as Z3 expressions.
+	 */
+	protected final List<BoolExpr> variableBounds = new LinkedList<>();
+
+	/**
+	 * Mapping of Green expressions to Z3 expressions.
+	 */
+	protected final Map<Expression, BoolExpr> assertions = new HashMap<>();
+
+	/**
+	 * Mapping of Z3 expressions to Green expressions.
+	 */
+	protected final Map<BoolExpr, Expression> coreClauseMapping = new HashMap<>();
+
+	/**
+	 * Mapping of Green variables to corresponding Z3 variables.
+	 */
+	protected final Map<Variable, Expr> variableMapping = new HashMap<>();
+
+	/**
+	 * Size of bitvectors.
+	 */
+	protected final int bitVectorSize;
+	
+	/**
+	 * Counter for the number of predicates.
+	 */
+	protected int counter = 0;
+
+	/**
+	 * Create an instance of the translator.
+	 * 
+	 * @param context Z3 context
+	 */
+	public Z3JavaBVTranslator(Context context, int bitvectorSize) {
+		this.z3Context = context;
+		this.bitVectorSize = bitvectorSize;
 	}
 
+	/**
+	 * Return the number of variables in the last translation.
+	 * 
+	 * @return number of variables in the last translation
+	 */
+	public int getVariableCount() {
+		return variableMapping.size();
+	}
+
+	/**
+	 * Return the variable mapping.
+	 * 
+	 * @return variable mapping
+	 */
+	public Map<Variable, Expr> getVariableMap() {
+		return variableMapping;
+	}
+
+	/**
+	 * Return the mapping of Green expressions to Z3 expressions.
+	 * 
+	 * @return mapping of Green expressions to Z3 expressions
+	 */
+	public Map<Expression, BoolExpr> getAssertions() {
+		return assertions;
+	}
+
+	/**
+	 * Return the conjunction of the Green expression translation and the variable
+	 * bounds.
+	 * 
+	 * @return conjoined Z3 expression
+	 */
 	public BoolExpr getTranslation() {
 		BoolExpr result = (BoolExpr) stack.pop();
-		/* not required due to Bounder being used */
-		/*
-		 * not sure why this was commented out, it is clearly wrong, with or without
-		 * bounder
-		 */
-		for (BoolExpr expr : domains) {
+		for (BoolExpr expr : variableBounds) {
 			try {
-				result = context.mkAnd(result, expr);
+				result = z3Context.mkAnd(result, expr);
 			} catch (Z3Exception e) {
 				e.printStackTrace();
 			}
 		}
-		/* was end of old comment */
 		return result;
 	}
 
-	public Map<BoolExpr, Expression> getCoreMappings() {
-		// TBD: Optimise
-		for (Expression e : asserts.keySet()) {
-			BoolExpr px = context.mkBoolConst("q" + counter++);
-			// px is the predicate name (in Context object)
-			// e is the Green expression of the assertion/clause
-			coreClauseMapping.put(px, e);
-		}
+	/**
+	 * Return the mapping of Z3 expressions to Green expressions.
+	 * 
+	 * @return mapping of Z3 expressions to Green expressions
+	 */
+	public Map<BoolExpr, Expression> getCoreClauseMappings() {
+		assertions.forEach((k, v) -> coreClauseMapping.put(z3Context.mkBoolConst(CLAUSE_PREFIX + counter++), k));
 		return coreClauseMapping;
 	}
 
-	public Map<Variable, Expr> getVariableMap() {
-		return v2e;
-	}
-
-	public int getVariableCount() {
-		return v2e.size();
-	}
-
-	public Map<Expression, Expr> getAsserts() {
-		return asserts;
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * IntConstant)
+	 */
 	@Override
 	public void postVisit(IntConstant constant) {
 		try {
-			stack.push(context.mkBV(constant.getValue(), size));
+			stack.push(z3Context.mkBV(constant.getValue(), bitVectorSize));
 		} catch (Z3Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	/*
-	 * @Override public void postVisit(IntegerConstant constant) { try {
-	 * stack.push(context.mkBV(constant.getValue(), constant.getSize())); } catch
-	 * (Z3Exception e) { e.printStackTrace(); } }
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * RealConstant)
 	 */
-
 	@Override
 	public void postVisit(RealConstant constant) {
 		try {
-			stack.push(context.mkReal(Double.toString(constant.getValue())));
+			stack.push(z3Context.mkReal(Double.toString(constant.getValue())));
 		} catch (Z3Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * IntVariable)
+	 */
 	@Override
 	public void postVisit(IntVariable variable) {
-		BitVecExpr v = (BitVecExpr) v2e.get(variable);
-		if (v == null) {
-			Integer lower = variable.getLowerBound();
-			Integer upper = variable.getUpperBound();
+		BitVecExpr var = (BitVecExpr) variableMapping.get(variable);
+		if (var == null) {
+			int lower = variable.getLowerBound();
+			int upper = variable.getUpperBound();
 			try {
-				v = context.mkBVConst(variable.getName(), size);
-				// now add bounds
-				BoolExpr low = context.mkBVSGE(v, context.mkBV(lower, size));
-				Operation eLow = new Operation(Operation.Operator.GE, variable, new IntConstant(lower));
-				asserts.put(eLow, low);
-
-				BoolExpr high = context.mkBVSLE(v, context.mkBV(upper, size));
-				Operation eHigh = new Operation(Operation.Operator.GE, variable, new IntConstant(upper));
-				asserts.put(eHigh, high);
-
-				BoolExpr domain = context.mkAnd(low, high);
-				domains.add(context.mkAnd(low, high));
-				asserts.put(new Operation(Operation.Operator.AND, eLow, eHigh), domain); // This one is needed
+				var = z3Context.mkBVConst(variable.getName(), bitVectorSize);
+				BoolExpr lowerBound = z3Context.mkBVSGE(var, z3Context.mkBV(lower, bitVectorSize));
+				Operation low = new Operation(Operation.Operator.GE, variable, new IntConstant(lower));
+				assertions.put(low, lowerBound);
+				BoolExpr upperBound = z3Context.mkBVSLE(var, z3Context.mkBV(upper, bitVectorSize));
+				Operation upp = new Operation(Operation.Operator.GE, variable, new IntConstant(upper));
+				assertions.put(upp, upperBound);
+				BoolExpr bounds = z3Context.mkAnd(lowerBound, upperBound);
+				variableBounds.add(bounds);
+				assertions.put(new Operation(Operation.Operator.AND, low, upp), bounds); // This one is needed
 			} catch (Z3Exception e) {
 				e.printStackTrace();
 			}
-			v2e.put(variable, v);
+			variableMapping.put(variable, var);
+		}
+		stack.push(var);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
+	 * RealVariable)
+	 */
+	@Override
+	public void postVisit(RealVariable variable) {
+		Expr v = variableMapping.get(variable);
+		if (v == null) {
+			double lower = variable.getLowerBound();
+			double upper = variable.getUpperBound();
+			try {
+				FPNum l = null, u = null;
+				switch (bitVectorSize) {
+				case 16:
+					v = z3Context.mkConst(variable.getName(), z3Context.mkFPSort16());
+					l = z3Context.mkFP(lower, z3Context.mkFPSort16());
+					u = z3Context.mkFP(upper, z3Context.mkFPSort16());
+					break;
+				case 32:
+					v = z3Context.mkConst(variable.getName(), z3Context.mkFPSort32());
+					l = z3Context.mkFP(lower, z3Context.mkFPSort32());
+					u = z3Context.mkFP(upper, z3Context.mkFPSort32());
+					break;
+				case 64:
+					v = z3Context.mkConst(variable.getName(), z3Context.mkFPSort64());
+					l = z3Context.mkFP(lower, z3Context.mkFPSort64());
+					u = z3Context.mkFP(upper, z3Context.mkFPSort64());
+					break;
+				default:
+					v = z3Context.mkConst(variable.getName(), z3Context.mkFPSort128());
+					l = z3Context.mkFP(lower, z3Context.mkFPSort128());
+					u = z3Context.mkFP(upper, z3Context.mkFPSort128());
+					break;
+				}
+				BoolExpr low = z3Context.mkFPGt((FPExpr) v, l);
+				BoolExpr high = z3Context.mkFPLt((FPExpr) v, u);
+				variableBounds.add(z3Context.mkAnd(low, high));
+			} catch (Z3Exception e) {
+				e.printStackTrace();
+			}
+			variableMapping.put(variable, v);
 		}
 		stack.push(v);
 	}
 
 	/*
-	 * @Override public void postVisit(IntegerVariable variable) { BitVecExpr v =
-	 * (BitVecExpr) v2e.get(variable); if (v == null) { Long lower =
-	 * variable.getLowerBound(); Long upper = variable.getUpperBound(); Integer size
-	 * = variable.getSize(); try { v = context.mkBVConst(variable.getName(), size);
-	 * // now add bounds BoolExpr low = context.mkBVSGE(v, context.mkBV(lower,
-	 * size)); Operation eLow = new Operation(Operation.Operator.GE, variable, new
-	 * IntegerConstant(lower, size)); asserts.put(eLow, low);
+	 * (non-Javadoc)
 	 * 
-	 * BoolExpr high = context.mkBVSLE(v, context.mkBV(upper, size)); Operation
-	 * eHigh = new Operation(Operation.Operator.GE, variable, new
-	 * IntegerConstant(upper, size)); asserts.put(eHigh, high);
-	 * 
-	 * BoolExpr domain = context.mkAnd(low,high);
-	 * domains.add(context.mkAnd(low,high)); asserts.put(new
-	 * Operation(Operation.Operator.AND, eLow, eHigh), domain); // This one is
-	 * needed } catch (Z3Exception e) { e.printStackTrace(); } v2e.put(variable, v);
-	 * } stack.push(v); }
+	 * @see
+	 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 	 */
-
-	@Override
-	public void postVisit(RealVariable variable) {
-		Expr v = v2e.get(variable);
-		if (v == null) {
-			Double lower = variable.getLowerBound();
-			Double upper = variable.getUpperBound();
-			try {
-				// TBD: Add Asserts
-				if (size == 32) {
-					v = context.mkConst(variable.getName(), context.mkFPSort32());
-					// now add bounds
-					BoolExpr low = context.mkFPGt((FPExpr) v, context.mkFP(lower, context.mkFPSort32()));
-					BoolExpr high = context.mkFPLt((FPExpr) v, context.mkFP(upper, context.mkFPSort32()));
-					domains.add(context.mkAnd(low, high));
-				} else {
-					v = context.mkConst(variable.getName(), context.mkFPSortDouble());
-					// now add bounds
-					BoolExpr low = context.mkFPGt((FPExpr) v, context.mkFP(lower, context.mkFPSortDouble()));
-					BoolExpr high = context.mkFPLt((FPExpr) v, context.mkFP(upper, context.mkFPSortDouble()));
-					domains.add(context.mkAnd(low, high));
-				}
-
-			} catch (Z3Exception e) {
-				e.printStackTrace();
-			}
-			v2e.put(variable, v);
-		}
-		stack.push(v);
-	}
-
 	@Override
 	public void postVisit(Operation operation) throws VisitorException {
 		Expr l = null;
@@ -205,124 +272,123 @@ public class Z3JavaBVTranslator extends Visitor {
 				l = stack.pop();
 			}
 		}
-		assert l != null;
-		assert r != null;
 		try {
 			switch (operation.getOperator()) {
 			case NOT:
-				Expr not = context.mkBVNot((BitVecExpr) l);
-				asserts.put(operation, not);
+				Expr not = null;
+				if (l instanceof BitVecExpr) {
+					not = z3Context.mkBVNot((BitVecExpr) l);
+				} else if ((l instanceof BoolExpr) && (r instanceof BoolExpr)) {
+					not = z3Context.mkNot((BoolExpr) l);
+					assertions.put(operation, (BoolExpr) not);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+				}
 				stack.push(not);
 				break;
 			case EQ:
-				Expr eq = context.mkEq(l, r);
-				asserts.put(operation, eq);
+				BoolExpr eq = z3Context.mkEq(l, r);
+				assertions.put(operation, eq);
 				stack.push(eq);
 				break;
 			case NE:
-				Expr ne = context.mkNot(context.mkEq(l, r));
-				asserts.put(operation, ne);
+				BoolExpr ne = z3Context.mkNot(z3Context.mkEq(l, r));
+				assertions.put(operation, ne);
 				stack.push(ne);
 				break;
 			case LT:
-				Expr lt = null;
-				if (l instanceof ArithExpr && r instanceof ArithExpr) {
-					lt = context.mkLt((ArithExpr) l, (ArithExpr) r);
-				} else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-					lt = context.mkBVSLT((BitVecExpr) l, (BitVecExpr) r);
+				BoolExpr lt = null;
+				if ((l instanceof BitVecExpr) && (r instanceof BitVecExpr)) {
+					lt = z3Context.mkBVSLT((BitVecExpr) l, (BitVecExpr) r);
+				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
+					lt = z3Context.mkLt((ArithExpr) l, (ArithExpr) r);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
 				}
-				asserts.put(operation, lt);
+				assertions.put(operation, lt);
 				stack.push(lt);
-
 				break;
 			case LE:
-				Expr le = null;
-				if (l instanceof ArithExpr && r instanceof ArithExpr) {
-					le = context.mkLe((ArithExpr) l, (ArithExpr) r);
-				} else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-					le = context.mkBVSLE((BitVecExpr) l, (BitVecExpr) r);
+				BoolExpr le = null;
+				if ((l instanceof BitVecExpr) && (r instanceof BitVecExpr)) {
+					le = z3Context.mkBVSLE((BitVecExpr) l, (BitVecExpr) r);
+				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
+					le = z3Context.mkLe((ArithExpr) l, (ArithExpr) r);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
 				}
-				asserts.put(operation, le);
+				assertions.put(operation, le);
 				stack.push(le);
 				break;
 			case GT:
-				Expr gt = null;
-				if (l instanceof ArithExpr && r instanceof ArithExpr) {
-					gt = context.mkGt((ArithExpr) l, (ArithExpr) r);
-				} else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-					gt = context.mkBVSGT((BitVecExpr) l, (BitVecExpr) r);
+				BoolExpr gt = null;
+				if ((l instanceof BitVecExpr) && (r instanceof BitVecExpr)) {
+					gt = z3Context.mkBVSGT((BitVecExpr) l, (BitVecExpr) r);
+				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
+					gt = z3Context.mkGt((ArithExpr) l, (ArithExpr) r);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
 				}
-				asserts.put(operation, gt);
+				assertions.put(operation, gt);
 				stack.push(gt);
 				break;
 			case GE:
-				Expr ge = null;
-				if (l instanceof ArithExpr && r instanceof ArithExpr) {
-					ge = context.mkGe((ArithExpr) l, (ArithExpr) r);
-				} else if (l instanceof ArithExpr && r instanceof BitVecExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof ArithExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-					ge = context.mkBVSGE((BitVecExpr) l, (BitVecExpr) r);
+				BoolExpr ge = null;
+				if ((l instanceof BitVecExpr) && (r instanceof BitVecExpr)) {
+					ge = z3Context.mkBVSGE((BitVecExpr) l, (BitVecExpr) r);
+				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
+					ge = z3Context.mkGe((ArithExpr) l, (ArithExpr) r);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
 				}
-				asserts.put(operation, ge);
+				assertions.put(operation, ge);
 				stack.push(ge);
 				break;
 			case AND:
 				Expr and = null;
-				if (l instanceof BoolExpr && r instanceof BoolExpr) {
-					and = context.mkAnd((BoolExpr) l, (BoolExpr) r);
-				} else if (l instanceof BoolExpr && r instanceof BitVecExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof BoolExpr) {
-					System.out.println("##@!@");
-				} else if (l instanceof BitVecExpr && r instanceof BitVecExpr) {
-					and = context.mkBVAND((BitVecExpr) l, (BitVecExpr) r);
+				if ((l instanceof BitVecExpr) && (r instanceof BitVecExpr)) {
+					and = z3Context.mkBVAND((BitVecExpr) l, (BitVecExpr) r);
+				} else if ((l instanceof BoolExpr) && (r instanceof BoolExpr)) {
+					and = z3Context.mkAnd((BoolExpr) l, (BoolExpr) r);
+					assertions.put(operation, (BoolExpr) and);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
 				}
-				asserts.put(operation, and);
 				stack.push(and);
 				break;
 			case OR:
-				Expr or = context.mkBVOR((BitVecExpr) l, (BitVecExpr) r);
-				asserts.put(operation, or);
+				Expr or = null;
+				if ((l instanceof BitVecExpr) && (r instanceof BitVecExpr)) {
+					or = z3Context.mkBVOR((BitVecExpr) l, (BitVecExpr) r);
+				} else if ((l instanceof BoolExpr) && (r instanceof BoolExpr)) {
+					or = z3Context.mkAnd((BoolExpr) l, (BoolExpr) r);
+					assertions.put(operation, (BoolExpr) or);
+				} else {
+					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+				}
 				stack.push(or);
 				break;
-//			case IMPLIES:
-//				stack.push(context.mkImplies(l, r));
-//				break;
 			case ADD:
-				stack.push(context.mkBVAdd((BitVecExpr) l, (BitVecExpr) r));
+				stack.push(z3Context.mkBVAdd((BitVecExpr) l, (BitVecExpr) r));
 				break;
 			case SUB:
-				stack.push(context.mkBVSub((BitVecExpr) l, (BitVecExpr) r));
+				stack.push(z3Context.mkBVSub((BitVecExpr) l, (BitVecExpr) r));
 				break;
 			case MUL:
-				stack.push(context.mkBVMul((BitVecExpr) l, (BitVecExpr) r));
+				stack.push(z3Context.mkBVMul((BitVecExpr) l, (BitVecExpr) r));
 				break;
 			case DIV:
-				stack.push(context.mkBVSDiv((BitVecExpr) l, (BitVecExpr) r));
+				stack.push(z3Context.mkBVSDiv((BitVecExpr) l, (BitVecExpr) r));
 				break;
 			case MOD:
-				stack.push(context.mkBVSMod((BitVecExpr) l, (BitVecExpr) r));
+				stack.push(z3Context.mkBVSMod((BitVecExpr) l, (BitVecExpr) r));
 				break;
 			default:
-				throw new TranslatorUnsupportedOperation("unsupported operation " + operation.getOperator());
+				throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operation " + operation.getOperator());
 			}
 		} catch (Z3Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 }

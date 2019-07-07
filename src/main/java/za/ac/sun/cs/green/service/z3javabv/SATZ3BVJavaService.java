@@ -1,29 +1,24 @@
-package za.ac.sun.cs.green.service.z3java;
+package za.ac.sun.cs.green.service.z3javabv;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
-import za.ac.sun.cs.green.expr.Constant;
-import za.ac.sun.cs.green.expr.IntConstant;
-import za.ac.sun.cs.green.expr.RealConstant;
-import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
-import za.ac.sun.cs.green.service.ModelService;
+import za.ac.sun.cs.green.service.SATService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 Java library model service.
+ * Z3 Java library SAT service using bitvectors.
  */
-public class ModelZ3JavaService extends ModelService {
+public class SATZ3BVJavaService extends SATService {
 
 	/**
 	 * Logic used for the Z3 solver.
@@ -31,14 +26,19 @@ public class ModelZ3JavaService extends ModelService {
 	protected static final String Z3_LOGIC = "QF_LIA";
 
 	/**
+	 * Size of bitvectors.
+	 */
+	protected static final int BV_SIZE = 32;
+	
+	/**
 	 * Instance of the Z3 solver.
 	 */
-	protected final Solver z3Solver;
+	protected static Solver z3Solver;
 
 	/**
 	 * Context of the Z3 solver.
 	 */
-	protected final Context z3Context;
+	protected static Context z3Context;
 
 	/**
 	 * Milliseconds spent by this service.
@@ -66,10 +66,10 @@ public class ModelZ3JavaService extends ModelService {
 	 * @param solver     associated Green solver
 	 * @param properties properties used to construct the service
 	 */
-	public ModelZ3JavaService(Green solver, Properties properties) {
+	public SATZ3BVJavaService(Green solver, Properties properties) {
 		super(solver);
 		Map<String, String> cfg = new HashMap<>();
-		cfg.put("model", "true");
+		cfg.put("model", "false");
 		try {
 			z3Context = new Context(cfg);
 		} catch (Exception x) {
@@ -95,19 +95,21 @@ public class ModelZ3JavaService extends ModelService {
 		super.report(reporter);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.service.SATService#solve(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
-	protected ModelService.Model model(Instance instance) {
+	protected Boolean solve(Instance instance) {
 		long startTime = System.currentTimeMillis();
+		Boolean result = false;
 
 		// translate instance to Z3
 		long startTime0 = System.currentTimeMillis();
-		Z3JavaTranslator translator = new Z3JavaTranslator(z3Context);
 		try {
+			Z3JavaBVTranslator translator = new Z3JavaBVTranslator(z3Context, BV_SIZE);
 			instance.getExpression().accept(translator);
-			int scopes = z3Solver.getNumScopes();
-			if (scopes > 0) {
-				z3Solver.pop(scopes);
-			}
 			z3Solver.push();
 			z3Solver.add(translator.getTranslation());
 		} catch (VisitorException x) {
@@ -117,46 +119,25 @@ public class ModelZ3JavaService extends ModelService {
 		}
 		translationTimeConsumption += System.currentTimeMillis() - startTime0;
 
-		// solve & extract model
-		Map<Variable, Constant> model = new HashMap<>();
+		// solve
 		try {
-			if (Status.SATISFIABLE == z3Solver.check()) {
-				Map<Variable, Expr> variableMap = translator.getVariableMap();
-				com.microsoft.z3.Model z3Model = z3Solver.getModel();
-				for (Map.Entry<Variable, Expr> entry : variableMap.entrySet()) {
-					Variable var = entry.getKey();
-					Expr z3Var = entry.getValue();
-					Expr z3Val = z3Model.evaluate(z3Var, false);
-					Constant val = null;
-					if (z3Val.isIntNum()) {
-						val = new IntConstant(Integer.parseInt(z3Val.toString()));
-					} else if (z3Val.isRatNum()) {
-						String z3ValString = z3Val.toString();
-						if (z3ValString.contains("/")) {
-							String[] rat = z3ValString.split("/");
-							double num = Double.parseDouble(rat[0]);
-							double den = Double.parseDouble(rat[1]);
-							val = new RealConstant(num / den);
-						} else {
-							val = new RealConstant(Double.parseDouble(z3ValString));
-						}
-					} else {
-						log.warn("Error unsupported type for variable {}", z3Val);
-						return null;
-					}
-					model.put(var, val);
-				}
-			} else {
-				unsatTimeConsumption += System.currentTimeMillis() - startTime;
-				timeConsumption += System.currentTimeMillis() - startTime;
-				return new ModelService.Model(false, null);
-			}
-		} catch (Z3Exception x) {
-			log.warn("Error in Z3 ({})", x.getMessage());
+			result = (Status.SATISFIABLE == z3Solver.check());
+		} catch (Z3Exception e) {
+			log.warn("Error in Z3 ({})", e.getMessage());
 		}
-		satTimeConsumption += System.currentTimeMillis() - startTime;
+
+		// clean up
+		int scopes = z3Solver.getNumScopes();
+		if (scopes > 0) {
+			z3Solver.pop(scopes);
+		}
+		if (result) {
+			satTimeConsumption += System.currentTimeMillis() - startTime;
+		} else {
+			unsatTimeConsumption += System.currentTimeMillis() - startTime;
+		}
 		timeConsumption += System.currentTimeMillis() - startTime;
-		return new ModelService.Model(true, model);
+		return result;
 	}
 
 }

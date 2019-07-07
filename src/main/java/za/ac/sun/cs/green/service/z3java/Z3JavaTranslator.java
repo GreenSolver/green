@@ -54,7 +54,7 @@ public class Z3JavaTranslator extends Visitor {
 	protected final Map<Expression, BoolExpr> assertions = new HashMap<>();
 
 	/**
-	 * Mapping of Z3 expressions to Green expressions.
+	 * Mapping of Z3 named assertions to Green expressions.
 	 */
 	protected final Map<BoolExpr, Expression> coreClauseMapping = new HashMap<>();
 
@@ -123,9 +123,10 @@ public class Z3JavaTranslator extends Visitor {
 	}
 
 	/**
-	 * Return the mapping of Z3 expressions to Green expressions.
+	 * Return the mapping of Z3 named assertions to Green expressions. The named
+	 * assertion are, in effect, boolean constants.
 	 * 
-	 * @return mapping of Z3 expressions to Green expressions
+	 * @return mapping of Z3 named assertions to Green expressions
 	 */
 	public Map<BoolExpr, Expression> getCoreClauseMappings() {
 		assertions.forEach((k, v) -> coreClauseMapping.put(z3Context.mkBoolConst(CLAUSE_PREFIX + counter++), k));

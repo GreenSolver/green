@@ -28,27 +28,12 @@ public class SATZ3JavaService extends SATService {
 	/**
 	 * Instance of the Z3 solver.
 	 */
-	protected static final Solver z3Solver;
+	protected final Solver z3Solver;
 
 	/**
 	 * Context of the Z3 solver.
 	 */
-	protected static final Context z3Context;
-
-	/*
-	 * Static code to initialize the static fields z3Context and z3Solver.
-	 */
-	static {
-		Map<String, String> cfg = new HashMap<>();
-		cfg.put("model", "false");
-		try {
-			z3Context = new Context(cfg);
-		} catch (Exception x) {
-			x.printStackTrace();
-			throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + x);
-		}
-		z3Solver = z3Context.mkSolver(Z3_LOGIC);
-	}
+	protected final Context z3Context;
 
 	/**
 	 * Milliseconds spent by this service.
@@ -78,6 +63,15 @@ public class SATZ3JavaService extends SATService {
 	 */
 	public SATZ3JavaService(Green solver, Properties properties) {
 		super(solver);
+		Map<String, String> cfg = new HashMap<>();
+		cfg.put("model", "false");
+		try {
+			z3Context = new Context(cfg);
+		} catch (Exception x) {
+			x.printStackTrace();
+			throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + x);
+		}
+		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
 	/*
@@ -111,6 +105,10 @@ public class SATZ3JavaService extends SATService {
 		try {
 			Z3JavaTranslator translator = new Z3JavaTranslator(z3Context);
 			instance.getExpression().accept(translator);
+			int scopes = z3Solver.getNumScopes();
+			if (scopes > 0) {
+				z3Solver.pop(scopes);
+			}
 			z3Solver.push();
 			z3Solver.add(translator.getTranslation());
 		} catch (VisitorException x) {
@@ -127,11 +125,6 @@ public class SATZ3JavaService extends SATService {
 			log.warn("Error in Z3 ({})", e.getMessage());
 		}
 
-		// clean up
-		int scopes = z3Solver.getNumScopes();
-		if (scopes > 0) {
-			z3Solver.pop(scopes);
-		}
 		if (result) {
 			satTimeConsumption += System.currentTimeMillis() - startTime;
 		} else {

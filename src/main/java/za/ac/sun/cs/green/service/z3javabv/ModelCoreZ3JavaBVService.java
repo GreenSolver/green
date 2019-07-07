@@ -25,160 +25,180 @@ import za.ac.sun.cs.green.expr.RealConstant;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
+import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
+import za.ac.sun.cs.green.service.z3java.Z3JavaTranslator;
 import za.ac.sun.cs.green.util.Reporter;
 
+/**
+ * Z3 Java library model service using bitvectors.
+ */
 public class ModelCoreZ3JavaBVService extends ModelCoreService {
 
-	Context ctx;
-	Solver z3Solver;
+	/**
+	 * Logic used for the Z3 solver.
+	 */
+	protected static final String Z3_LOGIC = "QF_BV";
+
+	/**
+	 * Size of bitvectors.
+	 */
+	protected static final int BV_SIZE = 32;
+
+	/**
+	 * Instance of the Z3 solver.
+	 */
+	protected final Solver z3Solver;
+
+	/**
+	 * Context of the Z3 solver.
+	 */
+	protected final Context z3Context;
+
+	/**
+	 * Milliseconds spent by this service.
+	 */
 	protected long timeConsumption = 0;
-	protected long translationTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to compute a SAT result.
+	 */
 	protected long satTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to compute an UNSAT result.
+	 */
 	protected long unsatTimeConsumption = 0;
+
+	/**
+	 * Milliseconds used to translate Green expression to Z3 library calls.
+	 */
+	protected long translationTimeConsumption = 0;
+
 	protected int conjunctCount = 0;
 	protected int variableCount = 0;
-	private static final String LOGIC = "QF_BV";
 
-	private static final class Z3Wrapper {
-		private Context ctx;
-		private Solver solver;
-
-		private static Z3Wrapper instance = null;
-
-		public static Z3Wrapper getInstance() {
-			if (instance == null) {
-				instance = new Z3Wrapper();
-			}
-			return instance;
-		}
-
-		private Z3Wrapper() {
-			HashMap<String, String> cfg = new HashMap<String, String>();
-			cfg.put("model", "true");
-			cfg.put("unsat_core", "true");
-			cfg.put("auto_config", "false");
-
-			try {
-				ctx = new Context(cfg);
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + e);
-			}
-			// TODO : Changed logic to QF_LIA from AUF_LIA
-//            solver = ctx.mkSolver(LOGIC); // removed since this creation is unnecessary
-		}
-
-		public Solver getSolver() {
-			return this.solver;
-		}
-
-		public Context getCtx() {
-			return this.ctx;
-		}
-	}
-
+	/**
+	 * Construct an instance of the Z3 Java library service.
+	 * 
+	 * @param solver     associated Green solver
+	 * @param properties properties used to construct the service
+	 */
 	public ModelCoreZ3JavaBVService(Green solver, Properties properties) {
 		super(solver);
-		Z3Wrapper z3Wrapper = Z3Wrapper.getInstance();
-		z3Solver = z3Wrapper.getSolver();
-		ctx = z3Wrapper.getCtx();
+		Map<String, String> cfg = new HashMap<>();
+		cfg.put("model", "true");
+		cfg.put("unsat_core", "true");
+		cfg.put("auto_config", "false");
+		try {
+			z3Context = new Context(cfg);
+		} catch (Exception x) {
+			x.printStackTrace();
+			throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + x);
+		}
+		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.green.service.SATService#report(za.ac.sun.cs.green.util.
+	 * Reporter)
+	 */
+	@Override
+	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("  satTimeConsumption", satTimeConsumption);
+		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
+		reporter.report("  translationTimeConsumption", translationTimeConsumption);
+//		reporter.report("conjunctCount", conjunctCount);
+//		reporter.report("variableCount", variableCount);
+		super.report(reporter);
+	}
+
+	/**
+	 * Calculate and return either a model, a core, or {@code null}.
+	 * 
+	 * @param instance the instance to solve
+	 * @return a{@link ModelCore} or {@code null}
+	 * @see za.ac.sun.cs.green.service.ModelCoreService#modelCore(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
 	protected ModelCore modelCore(Instance instance) {
 		long startTime = System.currentTimeMillis();
-		ModelCore mc = null;
+
 		// translate instance to Z3
-		long t0Translation = System.currentTimeMillis();
-		Z3JavaBVTranslator translator = new Z3JavaBVTranslator(ctx);
+		long startTime0 = System.currentTimeMillis();
+		Z3JavaTranslator translator = new Z3JavaTranslator(z3Context);
 		try {
 			instance.getExpression().accept(translator);
-		} catch (VisitorException e1) {
-			log.log(Level.WARN, "Error in translation to Z3" + e1.getMessage());
+		} catch (VisitorException x) {
+			log.warn("Error in translation to Z3 ({})", x.getMessage());
+		} catch (Z3Exception x) {
+			log.fatal("Error in Z3 ({})", x.getMessage());
 		}
-		// get context out of the translator
-		Map<BoolExpr, Expression> namedAsserts = translator.getCoreMappings();
-		// model should now be in ctx
+		translationTimeConsumption += System.currentTimeMillis() - startTime0;
+
+		// solve & extract model/core
+		Map<BoolExpr, Expression> coreClauseMappings = translator.getCoreClauseMappings();
 		try {
-			z3Solver = ctx.mkSolver(LOGIC); // create clean instance
-			for (BoolExpr px : namedAsserts.keySet()) {
-				// px is the Predicate name
-				// assert and track each predicate/assertion
-				z3Solver.assertAndTrack((BoolExpr) translator.getAsserts().get(namedAsserts.get(px)), px);
+			z3Solver.reset();
+			for (BoolExpr core : coreClauseMappings.keySet()) {
+				z3Solver.assertAndTrack(translator.getAssertions().get(coreClauseMappings.get(core)), core);
 			}
 		} catch (Z3Exception e1) {
 			log.log(Level.WARN, "Error in Z3" + e1.getMessage());
 		}
-//		conjunctCount += instance.getExpression().getString().split("&&").length;
-		conjunctCount += instance.getExpression().toString().split("&&").length;
-		variableCount += translator.getVariableCount();
-		translationTimeConsumption += (System.currentTimeMillis() - t0Translation);
-		// solve
-		try { // Real Stuff is still untested
+		Map<Variable, Constant> model = new HashMap<>();
+		try {
 			if (Status.SATISFIABLE == z3Solver.check()) {
 				Map<Variable, Expr> variableMap = translator.getVariableMap();
-				HashMap<Variable, Constant> greenModel = new HashMap<>();
-				Model model = z3Solver.getModel();
+				Model z3Model = z3Solver.getModel();
 				for (Map.Entry<Variable, Expr> entry : variableMap.entrySet()) {
-					Variable greenVar = entry.getKey();
+					Variable var = entry.getKey();
 					Expr z3Var = entry.getValue();
-					Expr z3Val = model.evaluate(z3Var, false);
+					Expr z3Val = z3Model.evaluate(z3Var, false);
 					Constant val = null;
 					if (z3Val.isIntNum()) {
 						val = new IntConstant(Integer.parseInt(z3Val.toString()));
 					} else if (z3Val.isRatNum()) {
-						val = new RealConstant(Double.parseDouble(z3Val.toString()));
+						String z3ValString = z3Val.toString();
+						if (z3ValString.contains("/")) {
+							String[] rat = z3ValString.split("/");
+							double num = Double.parseDouble(rat[0]);
+							double den = Double.parseDouble(rat[1]);
+							val = new RealConstant(num / den);
+						} else {
+							val = new RealConstant(Double.parseDouble(z3ValString));
+						}
 					} else if (z3Val.isBV()) {
-						val = new IntConstant((int) Long.parseLong(z3Val.toString()));
+						val = new IntConstant(Integer.parseInt(z3Val.toString()));
 					} else {
-						log.log(Level.WARN, "Error unsupported type for variable " + z3Val);
+						log.warn("Error unsupported type for variable {}", z3Val);
 						return null;
 					}
-					greenModel.put(greenVar, val);
-//					log.log(Level.INFO,"" + greenVar + " has value " + val);
+					model.put(var, val);
 				}
-				mc = new ModelCore(true, greenModel, null);
-				satCount++;
-				satTimeConsumption += (System.currentTimeMillis() - startTime);
 			} else {
-//				log.log(Level.WARNING,"constraint has no model, it is infeasible");
-				Set<Expression> clauses = new HashSet<>();
-				for (Expr tmp : z3Solver.getUnsatCore()) {
-					if (tmp != null) {
-						Expression realClause = namedAsserts.get(tmp);
-						if (realClause != null) {
-							clauses.add(realClause);
+				Set<Expression> unsatCore = new HashSet<>();
+				for (BoolExpr core : z3Solver.getUnsatCore()) {
+					if (core != null) {
+						Expression clause = coreClauseMappings.get(core);
+						if (clause != null) {
+							unsatCore.add(clause);
 						}
 					}
 				}
-				mc = new ModelCore(false, null, clauses);
-				unsatCount++;
-				unsatTimeConsumption += (System.currentTimeMillis() - startTime);
+				unsatTimeConsumption += System.currentTimeMillis() - startTime;
+				timeConsumption += System.currentTimeMillis() - startTime;
+				return new ModelCore(false, null, unsatCore);
 			}
 		} catch (Z3Exception e) {
 			log.log(Level.WARN, "Error in Z3" + e.getMessage());
 		}
-		timeConsumption += (System.currentTimeMillis() - startTime);
-		return mc;
-	}
-
-	@Override
-	public void report(Reporter reporter) {
-//        reporter.reportZZ("cacheHitCount", cacheHitCount);
-//        reporter.reportZZ("cacheMissCount", cacheMissCount);
-//        reporter.reportZZ("satCacheHitCount", modelHitCount);
-//        reporter.reportZZ("unsatCacheHitCount", noModelHitCount);
-//        reporter.reportZZ("satCacheMissCount", modelMissCount);
-//        reporter.reportZZ("unsatCacheMissCount", noModelMissCount);
-//        reporter.reportZZ("satQueries", modelCount);
-//        reporter.reportZZ("unsatQueries", noModelCount);
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("satTimeConsumption", satTimeConsumption);
-		reporter.report("unsatTimeConsumption", unsatTimeConsumption);
-		reporter.report("translationTimeConsumption", translationTimeConsumption);
-		reporter.report("conjunctCount", conjunctCount);
-		reporter.report("variableCount", variableCount);
+		satTimeConsumption += System.currentTimeMillis() - startTime;
+		timeConsumption += System.currentTimeMillis() - startTime;
+		return new ModelCore(false, model, null);
 	}
 
 }
