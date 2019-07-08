@@ -4,9 +4,9 @@ permalink: /
 ---
 
 <section class="hero"><div class="wrapper">
-	<h1>GREEN</h1>
+	<!-- <h1>GREEN</h1> -->
 	{% include svg/green.svg %}
-	<h2>A universal interface to a range of SAT/SMT decision procedures, constraint solvers, model counters, and related tools. Queries are reduced, reused, and recycled by built-in routines for simplification and persistence.</h2>
+	<h2>GREEN is a universal interface to SAT/SMT decision procedures, constraint solvers, model counters, and related tools. Queries are reduced, reused, and recycled for simplification and persistence.</h2>
 	<div class="buttons">
 		<a class="button" href="{{ '/userguide/getting-started/' | relative_url }}">Get started</a>
 		<span class="github-button"><iframe src="https://ghbtns.com/github-btn.html?user=GreenSolver&amp;repo=green&amp;type=star&amp;count=true&amp;size=large" frameBorder="0" scrolling="0" width="160" height="30" title="GitHub Stars"></iframe></span>

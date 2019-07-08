@@ -62,21 +62,32 @@ dependencies {
 
 barvinok is a library for counting the number of integer points in parametric and non-parametric polytopes.
 
-  - [http://barvinok.gforge.inria.fr/](http://barvinok.gforge.inria.fr/)
+  - [```http://barvinok.gforge.inria.fr/```](http://barvinok.gforge.inria.fr/)
 
 ### LattE
 
 LattE (Lattice point Enumeration) is a computer software dedicated to the problems of counting lattice points and integration inside convex polytopes.
 
-  - [https://www.math.ucdavis.edu/~latte/](https://www.math.ucdavis.edu/~latte/)
+  - [```https://www.math.ucdavis.edu/~latte/```](https://www.math.ucdavis.edu/~latte/)
+  - [```https://github.com/latte-int/latte```](https://github.com/latte-int/latte)
+
+For the latest information, consult the repository.  As of July 2019, the following instructions work on Linux:
+
+~~~
+$ wget https://github.com/latte-int/latte/releases/latest/download/latte-integrale-1.7.5.tar.gz
+$ tar xf latte-integrale-1.7.5.tar.gz
+$ cd latte-integrale-1.7.5/
+$ ./configure --prefix=/usr/local
+$ sudo make
+~~~
 
 ### Z3
 
 Z3 is an efficient SMT (Satisfiability Modulo Theories) solver with specialized algorithms for solving background theories.
 
-  - [https://github.com/Z3Prover/z3](https://github.com/Z3Prover/z3)
+  - [```https://github.com/Z3Prover/z3```](https://github.com/Z3Prover/z3)
 
-It is relatively easy to install:
+For the latest information, consult the repository.  As of July 2019, the following instructions work on Linux:
 
 ~~~
 $ git clone https://github.com/Z3Prover/z3.git
