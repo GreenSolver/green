@@ -50,7 +50,9 @@ task javadocJar(type: Jar) {
 }
 
 artifacts {
-	archives jar, sourcesJar, javadocJar
+	archives jar
+	archives sourcesJar
+	archives javadocJar
 }
 
 publishing {
@@ -91,6 +93,12 @@ publishing {
 		}
 	}
 }
+
+signing {
+    sign publishing.publications.release
+}
+
+publishReleasePublicationToReleaseRepository.dependsOn signReleasePublication
 
 def customizePom(pom) {
 	pom.withXml {
@@ -140,8 +148,4 @@ tasks.withType(PublishToMavenRepository) {
 		(repository == publishing.repositories.release && publication == publishing.publications.release) ||
 		(repository == publishing.repositories.snapshot && publication == publishing.publications.snapshot)
 	}
-}
-
-signing {
-    sign publishing.publications.release
 }
