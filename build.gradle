@@ -73,8 +73,8 @@ publishing {
 	repositories {
 		maven {
 			name = 'release'
-			url = "file://${buildDir}/repo"
-			// url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+			// url = "file://${buildDir}/repo"
+			url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
 			credentials {
 				username repo_username
 				password repo_password
