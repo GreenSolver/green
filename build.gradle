@@ -4,16 +4,14 @@ plugins {
 	id 'jacoco'
 	id 'eclipse'
 	id 'checkstyle'
-	id 'com.palantir.git-version' version '0.12.0-rc2'
-	id 'com.jfrog.artifactory' version '4.8.1'
 	id 'maven-publish'
+	id 'signing'
 }
 
 mainClassName = 'za.ac.sun.cs.green.Green'
-group = 'za.ac.sun.cs'
+group = 'com.github.green-solver'
 
 repositories {
-	jcenter()
 	mavenCentral()
 }
 
@@ -41,37 +39,113 @@ jacocoTestReport {
     }
 }
 
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives jar, sourcesJar, javadocJar
+}
+
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
+		release(MavenPublication) {
+			customizePom(pom)
+			version = green_version
 			from components.java
-			groupId = group
-			version gitVersion() + '-SNAPSHOT'
+			artifact sourcesJar
+			artifact javadocJar
+		}
+		snapshot(MavenPublication) {
+			customizePom(pom)
+			version = green_version + "-SNAPSHOT"
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+		}
+	}
+	repositories {
+		maven {
+			name = 'release'
+			url = "file://${buildDir}/repo"
+			// url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+			credentials {
+				username repo_username
+				password repo_password
+			}
+		}
+		maven {
+			name = 'snapshot'
+			// url = "file://${buildDir}/snap"
+			url = "https://oss.sonatype.org/content/repositories/snapshots"
+			credentials {
+				username repo_username
+				password repo_password
+			}
 		}
 	}
 }
 
-artifactory {
-	contextUrl = project.getProperty('artifactory_contextUrl')
-	publish {
-		repository {
-			repoKey = 'gradle-dev-local'
-			username = project.getProperty('artifactory_user')
-			password = project.getProperty('artifactory_password')
-			maven = true
+def customizePom(pom) {
+	pom.withXml {
+		def root = asNode()
+		root.dependencies.removeAll { dep ->
+			dep.scope == "test"
 		}
-		defaults {
-			publications('mavenJava')
-			publishArtifacts = true
-			publishPom = true
+		root.children().last() + {
+			resolveStrategy = Closure.DELEGATE_FIRST
+			name 'Green Library'
+			description 'Universal interface to decision procedures, constraint solvers, model counters, and related tools'
+			url 'https://github.com/GreenSolver/green'
+			packaging 'jar'
+			organization {
+				name 'GreenSolver'
+				url 'https://github.com/GreenSolver'
+			}
+			issueManagement {
+				system 'GitHub'
+				url 'https://github.com/GreenSolver/green/issues'
+			}
+			licenses {
+				license {
+					name 'GNU Lesser General Public License'
+					url 'https://www.gnu.org/licenses/lgpl-3.0.en.html'
+					distribution 'repo'
+				}
+			}
+			scm {
+				url 'https://github.com/GreenSolver/green'
+				connection 'scm:git:git@github.com:GreenSolver/green.git'
+				developerConnection 'scm:git:git@github.com:GreenSolver/green.git'
+			}
+			developers {
+				developer {
+					id 'jacogeld'
+					name 'Jaco Geldenhuys'
+					email 'jacogeld@gmail.com'
+				}
+			}
 		}
 	}
-	resolve {
-		repository {
-			repoKey = 'gradle-dev'
-			username = project.getProperty('artifactory_user')
-			password = project.getProperty('artifactory_password')
-			maven = true
-		}
+}
+
+tasks.withType(PublishToMavenRepository) {
+	onlyIf {
+		(repository == publishing.repositories.release && publication == publishing.publications.release) ||
+		(repository == publishing.repositories.snapshot && publication == publishing.publications.snapshot)
 	}
+}
+
+//signing {
+//    sign publishing.publications.release
+//}
+
+signing {
+	sign configurations.archives
 }
