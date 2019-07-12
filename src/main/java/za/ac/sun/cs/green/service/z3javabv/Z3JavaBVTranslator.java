@@ -70,7 +70,7 @@ public class Z3JavaBVTranslator extends Visitor {
 	 * Size of bitvectors.
 	 */
 	protected final int bitVectorSize;
-	
+
 	/**
 	 * Counter for the number of predicates.
 	 */
@@ -282,7 +282,8 @@ public class Z3JavaBVTranslator extends Visitor {
 					not = z3Context.mkNot((BoolExpr) l);
 					assertions.put(operation, (BoolExpr) not);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				stack.push(not);
 				break;
@@ -303,7 +304,8 @@ public class Z3JavaBVTranslator extends Visitor {
 				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
 					lt = z3Context.mkLt((ArithExpr) l, (ArithExpr) r);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				assertions.put(operation, lt);
 				stack.push(lt);
@@ -315,7 +317,8 @@ public class Z3JavaBVTranslator extends Visitor {
 				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
 					le = z3Context.mkLe((ArithExpr) l, (ArithExpr) r);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				assertions.put(operation, le);
 				stack.push(le);
@@ -327,7 +330,8 @@ public class Z3JavaBVTranslator extends Visitor {
 				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
 					gt = z3Context.mkGt((ArithExpr) l, (ArithExpr) r);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				assertions.put(operation, gt);
 				stack.push(gt);
@@ -339,7 +343,8 @@ public class Z3JavaBVTranslator extends Visitor {
 				} else if ((l instanceof ArithExpr) && (r instanceof ArithExpr)) {
 					ge = z3Context.mkGe((ArithExpr) l, (ArithExpr) r);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				assertions.put(operation, ge);
 				stack.push(ge);
@@ -352,7 +357,8 @@ public class Z3JavaBVTranslator extends Visitor {
 					and = z3Context.mkAnd((BoolExpr) l, (BoolExpr) r);
 					assertions.put(operation, (BoolExpr) and);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				stack.push(and);
 				break;
@@ -364,7 +370,8 @@ public class Z3JavaBVTranslator extends Visitor {
 					or = z3Context.mkAnd((BoolExpr) l, (BoolExpr) r);
 					assertions.put(operation, (BoolExpr) or);
 				} else {
-					throw new Z3JavaBVTranslatorUnsupportedOperation("unsupported operands, operation==" + operation.getOperator());
+					throw new Z3JavaBVTranslatorUnsupportedOperation(
+							"unsupported operands, operation==" + operation.getOperator());
 				}
 				stack.push(or);
 				break;

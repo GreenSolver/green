@@ -17,7 +17,6 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
-import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
 import za.ac.sun.cs.green.util.Configuration;
 

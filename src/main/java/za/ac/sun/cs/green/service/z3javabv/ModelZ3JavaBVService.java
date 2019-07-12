@@ -38,27 +38,12 @@ public class ModelZ3JavaBVService extends ModelService {
 	/**
 	 * Instance of the Z3 solver.
 	 */
-	protected static final Solver z3Solver;
+	protected final Solver z3Solver;
 
 	/**
 	 * Context of the Z3 solver.
 	 */
-	protected static final Context z3Context;
-
-	/*
-	 * Static code to initialize the static fields z3Context and z3Solver.
-	 */
-	static {
-		Map<String, String> cfg = new HashMap<>();
-		cfg.put("model", "true");
-		try {
-			z3Context = new Context(cfg);
-		} catch (Exception x) {
-			x.printStackTrace();
-			throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + x);
-		}
-		z3Solver = z3Context.mkSolver(Z3_LOGIC);
-	}
+	protected final Context z3Context;
 
 	/**
 	 * Milliseconds spent by this service.
@@ -88,6 +73,15 @@ public class ModelZ3JavaBVService extends ModelService {
 	 */
 	public ModelZ3JavaBVService(Green solver, Properties properties) {
 		super(solver);
+		Map<String, String> cfg = new HashMap<>();
+		cfg.put("model", "true");
+		try {
+			z3Context = new Context(cfg);
+		} catch (Exception x) {
+			x.printStackTrace();
+			throw new RuntimeException("## Error Z3: Exception caught in Z3 JNI: \n" + x);
+		}
+		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
 	/*

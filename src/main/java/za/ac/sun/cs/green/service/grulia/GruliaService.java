@@ -36,7 +36,7 @@ import za.ac.sun.cs.green.util.Reporter;
  * @author Willem Visser (2018, 2019) (supervisor)
  * @author Jaco Geldenhuys (2017) (supervisor)
  */
-class GruliaService extends SATService {
+public class GruliaService extends SATService {
 
 	// ======================================================================
 	//
