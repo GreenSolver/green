@@ -142,10 +142,6 @@ tasks.withType(PublishToMavenRepository) {
 	}
 }
 
-//signing {
-//    sign publishing.publications.release
-//}
-
 signing {
-	sign configurations.archives
+    sign publishing.publications.release
 }
