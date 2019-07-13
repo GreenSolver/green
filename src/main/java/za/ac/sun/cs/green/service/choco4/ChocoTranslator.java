@@ -1,9 +1,13 @@
 package za.ac.sun.cs.green.service.choco4;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.BiFunction;
+
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.relational.ReExpression;
+import org.chocosolver.solver.variables.IntVar;
 
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
@@ -12,37 +16,25 @@ import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
-import org.chocosolver.solver.expression.discrete.relational.ReExpression;
-import org.chocosolver.solver.variables.IntVar;
 
 public class ChocoTranslator extends Visitor {
 
-	private Model chocoModel = null;
+	private final Model chocoModel;
 
-	private Stack<Object> stack = null;
+	private final Object placeholder = new Object();
 
-	private List<ReExpression> constraints = null;
+	private final Stack<Object> stack = new Stack<Object>();
 
-	private Map<Variable, IntVar> variableMap = null;
+	private final Map<Variable, IntVar> variableMap;
 
 	public ChocoTranslator(Model chocoModel, Map<Variable, IntVar> variableMap) {
 		this.chocoModel = chocoModel;
-		stack = new Stack<Object>();
-		constraints = new LinkedList<ReExpression>();
 		this.variableMap = variableMap;
 	}
 
 	public void translate(Expression expression) throws VisitorException {
 		expression.accept(this);
-		for (ReExpression c : constraints) {
-			c.post();
-		}
-		if (!stack.isEmpty()) {
-			((ReExpression) stack.pop()).post();
-		}
-		assert stack.isEmpty();
+		assert (stack.isEmpty() || (stack.pop() == placeholder));
 	}
 
 	@Override
@@ -60,6 +52,42 @@ public class ChocoTranslator extends Visitor {
 			variableMap.put(variable, v);
 		}
 		stack.push(v);
+	}
+
+	private void clause(Object left, Object right, BiFunction<Integer, Integer, Boolean> va,
+			BiFunction<ArExpression, Integer, ReExpression> vj, BiFunction<ArExpression, Integer, ReExpression> vi,
+			BiFunction<ArExpression, ArExpression, ReExpression> vv) {
+		if ((left instanceof Integer) && (right instanceof Integer)) {
+			(va.apply((Integer) left, (Integer) right) ? chocoModel.trueConstraint() : chocoModel.falseConstraint())
+					.post();
+		} else if ((left instanceof IntVar) && (right instanceof Integer)) {
+			vi.apply((ArExpression) left, (Integer) right).post();
+		} else if ((left instanceof Integer) && (right instanceof IntVar)) {
+			vj.apply((ArExpression) right, (Integer) left).post();
+		} else {
+			vv.apply((ArExpression) left, (ArExpression) right).post();
+		}
+		stack.push(placeholder);
+	}
+
+	private void clause(Object left, Object right, BiFunction<Integer, Integer, Boolean> va,
+			BiFunction<ArExpression, Integer, ReExpression> vi,
+			BiFunction<ArExpression, ArExpression, ReExpression> vv) {
+		clause(left, right, va, vi, vi, vv);
+	}
+
+	private void term(Object left, Object right, BiFunction<Integer, Integer, Integer> va,
+			BiFunction<ArExpression, Integer, ArExpression> vi,
+			BiFunction<ArExpression, ArExpression, ArExpression> vv) {
+		if ((left instanceof Integer) && (right instanceof Integer)) {
+			stack.push(va.apply((Integer) left, (Integer) right));
+		} else if ((left instanceof IntVar) && (right instanceof Integer)) {
+			stack.push(vi.apply((ArExpression) left, (Integer) right));
+		} else if ((left instanceof Integer) && (right instanceof IntVar)) {
+			stack.push(vi.apply((ArExpression) right, (Integer) left));
+		} else {
+			stack.push(vv.apply((ArExpression) left, (ArExpression) right));
+		}
 	}
 
 	@Override
@@ -81,93 +109,39 @@ public class ChocoTranslator extends Visitor {
 		}
 		switch (operation.getOperator()) {
 		case EQ:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).eq((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).eq((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).eq((ArExpression) r));
-			}
+			clause(l, r, (a, b) -> a == b, (a, b) -> a.eq(b), (a, b) -> a.eq(b));
 			break;
 		case NE:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).ne((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).ne((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).ne((ArExpression) r));
-			}
+			clause(l, r, (a, b) -> a != b, (a, b) -> a.ne(b), (a, b) -> a.ne(b));
 			break;
 		case LT:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).gt((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).lt((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).lt((ArExpression) r));
-			}
+			clause(l, r, (a, b) -> a < b, (a, b) -> a.gt(b), (a, b) -> a.lt(b), (a, b) -> a.lt(b));
 			break;
 		case LE:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).ge((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).le((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).le((ArExpression) r));
-			}
+			clause(l, r, (a, b) -> a <= b, (a, b) -> a.ge(b), (a, b) -> a.le(b), (a, b) -> a.le(b));
 			break;
 		case GT:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).lt((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).gt((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).gt((ArExpression) r));
-			}
+			clause(l, r, (a, b) -> a > b, (a, b) -> a.lt(b), (a, b) -> a.gt(b), (a, b) -> a.gt(b));
 			break;
 		case GE:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).le((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).ge((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).ge((ArExpression) r));
-			}
+			clause(l, r, (a, b) -> a >= b, (a, b) -> a.le(b), (a, b) -> a.ge(b), (a, b) -> a.ge(b));
 			break;
 		case AND:
 			if (l != null) {
-				constraints.add((ReExpression) l);
+				assert (l == placeholder);
 			}
 			if (r != null) {
-				constraints.add((ReExpression) r);
+				assert (r == placeholder);
 			}
 			break;
 		case ADD:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).add((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).add((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).add((ArExpression) r));
-			}
+			term(l, r, (a, b) -> a + b, (a, b) -> a.add(b), (a, b) -> a.add(b));
 			break;
 		case SUB:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).sub((Integer) l).neg());
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).sub((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).sub((ArExpression) r));
-			}
+			term(l, r, (a, b) -> a - b, (a, b) -> a.sub(b), (a, b) -> a.sub(b));
 			break;
 		case MUL:
-			if (l instanceof Integer) {
-				stack.push(((ArExpression) r).mul((Integer) l));
-			} else if (r instanceof Integer) {
-				stack.push(((ArExpression) l).mul((Integer) r));
-			} else {
-				stack.push(((ArExpression) l).mul((ArExpression) r));
-			}
+			term(l, r, (a, b) -> a * b, (a, b) -> a.mul(b), (a, b) -> a.mul(b));
 			break;
 		default:
 			throw new TranslatorUnsupportedOperation("unsupported operation " + operation.getOperator());
