@@ -39,6 +39,11 @@ jacocoTestReport {
     }
 }
 
+//----------------------------------------------------------------------
+// Everything below deals with publishing the library on the maven
+// central repository
+//----------------------------------------------------------------------
+ 
 task sourcesJar(type: Jar) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
@@ -137,6 +142,10 @@ def customizePom(pom) {
 					id 'jacogeld'
 					name 'Jaco Geldenhuys'
 					email 'jacogeld@gmail.com'
+				}
+				developer {
+					id 'wvisser'
+					name 'Willem Visser'
 				}
 			}
 		}
