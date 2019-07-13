@@ -85,7 +85,7 @@ public abstract class BasicService implements Service {
 	}
 
 	/**
-	 * This fallback implementation of {@link #processRequest(Instance)} return
+	 * This fallback implementation of {@link #processRequest(Instance)} returns
 	 * {@code null}. See the class comment for a description of what effect this
 	 * may have.
 	 * 
