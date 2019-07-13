@@ -183,6 +183,7 @@ public abstract class ModelCoreService extends BasicService {
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
 		long startTime = System.currentTimeMillis();
+		invocationCount++;
 		Object result = instance.getData(getClass());
 		if (result == null) {
 			result = solve0(instance);
@@ -219,7 +220,6 @@ public abstract class ModelCoreService extends BasicService {
 	 */
 	protected ModelCore solve0(Instance instance) {
 		long startTime = System.currentTimeMillis();
-		invocationCount++;
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
 		keyTimeConsumption += System.currentTimeMillis() - startTime;
 		ModelCore result = (ModelCore) store.get(key);

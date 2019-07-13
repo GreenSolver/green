@@ -178,6 +178,7 @@ public abstract class SATService extends BasicService {
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
 		long startTime = System.currentTimeMillis();
+		invocationCount++;
 		Object result = instance.getData(getClass());
 		if (result == null) {
 			result = solve0(instance);
@@ -214,7 +215,6 @@ public abstract class SATService extends BasicService {
 	 */
 	protected Boolean solve0(Instance instance) {
 		long startTime = System.currentTimeMillis();
-		invocationCount++;
 		String key = SERVICE_KEY + instance.getFullExpression().toString();
 		keyTimeConsumption += System.currentTimeMillis() - startTime;
 		Boolean result = store.getBoolean(key);
