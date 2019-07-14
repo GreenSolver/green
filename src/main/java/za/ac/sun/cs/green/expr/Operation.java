@@ -161,7 +161,7 @@ public class Operation extends Expression {
 		return operator;
 	}
 
-	public int getOperatandCount() {
+	public int getOperandCount() {
 		return operands.length;
 	}
 
