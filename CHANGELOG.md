@@ -7,20 +7,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- ...
+- Identity service
+  [7e76bd0](https://github.com/GreenSolver/green/commit/7e76bd0d9c979ed134ecbdcd75a9f688049d0305)
 
 ### Changed
-- ...
+- Counting of invocations for some services
+  [b5d675a](https://github.com/GreenSolver/green/commit/b5d675ace072ea81b65db6af29b185c958fe24e1)
 
 ### Deprecated
 - ...
 
 ### Removed
-- ...
+- Defunct factorization code
+  [x](https://github.com/GreenSolver/green/commit/x)
 
 ### Fixed
-- ...
-
+- Choco translation, [Issue #27](https://github.com/GreenSolver/green/issues/27)
+  [6124445](https://github.com/GreenSolver/green/commit/61244457a9360ad87e9a28ae6ba3fa827b523333)
+- Factorization for newer model / model-core return values
+  [x](https://github.com/GreenSolver/green/commit/x)
 
 ## [0.2.0] - 2019.07.12
 

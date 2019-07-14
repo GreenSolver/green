@@ -1,7 +1,13 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.factorizer;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apfloat.Apint;
@@ -9,119 +15,89 @@ import org.apfloat.Apint;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Service;
-import za.ac.sun.cs.green.expr.Expression;
-import za.ac.sun.cs.green.service.BasicService;
-import za.ac.sun.cs.green.util.Reporter;
 
-public class CountFactorizerService extends BasicService {
-
-	private static final String FACTORS = "FACTORS";
-	private static final String COUNT = "COUNT";
-
-	private static final String FACTORS_UNSOLVED = "FACTORS_UNSOLVED";
+/**
+ * Factorizer service that handles count queries.
+ */
+public class CountFactorizerService extends FactorizerService {
 
 	/**
-	 * Number of times the slicer has been invoked.
+	 * Satellite data key for the accumulated for factors.
 	 */
-	private int invocationCount = 0;
+	public static final String FACTOR_COUNT = "FACTOR_COUNT";
 
 	/**
-	 * Total number of constraints processed.
+	 * Constructor for the count factorizer service.
+	 *
+	 * @param solver the {@link Green} solver this service will be added to
 	 */
-	private int constraintCount = 0;
-
-	/**
-	 * Number of factored constraints returned.
-	 */
-	private int factorCount = 0;
-
 	public CountFactorizerService(Green solver) {
 		super(solver);
 	}
 
+	/**
+	 * Process a request (in addition to whatever the {@link Factorizer} superclass
+	 * does) by creating a satellite data item where the total count for the factors
+	 * is stored.
+	 *
+	 * @param instance the instance to factorize
+	 * @return set of factors as instances
+	 *
+	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#processRequest0(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
-	public Set<Instance> processRequest(Instance instance) {
-		invocationCount++;
-		@SuppressWarnings("unchecked")
-		Set<Instance> result = (Set<Instance>) instance.getData(FACTORS);
-		if (result == null) {
-			final Instance p = instance.getParent();
-
-			FactorExpressionOld fc0 = null;
-			if (p != null) {
-				fc0 = (FactorExpressionOld) p.getData(FactorExpressionOld.class);
-				if (fc0 == null) {
-					// Construct the parent's factor and store it
-					fc0 = new FactorExpressionOld(null, p.getFullExpression());
-					p.setData(FactorExpressionOld.class, fc0);
-				}
-			}
-
-			final FactorExpressionOld fc = new FactorExpressionOld(fc0, instance.getExpression());
-			instance.setData(FactorExpressionOld.class, fc);
-
-			result = new HashSet<Instance>();
-			for (Expression e : fc.getFactors()) {
-				log.info("Factorizer computes instance for :" + e);
-				final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
-				result.add(i);
-			}
-			result = Collections.unmodifiableSet(result);
-			instance.setData(FACTORS, result);
-			instance.setData(COUNT, Apint.ONE);
-			instance.setData(FACTORS_UNSOLVED, new HashSet<Instance>(result));
-
-			log.info("Factorize exiting with " + result.size() + " results");
-
-			constraintCount += 1;
-			factorCount += fc.getNumFactors();
-		}
-		return result;
+	protected Set<Instance> processRequest0(Instance instance) {
+		instance.setData(FACTOR_COUNT, Apint.ONE);
+		return super.processRequest0(instance);
 	}
 
+	/**
+	 * Handle a partial result (for a single factor). This amounts to returning 0 as
+	 * soon as a factor is not satisfiable.
+	 *
+	 * @param instance    input instance
+	 * @param subService  subservice (= child service) that computed a result
+	 * @param subInstance subinstance which this service passed to the subservice
+	 * @param result      result return by the sub-service
+	 * @return a new (intermediary) result
+	 *
+	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#childDone(za.ac.sun.cs.green.Instance,
+	 *      za.ac.sun.cs.green.Service, za.ac.sun.cs.green.Instance,
+	 *      java.lang.Object)
+	 */
 	@Override
 	public Object childDone(Instance instance, Service subservice, Instance subinstance, Object result) {
-		Apint count = (Apint) result;
-		if ((count != null) && count.equals(Apint.ZERO)) {
-			log.warn("Count for a FACTOR is ZERO, this should not happen!");
-			return Apint.ZERO;
+		if (result instanceof Apint) {
+			if (!((Apint) result).equals(Apint.ZERO)) {
+				return Apint.ZERO;
+			}
 		}
-		@SuppressWarnings("unchecked")
-		HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
-		if (unsolved.contains(subinstance)) {
-			Apint total = (Apint) instance.getData(COUNT);
-			total = total.multiply(count);
-			instance.setData(COUNT, total);
-			// Remove the subinstance now that it is solved
-			unsolved.remove(subinstance);
-			instance.setData(FACTORS_UNSOLVED, unsolved);
-			// Return true if no more unsolved factors; else return null to carry on the
-			// computation
-			return (unsolved.isEmpty()) ? total : null;
+		return super.childDone(instance, subservice, subinstance, result);
+	}
+
+	/**
+	 * Handle a new result by multiplying its (independent) count with the
+	 * accumulated overall count for factors.
+	 *
+	 * @param instance    input instance
+	 * @param subService  subservice (= child service) that computed a result
+	 * @param subInstance subinstance which this service passed to the subservice
+	 * @param result      result return by the sub-service
+	 * @return a new (intermediary) result
+	 *
+	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#handleNewChild(za.ac.sun.cs.green.Instance,
+	 *      za.ac.sun.cs.green.Service, za.ac.sun.cs.green.Instance,
+	 *      java.lang.Object)
+	 */
+	@Override
+	protected Object handleNewChild(Instance instance, Service subservice, Instance subinstance, Object result) {
+		if (result instanceof Apint) {
+			Apint newCount = ((Apint) instance.getData(FACTOR_COUNT)).multiply((Apint) result);
+			instance.setData(FACTOR_COUNT, newCount);
+			return newCount;
 		} else {
-			// We have already solved this subinstance; return null to carry on the
-			// computation
-			return null;
+			return result;
 		}
-	}
-
-	@Override
-	public Object allChildrenDone(Instance instance, Object result) {
-		@SuppressWarnings("unchecked")
-		HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
-		if (unsolved.size() >= 1 && result == null) {
-			log.fatal("Unsolved Factors but result is null -> concurrency bug");
-			result = true;
-		}
-		return result;
-	}
-
-	@Override
-	public void report(Reporter reporter) {
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("invocations", invocationCount);
-		reporter.report("totalConstraints", constraintCount);
-		reporter.report("factoredConstraints", factorCount);
 	}
 
 }

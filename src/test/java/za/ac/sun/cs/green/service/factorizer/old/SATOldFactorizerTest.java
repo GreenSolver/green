@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.factorizer;
+package za.ac.sun.cs.green.service.factorizer.old;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

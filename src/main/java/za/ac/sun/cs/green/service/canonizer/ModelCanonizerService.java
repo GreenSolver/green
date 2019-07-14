@@ -7,9 +7,11 @@ import java.util.Set;
 
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Green;
-import za.ac.sun.cs.green.Service;
+import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Variable;
+import za.ac.sun.cs.green.service.ModelService;
+import za.ac.sun.cs.green.service.ModelService.Model;
 
 public class ModelCanonizerService extends SATCanonizerService {
 
@@ -20,7 +22,7 @@ public class ModelCanonizerService extends SATCanonizerService {
 	}
 
 	private Map<Variable, Variable> reverseMap(Map<Variable, Variable> map) {
-		Map<Variable, Variable> revMap = new HashMap<Variable, Variable>();
+		Map<Variable, Variable> revMap = new HashMap<>();
 		for (Map.Entry<Variable, Variable> m : map.entrySet()) {
 			revMap.put(m.getValue(), m.getKey());
 		}
@@ -32,7 +34,7 @@ public class ModelCanonizerService extends SATCanonizerService {
 		@SuppressWarnings("unchecked")
 		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
 		if (result == null) {
-			final Map<Variable, Variable> map = new HashMap<Variable, Variable>();
+			final Map<Variable, Variable> map = new HashMap<>();
 			final Expression e = canonize(instance.getFullExpression(), map);
 			Map<Variable, Variable> reverseMap = reverseMap(map);
 			final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
@@ -44,21 +46,38 @@ public class ModelCanonizerService extends SATCanonizerService {
 	}
 
 	@Override
-	public Object childDone(Instance instance, Service subService, Instance subInstance, Object result) {
-		@SuppressWarnings("unchecked")
-		HashMap<Variable, Object> r = (HashMap<Variable, Object>) result;
-		if (r == null) {
+	public Object allChildrenDone(Instance instance, Object result) {
+		Object map = instance.getData(RENAME);
+		if ((result instanceof ModelService.Model) && (map instanceof Map<?, ?>)) {
+			Model model = (Model) result;
+			@SuppressWarnings("unchecked")
+			Map<Variable, Variable> reverseMap = (Map<Variable, Variable>) map;
+			Map<Variable, Constant> newMap = new HashMap<>();
+			for (Map.Entry<Variable, Constant> e : model.getModel().entrySet()) {
+				newMap.put(reverseMap.get(e.getKey()), e.getValue());
+			}
+			return new Model(model.isSat(), newMap);
+		} else {
 			return null;
 		}
-
-		@SuppressWarnings("unchecked")
-		HashMap<Variable, Variable> reverseMap = (HashMap<Variable, Variable>) instance.getData(RENAME);
-
-		HashMap<Variable, Object> newResult = new HashMap<Variable, Object>();
-		for (Map.Entry<Variable, Object> m : r.entrySet()) {
-			newResult.put(reverseMap.get(m.getKey()), m.getValue());
-		}
-		return newResult;
 	}
+
+//	@Override
+//	public Object childDone(Instance instance, Service subService, Instance subInstance, Object result) {
+//		@SuppressWarnings("unchecked")
+//		HashMap<Variable, Object> r = (HashMap<Variable, Object>) result;
+//		if (r == null) {
+//			return null;
+//		}
+//
+//		@SuppressWarnings("unchecked")
+//		HashMap<Variable, Variable> reverseMap = (HashMap<Variable, Variable>) instance.getData(RENAME);
+//
+//		HashMap<Variable, Object> newResult = new HashMap<Variable, Object>();
+//		for (Map.Entry<Variable, Object> m : r.entrySet()) {
+//			newResult.put(reverseMap.get(m.getKey()), m.getValue());
+//		}
+//		return newResult;
+//	}
 
 }

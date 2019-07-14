@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.service.factorizer;
+package za.ac.sun.cs.green.service.factorizer.old;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,6 +9,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
+import za.ac.sun.cs.green.service.factorizer.old.FactorExpressionOld;
 
 public class FactoredConstraintOldTest {
 

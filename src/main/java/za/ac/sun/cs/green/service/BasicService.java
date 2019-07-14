@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service;
 
 import java.util.Set;
@@ -21,12 +29,14 @@ import za.ac.sun.cs.green.util.Reporter;
  * left abstract, but many services may want the fallback behaviour, especially
  * for the latter two routines.
  * 
+ * <p>
  * As implemented, {@link #processRequest(Instance)} returns {@code null}, which
  * the standard task managers interpret to mean that the service has "handled"
  * the request, processed the input instance in some way, and is ready to
  * deliver a result. No child service is invoked, since there is no sub-instance
  * to pass along to them.
  * 
+ * <p>
  * As implemented here, {@link #childDone(Instance, Service, Instance, Object)}
  * returns whatever result it receives as input. The standard task managers
  * interpret this to mean that the child has successfully "handled" its
@@ -37,12 +47,11 @@ import za.ac.sun.cs.green.util.Reporter;
  * manager, it may decide to terminate other children that are already
  * processing their sub-instances.
  * 
+ * <p>
  * Finally, {@link #allChildrenDone(Instance, Object)} gets a last opportunity
  * to "finish" the result received by the current service from its child
  * services. As implemented here, the routine simply once again returns the
  * first result it received from any potential children.
- * 
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
 public abstract class BasicService implements Service {
 

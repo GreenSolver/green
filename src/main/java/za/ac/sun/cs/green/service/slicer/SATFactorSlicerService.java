@@ -7,7 +7,7 @@ import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.service.BasicService;
-import za.ac.sun.cs.green.service.factorizer.FactorExpressionOld;
+import za.ac.sun.cs.green.service.factorizer.old.FactorExpressionOld;
 import za.ac.sun.cs.green.util.Reporter;
 
 public class SATFactorSlicerService extends BasicService {

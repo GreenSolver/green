@@ -21,31 +21,22 @@ import za.ac.sun.cs.green.util.Configuration;
 
 public class ComplexModelFactorizerTest {
 
+	private static final String CANONIZER = "za.ac.sun.cs.green.service.canonizer.ModelCanonizerService";
+
+	// private static final String CANONIZER = "za.ac.sun.cs.green.service.identity.IdentityService";
+	
 	public static Green solver;
-
-	@SuppressWarnings("unused")
-	private static Properties setupNoCanon(Properties props) {
-		props.setProperty("green.service.model", "(bounder (factor z3))");
-		props.setProperty("green.service.model.factor", "za.ac.sun.cs.green.service.factorizer.ModelFactorizerService");
-		return props;
-	}
-
-	private static Properties setupWithCanon(Properties props) {
-		props.setProperty("green.service.model", "(bounder (factor (canonize z3)))");
-		props.setProperty("green.service.model.factor", "za.ac.sun.cs.green.service.factorizer.ModelFactorizerService");
-		props.setProperty("green.service.model.canonize", "za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
-		return props;
-	}
 
 	@BeforeClass
 	public static void initialize() {
 		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "model");
-		props = setupWithCanon(props);
+		props.setProperty("green.service.model", "(bounder (factorizer (canonizer z3)))");
 		props.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
-		props.setProperty("green.service.model.z3", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
-		props.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
+		props.setProperty("green.service.model.factorizer", "za.ac.sun.cs.green.service.factorizer.ModelFactorizerService");
+		props.setProperty("green.service.model.canonizer", CANONIZER);
+		props.setProperty("green.service.model.z3", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}

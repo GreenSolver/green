@@ -1,126 +1,107 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.factorizer;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Service;
-import za.ac.sun.cs.green.expr.Expression;
+import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Variable;
-import za.ac.sun.cs.green.service.BasicService;
-import za.ac.sun.cs.green.util.Reporter;
+import za.ac.sun.cs.green.service.ModelService.Model;
 
-public class ModelFactorizerService extends BasicService {
+/**
+ * Factorizer service that handles SAT queries.
+ */
+public class ModelFactorizerService extends FactorizerService {
 
-	private static final String FACTORS = "FACTORS";
-	private static final String MODELS = "MODELS";
-	private static final String FACTORS_UNSOLVED = "FACTORS_UNSOLVED";
+	/**
+	 * Satellite data key for collected models for factors.
+	 */
+	public static final String FACTOR_MODELS = "FACTOR_MODELS";
 
-	private FactorExpression factorizer;
-	private int invocationCount = 0; // number of times factorizer has been invoked
-	private int constraintCount = 0; // constraints processed
-	private int factorCount = 0; // number of factors
-	private long timeConsumption = 0;
-
+	/**
+	 * Constructor for the model factorizer service.
+	 *
+	 * @param solver the {@link Green} solver this service will be added to
+	 */
 	public ModelFactorizerService(Green solver) {
 		super(solver);
 	}
 
+	/**
+	 * Process a request (in addition to whatever the {@link Factorizer} superclass
+	 * does) by creating a satellite data item where the model for all of the
+	 * factors is stored.
+	 *
+	 * @param instance the instance to factorize
+	 * @return set of factors as instances
+	 *
+	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#processRequest0(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
-	public Set<Instance> processRequest(Instance instance) {
-		long startTime = System.currentTimeMillis();
-		invocationCount++;
-
-		@SuppressWarnings("unchecked")
-		Set<Instance> result = (Set<Instance>) instance.getData(FACTORS);
-		if (result == null) {
-//			final Instance p = instance.getParent();
-//            FactorExpression fc0 = null;
-//			if (p != null) {
-//				fc0 = (FactorExpression) p.getData(FactorExpression.class);
-//				if (fc0 == null) {
-//					// Construct the parent's factor and store it
-//					fc0 = new FactorExpression(p.getFullExpression());
-//					p.setData(FactorExpression.class, fc0);
-//				}
-//			}
-//			final FactorExpressionOld fc = new FactorExpressionOld(fc0, instance.getExpression());
-
-			final FactorExpression fc = new FactorExpression(instance.getFullExpression());
-			instance.setData(FACTORS, fc);
-			factorizer = fc;
-
-			result = new HashSet<Instance>();
-			for (Expression e : fc.getFactors()) {
-				log.debug("Factorizer computes instance for :" + e);
-				final Instance i = new Instance(getSolver(), instance.getSource(), null, e);
-				result.add(i);
-			}
-			result = Collections.unmodifiableSet(result);
-			instance.setData(FACTORS, result);
-			instance.setData(FACTORS_UNSOLVED, new HashSet<Instance>(result));
-			instance.setData(MODELS, new HashMap<Variable, Object>());
-
-			log.debug("Factorizer exiting with " + result.size() + " results");
-
-			constraintCount += 1;
-			factorCount += fc.getNumFactors();
-		}
-		timeConsumption += (System.currentTimeMillis() - startTime);
-		return result;
+	protected Set<Instance> processRequest0(Instance instance) {
+		instance.setData(FACTOR_MODELS, new HashMap<Variable, Object>());
+		return super.processRequest0(instance);
 	}
 
-	@SuppressWarnings("unchecked")
-	private boolean isUnsat(Object result) {
-		if (result == null) {
-			return true;
-		} else if (result instanceof HashMap) {
-			HashMap<Variable, Object> issat = (HashMap<Variable, Object>) result;
-			return issat.isEmpty();
-		} else if (result instanceof Boolean) {
-			Boolean issat = (Boolean) result;
-			return !issat;
-		}
-		return false;
-	}
-
-	@SuppressWarnings("unchecked")
+	/**
+	 * Handle a partial result (for a single factor). This amounts to returning a
+	 * "{@code false}" result as soon as a factor is not satisfiable.
+	 *
+	 * @param instance    input instance
+	 * @param subService  subservice (= child service) that computed a result
+	 * @param subInstance subinstance which this service passed to the subservice
+	 * @param result      result return by the sub-service
+	 * @return a new (intermediary) result
+	 *
+	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#childDone(za.ac.sun.cs.green.Instance,
+	 *      za.ac.sun.cs.green.Service, za.ac.sun.cs.green.Instance,
+	 *      java.lang.Object)
+	 */
 	@Override
 	public Object childDone(Instance instance, Service subservice, Instance subinstance, Object result) {
-		HashSet<Instance> unsolved = (HashSet<Instance>) instance.getData(FACTORS_UNSOLVED);
-		if (isUnsat(result)) {
-			return null;
+		if (result instanceof Model) {
+			if (!((Model) result).isSat()) {
+				return result;
+			}
 		}
-
-		if (unsolved.contains(subinstance)) {
-			// new child finished
-			HashMap<Variable, Object> parentSolutions = (HashMap<Variable, Object>) instance.getData(MODELS);
-			parentSolutions.putAll((HashMap<Variable, Object>) result);
-			instance.setData(MODELS, parentSolutions);
-			// Remove the subinstance now that it is solved
-			unsolved.remove(subinstance);
-			instance.setData(FACTORS_UNSOLVED, unsolved);
-			// Return true of no more unsolved factors; else return null to carry on the
-			// computation
-			return (unsolved.isEmpty()) ? parentSolutions : null;
-		} else {
-			// We have already solved this subinstance; return null to carry on the
-			// computation
-			return null;
-		}
+		return super.childDone(instance, subservice, subinstance, result);
 	}
 
+	/**
+	 * Handle a new result by merging its model with the model for all factors
+	 * stored in the instance's satellite data.
+	 *
+	 * @param instance    input instance
+	 * @param subService  subservice (= child service) that computed a result
+	 * @param subInstance subinstance which this service passed to the subservice
+	 * @param result      result return by the sub-service
+	 * @return a new (intermediary) result
+	 *
+	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#handleNewChild(za.ac.sun.cs.green.Instance,
+	 *      za.ac.sun.cs.green.Service, za.ac.sun.cs.green.Instance,
+	 *      java.lang.Object)
+	 */
 	@Override
-	public void report(Reporter reporter) {
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("invocations", invocationCount);
-		reporter.report("totalConstraints", constraintCount);
-		reporter.report("factoredConstraints", factorCount);
-		reporter.report("conjunctCount", factorizer.getConjunctCount());
-		reporter.report("timeConsumption", timeConsumption);
+	protected Object handleNewChild(Instance instance, Service subservice, Instance subinstance, Object result) {
+		if (result instanceof Model) {
+			@SuppressWarnings("unchecked")
+			Map<Variable, Constant> model = (Map<Variable, Constant>) instance.getData(FACTOR_MODELS);
+			model.putAll(((Model) result).getModel());
+			return model;
+		} else {
+			return result;
+		}
 	}
 
 }
