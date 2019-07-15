@@ -4,11 +4,13 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.BiFunction;
 
+import org.apache.logging.log4j.Logger;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.IntVar;
 
+import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
@@ -19,6 +21,11 @@ import za.ac.sun.cs.green.expr.VisitorException;
 
 public class ChocoTranslator extends Visitor {
 
+	/**
+	 * The Java {@link Logger} associated with the {@link Green} solver.
+	 */
+	protected final Logger log;
+
 	private final Model chocoModel;
 
 	private final Object placeholder = new Object();
@@ -27,7 +34,8 @@ public class ChocoTranslator extends Visitor {
 
 	private final Map<Variable, IntVar> variableMap;
 
-	public ChocoTranslator(Model chocoModel, Map<Variable, IntVar> variableMap) {
+	public ChocoTranslator(Logger log, Model chocoModel, Map<Variable, IntVar> variableMap) {
+		this.log = log;
 		this.chocoModel = chocoModel;
 		this.variableMap = variableMap;
 	}
@@ -60,12 +68,14 @@ public class ChocoTranslator extends Visitor {
 		if ((left instanceof Integer) && (right instanceof Integer)) {
 			(va.apply((Integer) left, (Integer) right) ? chocoModel.trueConstraint() : chocoModel.falseConstraint())
 					.post();
-		} else if ((left instanceof IntVar) && (right instanceof Integer)) {
+		} else if ((left instanceof ArExpression) && (right instanceof Integer)) {
 			vi.apply((ArExpression) left, (Integer) right).post();
-		} else if ((left instanceof Integer) && (right instanceof IntVar)) {
+		} else if ((left instanceof Integer) && (right instanceof ArExpression)) {
 			vj.apply((ArExpression) right, (Integer) left).post();
-		} else {
+		} else if ((left instanceof ArExpression) && (right instanceof ArExpression)) {
 			vv.apply((ArExpression) left, (ArExpression) right).post();
+		} else {
+			log.fatal("unhandled case (1) left={}, right={}", left, right);
 		}
 		stack.push(placeholder);
 	}
@@ -81,12 +91,14 @@ public class ChocoTranslator extends Visitor {
 			BiFunction<ArExpression, ArExpression, ArExpression> vv) {
 		if ((left instanceof Integer) && (right instanceof Integer)) {
 			stack.push(va.apply((Integer) left, (Integer) right));
-		} else if ((left instanceof IntVar) && (right instanceof Integer)) {
+		} else if ((left instanceof ArExpression) && (right instanceof Integer)) {
 			stack.push(vi.apply((ArExpression) left, (Integer) right));
-		} else if ((left instanceof Integer) && (right instanceof IntVar)) {
+		} else if ((left instanceof Integer) && (right instanceof ArExpression)) {
 			stack.push(vi.apply((ArExpression) right, (Integer) left));
-		} else {
+		} else if ((left instanceof ArExpression) && (right instanceof ArExpression)) {
 			stack.push(vv.apply((ArExpression) left, (ArExpression) right));
+		} else {
+			log.fatal("unhandled case (2) left={}, right={}", left, right);
 		}
 	}
 

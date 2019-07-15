@@ -25,7 +25,7 @@ public class ModelChocoService extends ModelService {
 		try {
 			org.chocosolver.solver.Model chocoModel = new org.chocosolver.solver.Model();
 			Map<Variable, IntVar> variableMap = new HashMap<>();
-			new ChocoTranslator(chocoModel, variableMap).translate(instance.getExpression());
+			new ChocoTranslator(log, chocoModel, variableMap).translate(instance.getExpression());
 			Solver chocoSolver = chocoModel.getSolver();
 			if (!chocoSolver.solve()) {
 				log.warn("constraint has no model, it is infeasible");

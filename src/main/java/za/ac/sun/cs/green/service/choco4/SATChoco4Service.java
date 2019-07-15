@@ -13,9 +13,9 @@ import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.SATService;
 
-public class SATChocoService extends SATService {
+public class SATChoco4Service extends SATService {
 
-	public SATChocoService(Green solver) {
+	public SATChoco4Service(Green solver) {
 		super(solver);
 	}
 
@@ -24,7 +24,8 @@ public class SATChocoService extends SATService {
 		Model chocoModel = new Model();
 		Map<Variable, IntVar> variableMap = new HashMap<Variable, IntVar>();
 		try {
-			new ChocoTranslator(chocoModel, variableMap).translate(instance.getExpression());
+			log.debug("solve: {}", () -> instance.getFullExpression());
+			new ChocoTranslator(log, chocoModel, variableMap).translate(instance.getFullExpression());
 			Solver chocoSolver = chocoModel.getSolver();
 			return chocoSolver.solve();
 		} catch (TranslatorUnsupportedOperation x) {
