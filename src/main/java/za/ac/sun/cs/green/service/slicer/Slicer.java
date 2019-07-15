@@ -69,6 +69,8 @@ public class Slicer {
 	}
 
 	public Expression slice(Expression fresh, Expression rest) {
+		log.debug("fresh: {}", () -> fresh);
+		log.debug("rest: {}", () -> rest);
 		// First update our statistics
 		invocationCount++;
 
@@ -146,6 +148,7 @@ public class Slicer {
 				minimal = new Operation(Operation.Operator.AND, minimal, e);
 			}
 		}
+		log.debug("rest: {}", () -> rest);
 		return minimal;
 	}
 
