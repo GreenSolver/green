@@ -40,7 +40,7 @@ public class IdentityServiceTest {
 		Properties props = new Properties();
 		props.setProperty("green.services", "idtest");
 		props.setProperty("green.service.idtest", "(choco)");
-		props.setProperty("green.service.idtest.choco", "za.ac.sun.cs.green.service.choco4.SATChocoService");
+		props.setProperty("green.service.idtest.choco", "za.ac.sun.cs.green.service.choco4.SATChoco4Service");
 		new Configuration(solver0, props).configure();
 		
 		solver1 = new Green("GREEN-TEST");

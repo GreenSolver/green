@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Identity service
   [7e76bd0](https://github.com/GreenSolver/green/commit/7e76bd0d9c979ed134ecbdcd75a9f688049d0305)
+- Logging & tests
+  [bcf2d41](https://github.com/GreenSolver/green/commit/bcf2d41ae04cdfca5932e954a2465e71c972bde5)
+  [598251d](https://github.com/GreenSolver/green/commit/598251d6066dd5faae56d5f79879d8aaec010447)
 
 ### Changed
 - Counting of invocations for some services
@@ -19,13 +22,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 - Defunct factorization code
-  [x](https://github.com/GreenSolver/green/commit/x)
+  [c110699](https://github.com/GreenSolver/green/commit/c11069962bfb183752548d1ca4adc7cd8972a1ca)
 
 ### Fixed
 - Choco translation, [Issue #27](https://github.com/GreenSolver/green/issues/27)
   [6124445](https://github.com/GreenSolver/green/commit/61244457a9360ad87e9a28ae6ba3fa827b523333)
+  [bcf2d41](https://github.com/GreenSolver/green/commit/bcf2d41ae04cdfca5932e954a2465e71c972bde5)
 - Factorization for newer model / model-core return values
-  [x](https://github.com/GreenSolver/green/commit/x)
+  [c110699](https://github.com/GreenSolver/green/commit/c11069962bfb183752548d1ca4adc7cd8972a1ca)
 
 ## [0.2.0] - 2019.07.12
 
