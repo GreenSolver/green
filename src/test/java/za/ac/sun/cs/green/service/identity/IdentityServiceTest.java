@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.identity;
 
 import static org.junit.Assert.assertEquals;
@@ -49,20 +57,11 @@ public class IdentityServiceTest {
 		new Configuration(solver1, props).configure();
 	}
 
-	/**
-	 * Check that satisfiability of the expression with and without the identity service and check that these two results are the same.
-	 *
-	 * @param expression expression to check
-	 * @param result expected result
-	 */
-	private void check(Expression expression, boolean result) {
-		Object result0 = new Instance(solver0, null, expression).request("idtest");
-		assertTrue(result0 instanceof Boolean);
-		Object result1 = new Instance(solver1, null, expression).request("idtest");
-		assertTrue(result1 instanceof Boolean);
-		assertEquals(result, result0);
-		assertEquals(result, result1);
-	}
+	// ======================================================================
+	//
+	// ACTUAL TESTS
+	//
+	// ======================================================================
 
 	/**
 	 * Test:
@@ -157,6 +156,27 @@ public class IdentityServiceTest {
 		check(o, false);
 	}
 	
+	// ======================================================================
+	//
+	// TEST SUPPORT ROUTINES
+	//
+	// ======================================================================
+
+	/**
+	 * Check that satisfiability of the expression with and without the identity service and check that these two results are the same.
+	 *
+	 * @param expression expression to check
+	 * @param result expected result
+	 */
+	private void check(Expression expression, boolean result) {
+		Object result0 = new Instance(solver0, null, expression).request("idtest");
+		assertTrue(result0 instanceof Boolean);
+		Object result1 = new Instance(solver1, null, expression).request("idtest");
+		assertTrue(result1 instanceof Boolean);
+		assertEquals(result, result0);
+		assertEquals(result, result1);
+	}
+
 }
 
 /*

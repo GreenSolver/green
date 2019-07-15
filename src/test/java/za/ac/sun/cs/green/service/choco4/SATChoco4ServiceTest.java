@@ -62,7 +62,7 @@ public class SATChoco4ServiceTest {
 	 * 2 == 2
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test00() {
@@ -79,7 +79,7 @@ public class SATChoco4ServiceTest {
 	 * (a in {0..99}) && (a == 0)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test01() {
@@ -96,7 +96,7 @@ public class SATChoco4ServiceTest {
 	 * (a in {0..99}) && (a == 100)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test02() {
@@ -113,7 +113,7 @@ public class SATChoco4ServiceTest {
 	 * (a in {0..99}) && (a == 10) && (a == 10)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test03() {
@@ -133,7 +133,7 @@ public class SATChoco4ServiceTest {
 	 * (a in {0..99}) && (a == 10) && (a == 20)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test04() {
@@ -153,7 +153,7 @@ public class SATChoco4ServiceTest {
 	 * (a in {0..99}) && (a >= 10) && (a < 20)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test05() {
@@ -174,7 +174,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (a >= 10)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test06() {
@@ -194,7 +194,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (a in {0..99}) && (a >= 10)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test07() {
@@ -215,7 +215,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (b in {0..99}) && (b == 2012)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test08() {
@@ -236,7 +236,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (b in {0..99}) && (a < b) && (b < c)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test09() {
@@ -264,7 +264,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (b in {0..99}) && (a <= b) && (b <= c)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test10() {
@@ -292,7 +292,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (a,b in {0..99}) && (b == 2 * a) && (c == 2 * b)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test11() {
@@ -319,7 +319,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (a,b in {0..9}) && (b == 2 * a) && (c == 2 * b)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test12() {
@@ -346,7 +346,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (a in {1..9}) && (b in {0..9}) && (b == 2 * a) && (c == 2 * b)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test13() {
@@ -373,7 +373,7 @@ public class SATChoco4ServiceTest {
 	 * Condition: (b != c)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test14() {
@@ -400,22 +400,54 @@ public class SATChoco4ServiceTest {
 	//
 	// ======================================================================
 
+	/**
+	 * Check that the expression is satisfiable.
+	 *
+	 * @param expression expression to check
+	 */
 	private void checkSat(Expression expression) {
 		check(expression, null, true);
 	}
 
+	/**
+	 * Check that the expression is unsatisfiable.
+	 *
+	 * @param expression expression to check
+	 */
 	private void checkUnsat(Expression expression) {
 		check(expression, null, false);
 	}
 
+	/**
+	 * Check that the expression is satisfiable under the assumption that the parent
+	 * expression is satisfiable (even if it is not).
+	 *
+	 * @param expression       expression to check
+	 * @param parentExpression parent expression
+	 */
 	private void checkSat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, true);
 	}
 
+	/**
+	 * Check that the expression is unsatisfiable under the assumption that the
+	 * parent expression is satisfiable (even if it is not).
+	 *
+	 * @param expression       expression to check
+	 * @param parentExpression parent expression
+	 */
 	private void checkUnsat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, false);
 	}
 
+	/**
+	 * Construct a Green instance with the given expression and parent expression,
+	 * and check that Green produces the expected result
+	 *
+	 * @param expression       expression to check
+	 * @param parentExpression parent expression
+	 * @param expected         correct outcome
+	 */
 	private void check(Expression expression, Expression parentExpression, boolean expected) {
 		Instance parent = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
 		Instance instance = new Instance(solver, parent, expression);

@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.util;
 
 import static org.junit.Assert.assertEquals;
@@ -8,14 +16,19 @@ import org.junit.Test;
 
 import za.ac.sun.cs.green.Green;
 
+/**
+ * Test that the task manager is set correctly.
+ */
 public class SetTaskManagerTest {
 
-//	private void load(Properties properties, String filename) throws FileNotFoundException, IOException {
-//		properties.load(new FileInputStream(filename));
-//	}
-
+	/**
+	 * Check that setting {@link DummyTaskManager} in the configuration properties
+	 * is correctly passed to a Green solver.
+	 *
+	 * @result Green solver should return the correct task manager instance
+	 */
 	@Test
-	public void test() {
+	public void test01() {
 		Green solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.taskmanager", DummyTaskManager.class.getCanonicalName());

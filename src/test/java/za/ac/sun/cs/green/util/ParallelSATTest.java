@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.util;
 
 import static org.junit.Assert.assertEquals;
@@ -16,10 +24,19 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.taskmanager.ParallelTaskManager;
 
+/**
+ * Tests for the parallel task manager.
+ */
 public class ParallelSATTest {
 
-	public static Green solver = null;
+	/**
+	 * The Green instance used throughout the test.
+	 */
+	public static Green solver;
 
+	/**
+	 * Set up the Green instance.
+	 */
 	@BeforeClass
 	public static void initialize() {
 		// solver = new Green();
@@ -36,13 +53,6 @@ public class ParallelSATTest {
 		config.configure();
 	}
 
-//	@AfterClass
-//	public static void report() {
-//		if (solver != null) {
-//			solver.report();
-//		}
-//	}
-
 	// ======================================================================
 	//
 	// ACTUAL TESTS
@@ -56,7 +66,7 @@ public class ParallelSATTest {
 	 * 2 == 2
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test00() {
@@ -73,7 +83,7 @@ public class ParallelSATTest {
 	 * (a in {0..99}) && (a == 0)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test01() {
@@ -90,7 +100,7 @@ public class ParallelSATTest {
 	 * (a in {0..99}) && (a == 100)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test02() {
@@ -107,7 +117,7 @@ public class ParallelSATTest {
 	 * (a in {0..99}) && (a == 10) && (a == 10)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test03() {
@@ -127,7 +137,7 @@ public class ParallelSATTest {
 	 * (a in {0..99}) && (a == 10) && (a == 20)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test04() {
@@ -147,7 +157,7 @@ public class ParallelSATTest {
 	 * (a in {0..99}) && (a >= 10) && (a < 20)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test05() {
@@ -168,7 +178,7 @@ public class ParallelSATTest {
 	 * Condition: (a >= 10)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test06() {
@@ -188,7 +198,7 @@ public class ParallelSATTest {
 	 * Condition: (a in {0..99}) && (a >= 10)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test07() {
@@ -208,7 +218,7 @@ public class ParallelSATTest {
 	 * (a,b in {0..99}) && (b == 2012) && (a >= 10)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test07a() {
@@ -230,7 +240,7 @@ public class ParallelSATTest {
 	 * Condition: (b in {0..99}) && (b == 2012)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test08() {
@@ -251,7 +261,7 @@ public class ParallelSATTest {
 	 * Condition: (b in {0..99}) && (a < b) && (b < c)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test09() {
@@ -279,7 +289,7 @@ public class ParallelSATTest {
 	 * Condition: (b in {0..99}) && (a <= b) && (b <= c)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test10() {
@@ -307,7 +317,7 @@ public class ParallelSATTest {
 	 * Condition: (a,b in {0..99}) && (b == 2 * a) && (c == 2 * b)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test11() {
@@ -334,7 +344,7 @@ public class ParallelSATTest {
 	 * Condition: (a,b in {0..9}) && (b == 2 * a) && (c == 2 * b)
 	 * </pre>
 	 * 
-	 * @result satisfied
+	 * @result satisfiable
 	 */
 	@Test
 	public void test12() {
@@ -361,7 +371,7 @@ public class ParallelSATTest {
 	 * Condition: (a in {1..9}) && (b in {0..9}) && (b == 2 * a) && (c == 2 * b)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test13() {
@@ -388,7 +398,7 @@ public class ParallelSATTest {
 	 * Condition: (b != c)
 	 * </pre>
 	 * 
-	 * @result unsatisfied
+	 * @result unsatisfiable
 	 */
 	@Test
 	public void test14() {
@@ -415,22 +425,54 @@ public class ParallelSATTest {
 	//
 	// ======================================================================
 
+	/**
+	 * Check that the expression is satisfiable.
+	 *
+	 * @param expression expression to check
+	 */
 	private void checkSat(Expression expression) {
 		check(expression, null, true);
 	}
 
+	/**
+	 * Check that the expression is unsatisfiable.
+	 *
+	 * @param expression expression to check
+	 */
 	private void checkUnsat(Expression expression) {
 		check(expression, null, false);
 	}
 
+	/**
+	 * Check that the expression is satisfiable under the assumption that the parent
+	 * expression is satisfiable (even if it is not).
+	 *
+	 * @param expression       expression to check
+	 * @param parentExpression parent expression
+	 */
 	private void checkSat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, true);
 	}
 
+	/**
+	 * Check that the expression is unsatisfiable under the assumption that the
+	 * parent expression is satisfiable (even if it is not).
+	 *
+	 * @param expression       expression to check
+	 * @param parentExpression parent expression
+	 */
 	private void checkUnsat(Expression expression, Expression parentExpression) {
 		check(expression, parentExpression, false);
 	}
 
+	/**
+	 * Construct a Green instance with the given expression and parent expression,
+	 * and check that Green produces the expected result
+	 *
+	 * @param expression       expression to check
+	 * @param parentExpression parent expression
+	 * @param expected         correct outcome
+	 */
 	private void check(Expression expression, Expression parentExpression, boolean expected) {
 		Instance p = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
 		Instance i = new Instance(solver, p, expression);
