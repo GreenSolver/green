@@ -71,6 +71,26 @@ public class ModelZ3JavaBVServiceTest {
 	 * Check:
 	 * 
 	 * <pre>
+	 * (v in {-10..99}) && (v == 0)
+	 * </pre>
+	 *
+	 * @result any model that satisfies the constraints
+	 */
+	@Test
+	public void test00() {
+		IntVariable v = new IntVariable("v", -10, 99);
+		IntConstant c0 = Operation.ZERO;
+		Operation o = Operation.eq(v, c0);
+		checkSat(o, m -> {
+			int w = ((IntConstant) m.get(v)).getValue();
+			return (w == 0);
+		});
+	}
+
+	/**
+	 * Check:
+	 * 
+	 * <pre>
 	 * (v0, v1 in {-10..99}) && (v0 == 0) && (v1 - 1 != 0)
 	 * </pre>
 	 *
@@ -94,7 +114,7 @@ public class ModelZ3JavaBVServiceTest {
 			return (w0 >= -10) && (w0 <= 99) && (w1 >= -10) && (w1 <= 99) && (w0 == 0) && (w1 - 1 != 0);
 		});
 	}
-
+	
 	/**
 	 * Check:
 	 * 
