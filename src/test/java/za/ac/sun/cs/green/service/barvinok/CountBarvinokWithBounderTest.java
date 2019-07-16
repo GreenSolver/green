@@ -28,7 +28,7 @@ public class CountBarvinokWithBounderTest {
 		Properties props = new Properties();
 		props.setProperty("green.services", "count");
 		props.setProperty("green.service.count", "(bounder (canonize latte))");
-		props.setProperty("green.service.count.latte", "za.ac.sun.cs.green.service.latte.CountLattEService");
+		props.setProperty("green.service.count.latte", "za.ac.sun.cs.green.service.latte.CountLatteService");
 		props.setProperty("green.service.count.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		props.setProperty("green.service.count.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
 		Configuration config = new Configuration(solver, props);

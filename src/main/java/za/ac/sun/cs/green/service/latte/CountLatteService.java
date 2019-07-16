@@ -42,7 +42,7 @@ import za.ac.sun.cs.green.service.CountService;
  * https://www.math.ucdavis.edu/~latte/software.php
  * https://github.com/latte-int/latte
  */
-public class CountLattEService extends CountService {
+public class CountLatteService extends CountService {
 
 	/**
 	 * Directory where the LattE output file numOFLatticePoints is stored.
@@ -98,7 +98,7 @@ public class CountLattEService extends CountService {
 	 */
 	private Logger log;
 
-	public CountLattEService(Green solver, Properties properties) {
+	public CountLatteService(Green solver, Properties properties) {
 		super(solver);
 		log = solver.getLogger();
 		String p = properties.getProperty("green.latte.path");
