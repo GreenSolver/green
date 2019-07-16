@@ -132,7 +132,7 @@ public class CountLatteServiceTest2 {
 	 * (v in [0, 99]) && (3 * v - 6 > 0)
 	 * </pre>
 	 *
-	 * @result 7
+	 * @result 97
 	 */
 	@Test
 	public void test03a() {
@@ -141,7 +141,7 @@ public class CountLatteServiceTest2 {
 		IntConstant c3 = new IntConstant(3);
 		IntConstant cm6 = new IntConstant(-6);
 		Operation o = Operation.gt(Operation.add(Operation.mul(c3, v), cm6), c0);
-		check(o, 7);
+		check(o, 97);
 	}
 	
 	/**
