@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -59,6 +60,11 @@ public class Green {
 	 */
 	private Store store;
 
+	/**
+	 * Properties that may be passed down to components.
+	 */
+	private Properties properties = null;
+	
 	/**
 	 * Constructs a Green solver instance with the given name. The name can be
 	 * anything whatsoever and is mainly used to obtain a unique logger.
@@ -330,4 +336,23 @@ public class Green {
 		taskManager.shutdown();
 	}
 
+	
+	/**
+	 * Return the properties for this solver.
+	 *
+	 * @param properties new properties
+	 */
+	public Properties getProperties() {
+		return properties;		
+	}
+
+	/**
+	 * Set the properties for this solver.
+	 *
+	 * @param properties new properties
+	 */
+	public void setProperties(Properties properties) {
+		this.properties = properties;		
+	}
+	
 }

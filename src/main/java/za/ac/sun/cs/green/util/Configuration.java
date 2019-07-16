@@ -41,7 +41,8 @@ public class Configuration {
 	/**
 	 * The full name of the subdirectory where the personal file is searched for.
 	 */
-	private static final String HOME_GREEN_DIRECTORY = HOME_DIRECTORY + File.separator + GREEN_DIRECTORY + File.separator;
+	private static final String HOME_GREEN_DIRECTORY = HOME_DIRECTORY + File.separator + GREEN_DIRECTORY
+			+ File.separator;
 
 	/**
 	 * The Green solver to configure.
@@ -254,6 +255,7 @@ public class Configuration {
 				}
 			}
 		}
+		solver.setProperties(properties);
 	}
 
 	/**
