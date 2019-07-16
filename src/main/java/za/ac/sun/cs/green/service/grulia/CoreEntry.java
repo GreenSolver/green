@@ -53,7 +53,13 @@ public class CoreEntry extends Entry {
 	@Override
 	public String toString0() {
 		StringBuilder s = new StringBuilder();
-		s.append("model=").append(new TreeSet<>(getCore()));
+		s.append("core=");
+		Set<Expression> core = getCore();
+		if (core == null) {
+			s.append("null");
+		} else {
+			s.append(new TreeSet<>(core));
+		}
 		return s.toString();
 	}
 

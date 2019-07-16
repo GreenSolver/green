@@ -20,7 +20,6 @@ import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
-import za.ac.sun.cs.green.service.SATService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
@@ -36,7 +35,7 @@ import za.ac.sun.cs.green.util.Reporter;
  * @author Willem Visser (2018, 2019) (supervisor)
  * @author Jaco Geldenhuys (2017) (supervisor)
  */
-public class GruliaService extends SATService {
+public class GruliaService extends ModelCoreService {
 
 	// ======================================================================
 	//
@@ -52,10 +51,10 @@ public class GruliaService extends SATService {
 	/**
 	 * Whether to substitute zero for variables not present in model.
 	 */
-	private static final boolean DEFAULT_ZERO = false;
+//	private static final boolean DEFAULT_ZERO = false;
 
 	/**
-	 * Tree-based repo or not.
+	 * Tree-based repository or not.
 	 */
 	private static final boolean BINARY_TREE_REPO = true;
 
@@ -91,10 +90,10 @@ public class GruliaService extends SATService {
 	private long passedToSolverCount = 0;
 
 	/**
-	 * Number of times SatDelta is zero, which means that one of the reference
+	 * Number of times one of the reference
 	 * solutions satisfied the expression to solve.
 	 */
-	private long zeroSatDeltaCount = 0;
+	private long satDeltaHitCount = 0;
 
 	/**
 	 * Number of times a model in the SAT repo was found to satisfy an expression.
@@ -236,7 +235,7 @@ public class GruliaService extends SATService {
 	}
 
 	/**
-	 * Overrides the method of the {@link SATService} superclass. This version makes
+	 * Overrides the method of the {@link ModelCoreService} superclass. This version makes
 	 * provision for the fact that Grulia may or may not compute an answer to the
 	 * process.
 	 * 
@@ -252,33 +251,37 @@ public class GruliaService extends SATService {
 	 * @param instance Green instance to solve
 	 * @return {@code null} if Grulia finds an answer for the request or a singleton
 	 *         set with the same instance
-	 * @see za.ac.sun.cs.green.service.SATService#processRequest(za.ac.sun.cs.green.Instance)
+	 * @see za.ac.sun.cs.green.service.ModelCoreService#processRequest(za.ac.sun.cs.green.Instance)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
 		log.trace("processing {}", instance);
 		long startTime = System.currentTimeMillis();
+		invocationCount++;
 		Set<Instance> returnValue = null;
 		Object result = instance.getData(getClass());
 		if (result == null) {
 			log.trace("not found inside instance");
 			result = solve0(instance);
+			if (result != null) {
+				instance.setData(getClass(), result);
+			}
 		}
 		if (result == null) {
 			log.trace("need to delegate to the solver");
 			returnValue = Collections.singleton(instance);
 			instance.setData(getClass(), returnValue);
 			passedToSolverCount++;
-		} else if (result instanceof Boolean) {
+		} else if (result instanceof ModelCore) {
 			log.trace("solved!");
 			instance.setData(getClass(), result);
-			if ((Boolean) result) {
-				satCount++;
-				satTimeConsumption += System.currentTimeMillis() - startTime;
+			if (((ModelCore) result).isSat()) {
+				modelCount++;
+				modelTimeConsumption += System.currentTimeMillis() - startTime;
 			} else {
-				unsatCount++;
-				unsatTimeConsumption += System.currentTimeMillis() - startTime;
+				coreCount++;
+				coreTimeConsumption += System.currentTimeMillis() - startTime;
 			}
 		} else {
 			assert (result instanceof Set<?>);
@@ -294,18 +297,18 @@ public class GruliaService extends SATService {
 	}
 
 	/**
-	 * Overrides the method of the {@link SATService} superclass. This version does
+	 * Overrides the method of the {@link ModelCoreService} superclass. This version does
 	 * not consult the store.
 	 *
-	 * @param instance The instance to solve.
-	 * @return satisfiability of the constraint.
-	 * @see za.ac.sun.cs.green.service.SATService#solve0(za.ac.sun.cs.green.Instance)
+	 * @param instance Green instance to solve
+	 * @return result of the computation as a {@link ModelCore}
+	 *
+	 * @see za.ac.sun.cs.green.service.ModelCoreService#solve0(za.ac.sun.cs.green.Instance)
 	 */
 	@Override
-	protected Boolean solve0(Instance instance) {
+	protected ModelCore solve0(Instance instance) {
 		long startTime = System.currentTimeMillis();
-		invocationCount++;
-		Boolean result = solve(instance);
+		ModelCore result = modelCore(instance);
 		solveTimeConsumption += System.currentTimeMillis() - startTime;
 		return result;
 	}
@@ -313,13 +316,15 @@ public class GruliaService extends SATService {
 	/**
 	 * Executes the Utopia algorithm as described in the paper of Aquino.
 	 *
-	 * @param instance The instance to solve
-	 * @return satisfiability of the constraint
+	 * @param instance Green instance to solve
+	 * @return the result of the computation as a {@link ModelCore}
+	 *
+	 * @see za.ac.sun.cs.green.service.ModelCoreService#modelCore(za.ac.sun.cs.green.Instance)
 	 */
 	@Override
-	protected Boolean solve(Instance instance) {
+	protected ModelCore modelCore(Instance instance) {
 		long startTime = System.currentTimeMillis();
-		Boolean result = null;
+		ModelCore result = null;
 		Expression fullExpr = instance.getFullExpression();
 		log.trace("fullExpr: {}", fullExpr);
 
@@ -338,11 +343,11 @@ public class GruliaService extends SATService {
 		// Compute SatDelta
 		double satDelta = calculateSatDelta(fullExpr);
 		log.trace("satDelta (average): {}", satDelta);
-		if (satDelta == 0.0) {
-			// The sat-delta computation produced a hit
-			zeroSatDeltaCount++;
-			result = true;
-		}
+//		if (satDelta == 0.0) {
+//			// The sat-delta computation produced a hit
+//			zeroSatDeltaCount++;
+//			result = true;
+//		}
 
 		// Try to find a model in the SAT repo that satisfies the expression.
 		if (result == null) {
@@ -380,7 +385,9 @@ public class GruliaService extends SATService {
 			for (int i = REFERENCE_SOLUTION.length - 1; i >= 0; i--) {
 				gruliaVisitor.setReferenceValue(REFERENCE_SOLUTION[i]);
 				expr.accept(gruliaVisitor);
-				result += gruliaVisitor.getResult();
+				double referenceSatDelta = gruliaVisitor.getResult();
+				// IF referenceSatDelta == 0, WE HAVE A HIT!
+				result += referenceSatDelta;
 				log.trace("referenceSolution: {} satDelta: {}", REFERENCE_SOLUTION[i], gruliaVisitor.getResult());
 			}
 			result = result / REFERENCE_SOLUTION.length;
@@ -405,13 +412,13 @@ public class GruliaService extends SATService {
 	 *
 	 * @param expr      expression to satisfy
 	 * @param setOfVars variables in expression, passed to repo
-	 * @return {@code true} if a satisfying model was found, otherwise {@code null}
+	 * @return {@code ModelCore} instance or {@code null}
 	 */
-	private Boolean findSharedModel(Expression expr, SortedSet<IntVariable> setOfVars) {
+	private ModelCore findSharedModel(Expression expr, SortedSet<IntVariable> setOfVars) {
 		log.trace("looking for shared models");
 		satRepoMissCount++; // Assume that we won't find a model.
 		ModelEntry anchorModel = new ModelEntry(expr.satDelta, null, setOfVars.size());
-		Boolean result = null;
+		ModelCore result = null;
 		if (satRepo.size() != 0) {
 			long startTime = System.currentTimeMillis();
 			List<ModelEntry> models = satRepo.getEntries(K, anchorModel);
@@ -433,7 +440,7 @@ public class GruliaService extends SATService {
 				modelEvaluationTimeConsumption += System.currentTimeMillis() - startTime0;
 				if (satCheck.isSat()) {
 					log.trace("found satisfying model");
-					result = true;
+					result = new ModelCore(true, model.getModel(), null);
 					repoModelHitCount++;
 					satRepoMissCount--; // Initial assumption was false.
 					break;
@@ -459,13 +466,13 @@ public class GruliaService extends SATService {
 	 * </ol>
 	 *
 	 * @param expr      expression to subsume
-	 * @return {@code false} if a subsuming core was found, otherwise {@code null}
+	 * @return {@code ModelCore} instance or {@code null}
 	 */
-	private Boolean findSharedCore(Expression expr) {
+	private ModelCore findSharedCore(Expression expr) {
 		log.trace("looking for shared cores");
 		unsatRepoMissCount++; // Assume that we won't find a model.
 		CoreEntry anchorCore = new CoreEntry(expr.satDelta, null);
-		Boolean result = null;
+		ModelCore result = null;
 		if (unsatRepo.size() != 0) {
 			long startTime = System.currentTimeMillis();
 			List<CoreEntry> cores = unsatRepo.getEntries(K, anchorCore);
@@ -473,12 +480,12 @@ public class GruliaService extends SATService {
 			log.trace("found {} close models", cores.size());
 			startTime = System.currentTimeMillis();
 			String exprStr = expr.toString();
-			for (Entry core : cores) {
+			for (CoreEntry core : cores) {
 				if (core == null) {
 					break;
 				}
 				long startTime0 = System.currentTimeMillis();
-				Set<Expression> unsatCore = ((CoreEntry) core).getCore();
+				Set<Expression> unsatCore = core.getCore();
 				boolean shared = (unsatCore.size() > 0);
 				for (Expression clause : unsatCore) {
 					if (!exprStr.contains(clause.toString())) {
@@ -489,7 +496,7 @@ public class GruliaService extends SATService {
 				coreEvaluationTimeConsumption += System.currentTimeMillis() - startTime0;
 				if (shared) {
 					log.trace("found subsuming core");
-					result = false;
+					result = new ModelCore(false, null, core.getCore());
 					repoCoreHitCount++;
 					unsatRepoMissCount--; // Initial assumption was false.
 					break;
@@ -505,8 +512,11 @@ public class GruliaService extends SATService {
 
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
-		Object modelCore = instance.getData(ModelCoreService.SERVICE_KEY + getClass()); 
-		if (modelCore instanceof ModelCore) {
+		if (!(result instanceof ModelCore)) {
+			result = instance.getData(getClass());
+		}
+		if (result instanceof ModelCore) {
+			ModelCore modelCore = (ModelCore) result;
 			solverCount++;
 			boolean isSat = ((ModelCore) modelCore).isSat();
 			double satDelta = instance.getFullExpression().satDelta;
@@ -517,18 +527,18 @@ public class GruliaService extends SATService {
 				log.trace("adding {} to satRepo", model);
 				satRepo.add(newEntry);
 				satRepoAddCount++;
-				satCount++;
+				modelCount++;
 			} else {
 				Set<Expression> core = ((ModelCore) modelCore).getCore();
 				CoreEntry newEntry = new CoreEntry(satDelta, core);
 				log.trace("adding {} to unsatRepo", core);
 				unsatRepo.add(newEntry);
 				unsatRepoAddCount++;
-				unsatCount++;
+				coreCount++;
 			}
-			return isSat;
+			return modelCore;
 		} else {
-			return instance.getData(getClass());
+			return null;
 		}
 	}
 
@@ -538,7 +548,7 @@ public class GruliaService extends SATService {
 
 		// Counters
 		reporter.report("passedToSolverCount", passedToSolverCount);
-		reporter.report("zeroSatDeltaCount", zeroSatDeltaCount);
+		reporter.report("satDeltaHitCount", satDeltaHitCount);
 		reporter.report("repoModelHitCount", repoModelHitCount);
 		reporter.report("satRepoMissCount", satRepoMissCount);
 		reporter.report("repoModelFailCount", repoModelFailCount);

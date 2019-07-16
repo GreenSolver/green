@@ -1,10 +1,18 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.grulia;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,23 +22,25 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
+import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
 import za.ac.sun.cs.green.util.Configuration;
 
 /**
- * JUnit test of Grulia
- *
- * @date: 2018/08/23
- * @author: JH Taljaard (USnr 18509193)
- * @contributor: Willem Visser (2018, 2019) (supervisor)
- * @contributor: Jaco Geldenhuys (2017) (supervisor)
+ * Tests for {@link GruliaService}. 
  */
 public class GruliaServiceTest {
 
+	/**
+	 * The Green instance used throughout the test.
+	 */
 	public static Green solver;
 
+	/**
+	 * Set up the Green instance.
+	 */
 	@BeforeClass
 	public static void initialize() {
-		solver = new Green();
+		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
 		props.setProperty("green.service.sat", "(grulia z3)");
@@ -40,152 +50,172 @@ public class GruliaServiceTest {
 		config.configure();
 	}
 
-	@AfterClass
-	public static void report() {
-		solver.report();
-		solver.getStore().flushAll();
-	}
+	// ======================================================================
+	//
+	// ACTUAL TESTS
+	//
+	// ======================================================================
 
-	private void check(Expression expression, String expected) {
-		Instance i = new Instance(solver, null, expression);
-		Object result = i.request("sat");
-		assertTrue(((result.toString()).equals(expected)));
-	}
-
-	/*
-	 * Input:
-	 * a = 0
+	/**
+	 * Test:
 	 * 
-	 * Solution: SAT
+	 * <pre>
+	 * (a in [-10, 10]) && (a == 0)
+	 * </pre>
 	 * 
-	 * Notes: Reference solution is expected to hit input.
+	 * One of the Grulia reference solutions is supposed to "hit" this input.
+	 *
+	 * @result satisfiable
 	 */
 	@Test
 	public void testJG00() {
 		IntVariable v1 = new IntVariable("a", -10, 10);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, Operation.ZERO);
-		check(o1, "true");
+		Operation o = Operation.eq(v1, Operation.ZERO);
+		checkSat(o);
 	}
 
+	/**
+	 * Test:
+	 * 
+	 * <pre>
+	 * (v0, v1 in [-10, 99]) && (v0 == 0) && (v1 - 1 != 0)
+	 * </pre>
+	 * 
+	 * SatDelta: 2
+	 *
+	 * @result satisfiable
+	 */
 	@Test
 	public void test01() {
-		// example: "(aa==0)&&(bb!=1)" => "1*v==0", "1*v+-1!=0" => 0 & 2
-		// SAT-Delta: 2 (for reference model 0)
-		IntVariable v1 = new IntVariable("v0", -10, 99);
-		IntConstant c1 = new IntConstant(0);
-		IntVariable v2 = new IntVariable("v1", -10, 99);
-		IntConstant c2 = new IntConstant(0);
-		IntConstant c3 = new IntConstant(-1);
-
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.ADD, v2, c3);
-		Operation o3 = new Operation(Operation.Operator.NE, o2, c2);
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o3);
-
-		check(o4, "true");
+		IntVariable v0 = new IntVariable("v0", -10, 99);
+		IntVariable v1 = new IntVariable("v1", -10, 99);
+		IntConstant c0 = new IntConstant(0);
+		IntConstant c0a = new IntConstant(0);
+		IntConstant cm1 = new IntConstant(-1);
+		Operation o1 = Operation.eq(v0, c0);
+		Operation o2 = Operation.ne(Operation.add(v1, cm1), c0a);
+		Operation o = Operation.and(o1, o2);
+		checkSat(o);
 	}
 
+	/**
+	 * Test:
+	 * 
+	 * <pre>
+	 * (v0, v1 in [-99, 99]) && (v0 + v1 + 1 <= 0)
+	 * </pre>
+	 * 
+	 * SatDelta: 1
+	 *
+	 * @result satisfiable
+	 */
 	@Test
 	public void test02() {
-		// example: "(aa+bb)<(aa-cc)" => "1*v+1*v+1<=0" => 1
-		// SAT-Delta: 1 (for reference model 0)
-		IntVariable v1 = new IntVariable("v0", -99, 99);
-		IntVariable v2 = new IntVariable("v1", -99, 99);
+		IntVariable v0 = new IntVariable("v0", -99, 99);
+		IntVariable v1 = new IntVariable("v1", -99, 99);
+		IntConstant c0 = new IntConstant(0);
 		IntConstant c1 = new IntConstant(1);
-		IntConstant c2 = new IntConstant(0);
-
-		Operation o1 = new Operation(Operation.Operator.ADD, v1, v2);
-		Operation o2 = new Operation(Operation.Operator.ADD, o1, c1);
-		Operation o3 = new Operation(Operation.Operator.LE, o2, c2);
-
-		check(o3, "true");
+		Operation o = Operation.le(Operation.add(Operation.add(v0, v1), c1), c0);
+		checkSat(o);
 	}
 
+	/**
+	 * Test:
+	 * 
+	 * <pre>
+	 * (a, b in [-99, 99]) && (5 * v0 < v1)
+	 * </pre>
+	 * 
+	 * SatDelta: 1
+	 *
+	 * @result satisfiable
+	 */
 	@Test
 	public void test03() {
-		// example: "((2+3)*aa)<bb" => 5*0<0
-		// SAT-Delta: 1 (for reference model 0)
-		IntVariable v1 = new IntVariable("aa", -99, 99);
-		IntConstant c1 = new IntConstant(5);
-		IntVariable v2 = new IntVariable("bb", -99, 99);
-
-		Operation o1 = new Operation(Operation.Operator.MUL, c1, v1);
-		Operation o2 = new Operation(Operation.Operator.LT, o1, v2);
-
-		check(o2, "true");
+		IntVariable v0 = new IntVariable("a", -99, 99);
+		IntVariable v1 = new IntVariable("b", -99, 99);
+		IntConstant c5 = new IntConstant(5);
+		Operation o = Operation.lt(Operation.mul(c5, v0), v1);
+		checkSat(o);
 	}
 
+	/**
+	 * Test:
+	 * 
+	 * <pre>
+	 * (v0, v1 in [0, 99]) && (5 * v0 + -1 * v1 + 1 <= 0)
+	 * </pre>
+	 * 
+	 * SatDelta: 1
+	 *
+	 * @result satisfiable
+	 */
 	@Test
 	public void test04() {
-		// example: "((2+3)*aa)<bb" => "5*v+-1*v+1<=0" => 5*0 + 0 + 1 < 0
-		// SAT-Delta: 1 (for reference model 0)
-		IntVariable v1 = new IntVariable("v0", 0, 99);
-		IntConstant c1 = new IntConstant(5);
-		IntVariable v2 = new IntVariable("v1", 0, 99);
-		IntConstant c2 = new IntConstant(-1);
-		IntConstant c3 = new IntConstant(1);
-		IntConstant c4 = new IntConstant(0);
-
-		Operation o1 = new Operation(Operation.Operator.MUL, c1, v1);
-		Operation o2 = new Operation(Operation.Operator.MUL, c2, v2);
-		Operation o3 = new Operation(Operation.Operator.ADD, o1, o2);
-		Operation o4 = new Operation(Operation.Operator.ADD, o3, c3);
-		Operation o5 = new Operation(Operation.Operator.LE, o4, c4);
-
-		check(o5, "true");
+		IntVariable v0 = new IntVariable("v0", 0, 99);
+		IntVariable v1 = new IntVariable("v1", 0, 99);
+		IntConstant c0 = new IntConstant(0);
+		IntConstant c1 = new IntConstant(1);
+		IntConstant cm1 = new IntConstant(-1);
+		IntConstant c5 = new IntConstant(5);
+		Operation o1 = Operation.mul(c5, v0);
+		Operation o2 = Operation.mul(cm1, v1);
+		Operation o3 = Operation.add(o1, o2);
+		Operation o4 = Operation.add(o3, c1);
+		Operation o = Operation.le(o4, c0);
+		checkSat(o);
 	}
 
+	/**
+	 * Test:
+	 * 
+	 * <pre>
+	 * (v0, v1 in [0, 99]) && (-1 * v0 + 6 <= 0) && (v0 + -1 * v1 + 1 == 0) && (v1 - 7 <= 0)
+	 * </pre>
+	 * 
+	 * SatDelta: 14
+	 *
+	 * @result satisfiable
+	 */
 	@Test
 	public void test05() {
-		// ((x>5)&&(x==(y-1)))&&(y<=7) => -1*v+6<=0, 1*v+-1*v+1==0, 1*v+-7<=0
-		// => 0+6 <= 0 + 0 - 0 + 1 == 0 + 0 - 7 <= 0
-		// => 6 + 1 + 7 = 14
-		// SAT-Delta: 14 (for reference model 0)
-		IntVariable v1 = new IntVariable("v0", 0, 99);
-		IntVariable v2 = new IntVariable("v1", 0, 99);
-		IntConstant c0 = new IntConstant(-1);
-		IntConstant c1 = new IntConstant(6);
-		IntConstant c2 = new IntConstant(1);
-		IntConstant c3 = new IntConstant(-7);
-		IntConstant c4 = new IntConstant(0);
-
-		Operation o1 = new Operation(Operation.Operator.MUL, c0, v1);
-		Operation o2 = new Operation(Operation.Operator.ADD, o1, c1);
-		Operation o3 = new Operation(Operation.Operator.LE, o2, c4);
-
-		Operation o4 = new Operation(Operation.Operator.MUL, c0, v2);
-		Operation o5 = new Operation(Operation.Operator.ADD, v1, o4);
-		Operation o55 = new Operation(Operation.Operator.ADD, o5, c2);
-		Operation o6 = new Operation(Operation.Operator.EQ, o55, c4);
-
-		Operation o7 = new Operation(Operation.Operator.ADD, v2, c3);
-		Operation o8 = new Operation(Operation.Operator.LE, o7, c4);
-
-		Operation o9 = new Operation(Operation.Operator.AND, o3, o6);
-		Operation o10 = new Operation(Operation.Operator.AND, o9, o8);
-
-		check(o10, "true");
+		IntVariable v0 = new IntVariable("v0", 0, 99);
+		IntVariable v1 = new IntVariable("v1", 0, 99);
+		IntConstant c0 = new IntConstant(0);
+		IntConstant c1 = new IntConstant(1);
+		IntConstant cm1 = new IntConstant(-1);
+		IntConstant c6 = new IntConstant(6);
+		IntConstant cm7 = new IntConstant(-7);
+		Operation o1 = Operation.le(Operation.add(Operation.mul(cm1, v0), c6), c0);
+		Operation o2 = Operation.eq(Operation.add(Operation.add(v0, Operation.mul(cm1, v1)), c1), c0);
+		Operation o3 = Operation.le(Operation.add(v1, cm7), c0);
+		Operation o = Operation.and(Operation.and(o1, o2), o3);
+		checkSat(o);
 	}
 
+	/**
+	 * Test:
+	 * 
+	 * <pre>
+	 * (v0, v1 in [0, 99]) && (v0 >= 5) && (v0 == v1 - 2) && (v1 <= 6)
+	 * </pre>
+	 * 
+	 * SatDelta: 14
+	 *
+	 * @result unsatisfiable
+	 */
 	@Test
 	public void test06() {
-		// ((x>5)&&(x==(y-2)))&&(y<=6)
-		// UNSAT
-		// SAT-Delta: 14 (for reference model 0)
-		IntVariable v1 = new IntVariable("x", 0, 99);
-		IntVariable v2 = new IntVariable("y", 0, 99);
-		IntConstant c1 = new IntConstant(5);
+		IntVariable v0 = new IntVariable("x", 0, 99);
+		IntVariable v1 = new IntVariable("y", 0, 99);
 		IntConstant c2 = new IntConstant(2);
-		IntConstant c3 = new IntConstant(6);
-
-		Operation o1 = new Operation(Operation.Operator.GT, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.EQ, v1, new Operation(Operation.Operator.SUB, v2, c2));
-		Operation o3 = new Operation(Operation.Operator.LE, v2, c3);
-
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
-		Operation o5 = new Operation(Operation.Operator.AND, o4, o3);
-
-		check(o5, "false");
+		IntConstant c5 = new IntConstant(5);
+		IntConstant c6 = new IntConstant(6);
+		Operation o1 = Operation.gt(v0, c5);
+		Operation o2 = Operation.eq(v0, Operation.sub(v1, c2));
+		Operation o3 = Operation.le(v1, c6);
+		Operation o = Operation.and(Operation.and(o1, o2), o3);
+		checkUnsat(o);
 	}
 
 	@Test
@@ -198,24 +228,21 @@ public class GruliaServiceTest {
 		IntConstant c2 = new IntConstant(1);
 		IntConstant c3 = new IntConstant(7);
 
-		Operation o1 = new Operation(Operation.Operator.GT, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.EQ, v1, new Operation(Operation.Operator.SUB, v2, c2));
-		Operation o3 = new Operation(Operation.Operator.LE, v2, c3);
+		Operation o1 = Operation.gt(v1, c1);
+		Operation o2 = Operation.eq(v1, Operation.sub(v2, c2));
+		Operation o3 = Operation.le(v2, c3);
 
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
-		Operation o5 = new Operation(Operation.Operator.AND, o4, o3);
-
-		check(o5, "true");
+		Operation o4 = Operation.and(o1, o2);
+		Operation o = Operation.and(o4, o3);
+		checkSat(o);
 	}
 
 	@Test
 	public void test08() {
 		IntVariable v1 = new IntVariable("v", 0, 99);
 		IntConstant c1 = new IntConstant(7);
-
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-
-		check(o1, "true");
+		Operation o = Operation.eq(v1, c1);
+		checkSat(o);
 	}
 
 	@Test
@@ -228,16 +255,15 @@ public class GruliaServiceTest {
 		IntConstant c2 = new IntConstant(1);
 		IntConstant c3 = new IntConstant(9);
 
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.ADD, v1, c2);
-		Operation o3 = new Operation(Operation.Operator.EQ, v2, o2);
+		Operation o1 = Operation.eq(v1, c1);
+		Operation o2 = Operation.add(v1, c2);
+		Operation o3 = Operation.eq(v2, o2);
 
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o3);
-		Operation o5 = new Operation(Operation.Operator.ADD, v2, c3);
-		Operation o6 = new Operation(Operation.Operator.LE, v3, o5);
-		Operation o7 = new Operation(Operation.Operator.AND, o4, o6);
-
-		check(o7, "true");
+		Operation o4 = Operation.and(o1, o3);
+		Operation o5 = Operation.add(v2, c3);
+		Operation o6 = Operation.le(v3, o5);
+		Operation o = Operation.and(o4, o6);
+		checkSat(o);
 	}
 
 	@Test
@@ -250,16 +276,15 @@ public class GruliaServiceTest {
 		IntConstant c2 = new IntConstant(1);
 		IntConstant c3 = new IntConstant(9);
 
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.ADD, v1, c2);
-		Operation o3 = new Operation(Operation.Operator.EQ, v2, o2);
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o3);
+		Operation o1 = Operation.eq(v1, c1);
+		Operation o2 = Operation.add(v1, c2);
+		Operation o3 = Operation.eq(v2, o2);
+		Operation o4 = Operation.and(o1, o3);
 
-		Operation o5 = new Operation(Operation.Operator.ADD, v2, c3);
-		Operation o6 = new Operation(Operation.Operator.LT, v3, o5);
-		Operation o7 = new Operation(Operation.Operator.AND, o4, o6);
-
-		check(o7, "true");
+		Operation o5 = Operation.add(v2, c3);
+		Operation o6 = Operation.lt(v3, o5);
+		Operation o = Operation.and(o4, o6);
+		checkSat(o);
 	}
 
 	@Test
@@ -275,52 +300,70 @@ public class GruliaServiceTest {
 		IntVariable a1 = new IntVariable("a1", min, max);
 		IntVariable c2 = new IntVariable("c2", min, max);
 
-		Operation o1 = new Operation(Operation.Operator.LE, c2, const65536);
-		Operation o2 = new Operation(Operation.Operator.GE, c2, const32768);
-		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.le(c2, const65536);
+		Operation o2 = Operation.ge(c2, const32768);
+		Operation o3 = Operation.and(o1, o2);
 
-		Operation o4 = new Operation(Operation.Operator.MUL, a1, const8);
-		Operation o40 = new Operation(Operation.Operator.SUB, const48, o4);
-		Operation o400 = new Operation(Operation.Operator.MOD, o40, const16);
-		Operation o5 = new Operation(Operation.Operator.NE, o400, const0);
+		Operation o4 = Operation.mul(a1, const8);
+		Operation o40 = Operation.sub(const48, o4);
+		Operation o400 = Operation.mod(o40, const16);
+		Operation o5 = Operation.ne(o400, const0);
 
-		Operation o6 = new Operation(Operation.Operator.AND, o5, o3);
-		check(o6, "true");
+		Operation o = Operation.and(o5, o3);
+		checkSat(o);
 	}
 
 	@Test
 	public void unsatTest01() {
 		IntVariable v1 = new IntVariable("x", 0, 99);
 		IntConstant c1 = new IntConstant(10);
-		Operation o1 = new Operation(Operation.Operator.LT, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.GT, v1, c1);
+		Operation o1 = Operation.lt(v1, c1);
+		Operation o2 = Operation.gt(v1, c1);
 
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
-
-		check(o4, "false");
+		Operation o = Operation.and(o1, o2);
+		checkUnsat(o);
 	}
 
 	@Test
 	public void unsatTest02() {
 		IntVariable v1 = new IntVariable("x", 0, 99);
 		IntConstant c1 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.GT, v1, c1);
-		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
-
-		check(o3, "false");
+		Operation o1 = Operation.eq(v1, c1);
+		Operation o2 = Operation.gt(v1, c1);
+		Operation o = Operation.and(o1, o2);
+		checkUnsat(o);
 	}
 
 	@Test
 	public void unsatTest03() {
 		IntVariable v1 = new IntVariable("x", 0, 99);
 		IntConstant c1 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v1, c1);
-		Operation o2 = new Operation(Operation.Operator.LT, v1, c1);
-		Operation o3 = new Operation(Operation.Operator.GT, v1, c1);
-		Operation o4 = new Operation(Operation.Operator.AND, o1, o2);
-		Operation o5 = new Operation(Operation.Operator.AND, o4, o3);
-
-		check(o5, "false");
+		Operation o1 = Operation.eq(v1, c1);
+		Operation o2 = Operation.lt(v1, c1);
+		Operation o3 = Operation.gt(v1, c1);
+		Operation o4 = Operation.and(o1, o2);
+		Operation o = Operation.and(o4, o3);
+		checkUnsat(o);
 	}
+
+	// ======================================================================
+	//
+	// TEST SUPPORT ROUTINES
+	//
+	// ======================================================================
+
+	private void checkSat(Expression expression) {
+		Instance instance = new Instance(solver, null, expression);
+		Object result = instance.request("sat");
+		assertTrue(result instanceof ModelCore);
+		assertTrue(((ModelCore) result).isSat());
+	}
+
+	private void checkUnsat(Expression expression) {
+		Instance instance = new Instance(solver, null, expression);
+		Object result = instance.request("sat");
+		assertTrue(result instanceof ModelCore);
+		assertFalse(((ModelCore) result).isSat());
+	}
+	
 }
