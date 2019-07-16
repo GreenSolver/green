@@ -28,7 +28,7 @@ public class ModelZ3JavaBVService extends ModelService {
 	/**
 	 * Logic used for the Z3 solver.
 	 */
-	protected static final String Z3_LOGIC = "QF_LIA";
+	protected static final String Z3_LOGIC = "QF_BV";
 
 	/**
 	 * Size of bitvectors.
