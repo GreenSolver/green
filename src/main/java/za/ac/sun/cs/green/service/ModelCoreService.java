@@ -22,7 +22,7 @@ import java.util.Set;
 public abstract class ModelCoreService extends BasicService {
 
 	/**
-	 * Key prefix used for the store (=cache) for models.
+	 * Key prefix used for model-cores in stores.
 	 */
 	public static final String SERVICE_KEY = "MODELCORE:";
 
@@ -170,7 +170,7 @@ public abstract class ModelCoreService extends BasicService {
 	 */
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
-		return instance;
+		return instance.getData(getClass());
 	}
 
 	/*

@@ -188,7 +188,18 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 					val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
 					value = new IntConstant(Integer.parseInt(val));
 				} else if (var instanceof RealVariable) {
-					value = new RealConstant(Double.parseDouble(assignment.get(name)));
+					String val = assignment.get(name);
+					if (val.contains("/")) {
+						val = val.replaceAll("\\(\\s*-\\s*\\(\\s*/\\s*(.+)\\s*\\)\\s*\\)", "(/ -$1)");
+						val = val.replaceAll("\\(\\s*/\\s*(.+)\\s*(.+)\\s*\\)", "$1/$2");
+						String[] rat = val.split("/");
+						double num = Double.parseDouble(rat[0]);
+						double den = Double.parseDouble(rat[1]);
+						value = new RealConstant(num / den);
+					} else {
+						val = val.replaceAll("\\(\\s*-\\s*(.+)\\)", "-$1");
+						value = new RealConstant(Double.parseDouble(val));
+					}
 				}
 				if (value != null) {
 					model.put(var, value);

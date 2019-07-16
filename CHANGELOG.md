@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Logging & tests
   [bcf2d41](https://github.com/GreenSolver/green/commit/bcf2d41ae04cdfca5932e954a2465e71c972bde5)
   [598251d](https://github.com/GreenSolver/green/commit/598251d6066dd5faae56d5f79879d8aaec010447)
+  [66da1cf](https://github.com/GreenSolver/green/commit/66da1cf8349cdb6b7df9906404e1e8bc6fb3f5f5)
+  [9e12088](https://github.com/GreenSolver/green/commit/9e120880a790d75bf0e37310a0cf1e62c27c2bb9)
 
 ### Changed
 - Counting of invocations for some services

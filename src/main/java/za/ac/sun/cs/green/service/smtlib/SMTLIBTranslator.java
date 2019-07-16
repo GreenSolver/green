@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import za.ac.sun.cs.green.expr.BoolVariable;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
@@ -227,6 +228,8 @@ public class SMTLIBTranslator extends Visitor {
 			Pair<String, Class<? extends Variable>> right) {
 		if ((left.getR() == RealVariable.class) || (right.getR() == RealVariable.class)) {
 			return RealVariable.class;
+		} else if ((left.getR() == BoolVariable.class) || (right.getR() == BoolVariable.class)) {
+			return BoolVariable.class;
 		} else {
 			return IntVariable.class;
 		}
@@ -288,29 +291,43 @@ public class SMTLIBTranslator extends Visitor {
 			return "div";
 		case MOD:
 			return "mod";
-		case BIT_AND:
-		case BIT_OR:
-		case BIT_XOR:
-		case SHIFTL:
-		case SHIFTR:
-		case SHIFTUR:
-		case SIN:
-		case COS:
-		case TAN:
-		case ASIN:
-		case ACOS:
-		case ATAN:
-		case ATAN2:
-		case ROUND:
-		case LOG:
-		case EXP:
-		case POWER:
-		case SQRT:
 		default:
 			throw new TranslatorUnsupportedOperation("unsupported operation " + op);
 		}
 	}
 
+	/**
+	 * Map GREEN operators to their resulting type.
+	 * 
+	 * @param op GREEN operator
+	 * @param supertype least common parent type
+	 * @return resulting type
+	 * @throws TranslatorUnsupportedOperation if an operator cannot/should not be
+	 *                                        translated
+	 */
+	protected Class<? extends Variable> setType(Operator op, Class<? extends Variable> supertype) throws TranslatorUnsupportedOperation {
+		switch (op) {
+		case EQ:
+		case NE:
+		case LT:
+		case LE:
+		case GT:
+		case GE:
+		case AND:
+		case OR:
+		case IMPLIES:
+			return BoolVariable.class;
+		case ADD:
+		case SUB:
+		case MUL:
+		case DIV:
+		case MOD:
+			return supertype;
+		default:
+			throw new TranslatorUnsupportedOperation("unsupported operation " + op);
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -345,7 +362,7 @@ public class SMTLIBTranslator extends Visitor {
 			b.append(adjust(l, v)).append(' ');
 			b.append(adjust(r, v)).append(')');
 		}
-		stack.push(new Pair<>(b.toString(), v));
+		stack.push(new Pair<>(b.toString(), setType(op, v)));
 		postVisitExtra(operation, op, b);
 	}
 

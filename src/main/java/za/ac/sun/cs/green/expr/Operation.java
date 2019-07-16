@@ -342,4 +342,74 @@ public class Operation extends Expression {
 		return sb.toString();
 	}
 
+	// ======================================================================
+	//
+	// STATIC METHODS
+	//
+	// ======================================================================
+
+	public static Operation eq(Expression left, Expression right) {
+		return new Operation(Operator.EQ, left, right);
+	}
+
+	public static Operation ne(Expression left, Expression right) {
+		return new Operation(Operator.NE, left, right);
+	}
+	
+	public static Operation lt(Expression left, Expression right) {
+		return new Operation(Operator.LT, left, right);
+	}
+	
+	public static Operation le(Expression left, Expression right) {
+		return new Operation(Operator.LE, left, right);
+	}
+	
+	public static Operation gt(Expression left, Expression right) {
+		return new Operation(Operator.GT, left, right);
+	}
+	
+	public static Operation ge(Expression left, Expression right) {
+		return new Operation(Operator.GE, left, right);
+	}
+	
+	public static Operation and(Expression left, Expression right) {
+		return new Operation(Operator.AND, left, right);
+	}
+	
+	public static Operation or(Expression left, Expression right) {
+		return new Operation(Operator.OR, left, right);
+	}
+	
+	public static Operation implies(Expression left, Expression right) {
+		return new Operation(Operator.IMPLIES, left, right);
+	}
+	
+	public static Operation not(Expression operand) {
+		return new Operation(Operator.NOT, operand);
+	}
+	
+	public static Operation add(Expression left, Expression right) {
+		return new Operation(Operator.ADD, left, right);
+	}
+	
+	public static Operation sub(Expression left, Expression right) {
+		return new Operation(Operator.SUB, left, right);
+	}
+	
+	public static Operation mul(Expression left, Expression right) {
+		return new Operation(Operator.MUL, left, right);
+	}
+	
+	public static Operation div(Expression left, Expression right) {
+		return new Operation(Operator.DIV, left, right);
+	}
+	
+	public static Operation mod(Expression left, Expression right) {
+		return new Operation(Operator.MOD, left, right);
+	}
+	
+	public static Operation neg(Expression operand) {
+		return new Operation(Operator.NEG, operand);
+	}
+	
 }

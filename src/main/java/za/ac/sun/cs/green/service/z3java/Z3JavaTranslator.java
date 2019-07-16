@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.apache.logging.log4j.Logger;
+
 import com.microsoft.z3.ArithExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -13,6 +15,7 @@ import com.microsoft.z3.Expr;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.Z3Exception;
 
+import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
@@ -32,6 +35,11 @@ public class Z3JavaTranslator extends Visitor {
 	 * Prefix used for naming clauses.
 	 */
 	protected static final String CLAUSE_PREFIX = "q";
+
+	/**
+	 * The Java {@link Logger} associated with the {@link Green} solver.
+	 */
+	protected final Logger log;
 
 	/**
 	 * Context of the Z3 solver.
@@ -73,7 +81,8 @@ public class Z3JavaTranslator extends Visitor {
 	 * 
 	 * @param context Z3 context
 	 */
-	public Z3JavaTranslator(Context context) {
+	public Z3JavaTranslator(Logger log, Context context) {
+		this.log = log;
 		this.z3Context = context;
 	}
 

@@ -42,6 +42,16 @@ public abstract class ModelSMTLIBService extends ModelService {
 		super.report(reporter);
 	}
 
+	/**
+	 * Return the logic to be used for the solver. The default is to return
+	 * "{@code QF_LIA}" for linear integer arithmetic.
+	 *
+	 * @return solver logic
+	 */
+	protected String getLogic() {
+		return "QF_LIA";
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -56,7 +66,10 @@ public abstract class ModelSMTLIBService extends ModelService {
 			instance.getExpression().accept(translator);
 			StringBuilder b = new StringBuilder();
 			b.append("(set-option :produce-models true)");
-			// b.append("(set-logic QF_LIA)");
+			String logic = getLogic();
+			if (logic != null) {
+				b.append("(set-logic ").append(logic).append(')');
+			}
 			b.append(Misc.join(translator.getVariableDefinitions(), " "));
 			b.append("(assert ").append(translator.getTranslation()).append(')');
 			b.append("(check-sat)");

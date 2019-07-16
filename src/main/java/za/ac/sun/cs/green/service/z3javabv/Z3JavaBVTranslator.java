@@ -189,7 +189,7 @@ public class Z3JavaBVTranslator extends Visitor {
 				Operation low = new Operation(Operation.Operator.GE, variable, new IntConstant(lower));
 				assertions.put(low, lowerBound);
 				BoolExpr upperBound = z3Context.mkBVSLE(var, z3Context.mkBV(upper, bitVectorSize));
-				Operation upp = new Operation(Operation.Operator.GE, variable, new IntConstant(upper));
+				Operation upp = new Operation(Operation.Operator.LE, variable, new IntConstant(upper));
 				assertions.put(upp, upperBound);
 				BoolExpr bounds = z3Context.mkAnd(lowerBound, upperBound);
 				variableBounds.add(bounds);
@@ -238,8 +238,8 @@ public class Z3JavaBVTranslator extends Visitor {
 					u = z3Context.mkFP(upper, z3Context.mkFPSort128());
 					break;
 				}
-				BoolExpr low = z3Context.mkFPGt((FPExpr) v, l);
-				BoolExpr high = z3Context.mkFPLt((FPExpr) v, u);
+				BoolExpr low = z3Context.mkFPGEq((FPExpr) v, l);
+				BoolExpr high = z3Context.mkFPLEq((FPExpr) v, u);
 				variableBounds.add(z3Context.mkAnd(low, high));
 			} catch (Z3Exception e) {
 				e.printStackTrace();

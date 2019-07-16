@@ -6,7 +6,7 @@
  * Licensed under GNU Lesser General Public License, version 3.
  * See LICENSE.md file in the project root for full license information.
  */
-package za.ac.sun.cs.green.util;
+package za.ac.sun.cs.green.taskmanager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -23,6 +23,7 @@ import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.taskmanager.ParallelTaskManager;
+import za.ac.sun.cs.green.util.Configuration;
 
 /**
  * Tests for the parallel task manager.
@@ -72,7 +73,7 @@ public class ParallelSATTest {
 	public void test00() {
 		IntConstant c2a = new IntConstant(2);
 		IntConstant c2b = new IntConstant(2);
-		Operation o = new Operation(Operation.Operator.EQ, c2a, c2b);
+		Operation o = Operation.eq(c2a, c2b);
 		checkSat(o);
 	}
 
@@ -89,7 +90,7 @@ public class ParallelSATTest {
 	public void test01() {
 		IntVariable v = new IntVariable("a", 0, 99);
 		IntConstant c0 = new IntConstant(0);
-		Operation o = new Operation(Operation.Operator.EQ, v, c0);
+		Operation o = Operation.eq(v, c0);
 		checkSat(o);
 	}
 
@@ -106,7 +107,7 @@ public class ParallelSATTest {
 	public void test02() {
 		IntVariable v = new IntVariable("a", 0, 99);
 		IntConstant c100 = new IntConstant(100);
-		Operation o = new Operation(Operation.Operator.EQ, v, c100);
+		Operation o = Operation.eq(v, c100);
 		checkUnsat(o);
 	}
 
@@ -124,9 +125,9 @@ public class ParallelSATTest {
 		IntVariable v = new IntVariable("a", 0, 99);
 		IntConstant c10a = new IntConstant(10);
 		IntConstant c10b = new IntConstant(10);
-		Operation o1 = new Operation(Operation.Operator.EQ, v, c10a);
-		Operation o2 = new Operation(Operation.Operator.EQ, v, c10b);
-		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.eq(v, c10a);
+		Operation o2 = Operation.eq(v, c10b);
+		Operation o3 = Operation.and(o1, o2);
 		checkSat(o3);
 	}
 
@@ -144,9 +145,9 @@ public class ParallelSATTest {
 		IntVariable v = new IntVariable("a", 0, 99);
 		IntConstant c10 = new IntConstant(10);
 		IntConstant c20 = new IntConstant(20);
-		Operation o1 = new Operation(Operation.Operator.EQ, v, c10);
-		Operation o2 = new Operation(Operation.Operator.EQ, v, c20);
-		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.eq(v, c10);
+		Operation o2 = Operation.eq(v, c20);
+		Operation o3 = Operation.and(o1, o2);
 		checkUnsat(o3);
 	}
 
@@ -164,9 +165,9 @@ public class ParallelSATTest {
 		IntVariable v = new IntVariable("a", 0, 99);
 		IntConstant c1 = new IntConstant(10);
 		IntConstant c2 = new IntConstant(20);
-		Operation o1 = new Operation(Operation.Operator.GE, v, c1);
-		Operation o2 = new Operation(Operation.Operator.LT, v, c2);
-		Operation o3 = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.ge(v, c1);
+		Operation o2 = Operation.lt(v, c2);
+		Operation o3 = Operation.and(o1, o2);
 		checkSat(o3);
 	}
 
@@ -185,8 +186,8 @@ public class ParallelSATTest {
 		IntVariable v = new IntVariable("a", 0, 99);
 		IntConstant c10 = new IntConstant(10);
 		IntConstant c20 = new IntConstant(20);
-		Operation o1 = new Operation(Operation.Operator.GE, v, c10);
-		Operation o2 = new Operation(Operation.Operator.LT, v, c20);
+		Operation o1 = Operation.ge(v, c10);
+		Operation o2 = Operation.lt(v, c20);
 		checkSat(o1, o2);
 	}
 
@@ -206,8 +207,8 @@ public class ParallelSATTest {
 		IntVariable v2 = new IntVariable("b", 0, 99);
 		IntConstant c10 = new IntConstant(10);
 		IntConstant c2012 = new IntConstant(2012);
-		Operation o1 = new Operation(Operation.Operator.GE, v1, c10);
-		Operation o2 = new Operation(Operation.Operator.EQ, v2, c2012);
+		Operation o1 = Operation.ge(v1, c10);
+		Operation o2 = Operation.eq(v2, c2012);
 		checkSat(o1, o2);
 	}
 
@@ -226,9 +227,9 @@ public class ParallelSATTest {
 		IntVariable v2 = new IntVariable("b", 0, 99);
 		IntConstant c10 = new IntConstant(10);
 		IntConstant c2012 = new IntConstant(2012);
-		Operation o1 = new Operation(Operation.Operator.GE, v1, c10);
-		Operation o2 = new Operation(Operation.Operator.EQ, v2, c2012);
-		Operation o = new Operation(Operation.Operator.AND, o2, o1);
+		Operation o1 = Operation.ge(v1, c10);
+		Operation o2 = Operation.eq(v2, c2012);
+		Operation o = Operation.and(o2, o1);
 		checkUnsat(o);
 	}
 	
@@ -248,8 +249,8 @@ public class ParallelSATTest {
 		IntVariable v2 = new IntVariable("b", 0, 99);
 		IntConstant c10 = new IntConstant(10);
 		IntConstant c2012 = new IntConstant(2012);
-		Operation o1 = new Operation(Operation.Operator.GE, v1, c10);
-		Operation o2 = new Operation(Operation.Operator.EQ, v2, c2012);
+		Operation o1 = Operation.ge(v1, c10);
+		Operation o2 = Operation.eq(v2, c2012);
 		checkUnsat(o2, o1);
 	}
 
@@ -270,14 +271,14 @@ public class ParallelSATTest {
 		IntVariable v3 = new IntVariable("c", 0, 99);
 		IntVariable v4 = new IntVariable("d", 0, 99);
 		IntVariable v5 = new IntVariable("e", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.LT, v1, v2);
-		Operation o2 = new Operation(Operation.Operator.LT, v2, v3);
-		Operation o3 = new Operation(Operation.Operator.LT, v3, v4);
-		Operation o4 = new Operation(Operation.Operator.LT, v4, v5);
-		Operation o5 = new Operation(Operation.Operator.LT, v5, v1);
-		Operation o45 = new Operation(Operation.Operator.AND, o4, o5);
-		Operation o345 = new Operation(Operation.Operator.AND, o3, o45);
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.lt(v1, v2);
+		Operation o2 = Operation.lt(v2, v3);
+		Operation o3 = Operation.lt(v3, v4);
+		Operation o4 = Operation.lt(v4, v5);
+		Operation o5 = Operation.lt(v5, v1);
+		Operation o45 = Operation.and(o4, o5);
+		Operation o345 = Operation.and(o3, o45);
+		Operation o12 = Operation.and(o1, o2);
 		checkUnsat(o12, o345);
 	}
 
@@ -298,14 +299,14 @@ public class ParallelSATTest {
 		IntVariable v3 = new IntVariable("c", 0, 99);
 		IntVariable v4 = new IntVariable("d", 0, 99);
 		IntVariable v5 = new IntVariable("e", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.LE, v1, v2);
-		Operation o2 = new Operation(Operation.Operator.LE, v2, v3);
-		Operation o3 = new Operation(Operation.Operator.LE, v3, v4);
-		Operation o4 = new Operation(Operation.Operator.LE, v4, v5);
-		Operation o5 = new Operation(Operation.Operator.LE, v5, v1);
-		Operation o45 = new Operation(Operation.Operator.AND, o4, o5);
-		Operation o345 = new Operation(Operation.Operator.AND, o3, o45);
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.le(v1, v2);
+		Operation o2 = Operation.le(v2, v3);
+		Operation o3 = Operation.le(v3, v4);
+		Operation o4 = Operation.le(v4, v5);
+		Operation o5 = Operation.le(v5, v1);
+		Operation o45 = Operation.and(o4, o5);
+		Operation o345 = Operation.and(o3, o45);
+		Operation o12 = Operation.and(o1, o2);
 		checkSat(o12, o345);
 	}
 
@@ -327,12 +328,12 @@ public class ParallelSATTest {
 		IntVariable v4 = new IntVariable("d", 0, 99);
 		IntVariable v5 = new IntVariable("e", 0, 99);
 		IntConstant c2 = new IntConstant(2);
-		Operation o1 = new Operation(Operation.Operator.EQ, v2, new Operation(Operation.Operator.MUL, c2, v1));
-		Operation o2 = new Operation(Operation.Operator.EQ, v3, new Operation(Operation.Operator.MUL, c2, v2));
-		Operation o3 = new Operation(Operation.Operator.EQ, v4, new Operation(Operation.Operator.MUL, c2, v3));
-		Operation o4 = new Operation(Operation.Operator.EQ, v5, new Operation(Operation.Operator.MUL, c2, v4));
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
+		Operation o1 = Operation.eq(v2, Operation.mul(c2, v1));
+		Operation o2 = Operation.eq(v3, Operation.mul(c2, v2));
+		Operation o3 = Operation.eq(v4, Operation.mul(c2, v3));
+		Operation o4 = Operation.eq(v5, Operation.mul(c2, v4));
+		Operation o12 = Operation.and(o1, o2);
+		Operation o34 = Operation.and(o3, o4);
 		checkSat(o12, o34);
 	}
 
@@ -354,12 +355,12 @@ public class ParallelSATTest {
 		IntVariable v4 = new IntVariable("d", 0, 9);
 		IntVariable v5 = new IntVariable("e", 0, 9);
 		IntConstant c2 = new IntConstant(2);
-		Operation o1 = new Operation(Operation.Operator.EQ, v2, new Operation(Operation.Operator.MUL, c2, v1));
-		Operation o2 = new Operation(Operation.Operator.EQ, v3, new Operation(Operation.Operator.MUL, c2, v2));
-		Operation o3 = new Operation(Operation.Operator.EQ, v4, new Operation(Operation.Operator.MUL, c2, v3));
-		Operation o4 = new Operation(Operation.Operator.EQ, v5, new Operation(Operation.Operator.MUL, c2, v4));
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
+		Operation o1 = Operation.eq(v2, Operation.mul(c2, v1));
+		Operation o2 = Operation.eq(v3, Operation.mul(c2, v2));
+		Operation o3 = Operation.eq(v4, Operation.mul(c2, v3));
+		Operation o4 = Operation.eq(v5, Operation.mul(c2, v4));
+		Operation o12 = Operation.and(o1, o2);
+		Operation o34 = Operation.and(o3, o4);
 		checkSat(o12, o34);
 	}
 
@@ -381,12 +382,12 @@ public class ParallelSATTest {
 		IntVariable v4 = new IntVariable("d", 0, 9);
 		IntVariable v5 = new IntVariable("e", 0, 9);
 		IntConstant c2 = new IntConstant(2);
-		Operation o1 = new Operation(Operation.Operator.EQ, v2, new Operation(Operation.Operator.MUL, c2, v1));
-		Operation o2 = new Operation(Operation.Operator.EQ, v3, new Operation(Operation.Operator.MUL, c2, v2));
-		Operation o3 = new Operation(Operation.Operator.EQ, v4, new Operation(Operation.Operator.MUL, c2, v3));
-		Operation o4 = new Operation(Operation.Operator.EQ, v5, new Operation(Operation.Operator.MUL, c2, v4));
-		Operation o12 = new Operation(Operation.Operator.AND, o1, o2);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
+		Operation o1 = Operation.eq(v2, Operation.mul(c2, v1));
+		Operation o2 = Operation.eq(v3, Operation.mul(c2, v2));
+		Operation o3 = Operation.eq(v4, Operation.mul(c2, v3));
+		Operation o4 = Operation.eq(v5, Operation.mul(c2, v4));
+		Operation o12 = Operation.and(o1, o2);
+		Operation o34 = Operation.and(o3, o4);
 		checkUnsat(o12, o34);
 	}
 
@@ -406,16 +407,16 @@ public class ParallelSATTest {
 		IntVariable v2 = new IntVariable("b", 0, 2048);
 		IntVariable v3 = new IntVariable("c", 0, 2048);
 		IntConstant c0 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.NE, v2, v3);
-		Operation o2 = new Operation(Operation.Operator.EQ, v1, v3);
-		Operation o3 = new Operation(Operation.Operator.EQ, v1, v2);
-		Operation o4 = new Operation(Operation.Operator.GT, v1, c0);
-		Operation o5 = new Operation(Operation.Operator.GT, v2, c0);
-		Operation o6 = new Operation(Operation.Operator.GT, v3, c0);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o56 = new Operation(Operation.Operator.AND, o5, o6);
-		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		Operation o23456 = new Operation(Operation.Operator.AND, o234, o56);
+		Operation o1 = Operation.ne(v2, v3);
+		Operation o2 = Operation.eq(v1, v3);
+		Operation o3 = Operation.eq(v1, v2);
+		Operation o4 = Operation.gt(v1, c0);
+		Operation o5 = Operation.gt(v2, c0);
+		Operation o6 = Operation.gt(v3, c0);
+		Operation o34 = Operation.and(o3, o4);
+		Operation o56 = Operation.and(o5, o6);
+		Operation o234 = Operation.and(o2, o34);
+		Operation o23456 = Operation.and(o234, o56);
 		checkUnsat(o1, o23456);
 	}
 

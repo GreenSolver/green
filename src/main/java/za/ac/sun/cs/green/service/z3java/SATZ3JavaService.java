@@ -103,7 +103,7 @@ public class SATZ3JavaService extends SATService {
 		// translate instance to Z3
 		long startTime0 = System.currentTimeMillis();
 		try {
-			Z3JavaTranslator translator = new Z3JavaTranslator(z3Context);
+			Z3JavaTranslator translator = new Z3JavaTranslator(log, z3Context);
 			instance.getExpression().accept(translator);
 			int scopes = z3Solver.getNumScopes();
 			if (scopes > 0) {

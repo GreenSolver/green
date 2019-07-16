@@ -129,7 +129,7 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 
 		// translate instance to Z3
 		long startTime0 = System.currentTimeMillis();
-		Z3JavaTranslator translator = new Z3JavaTranslator(z3Context);
+		Z3JavaTranslator translator = new Z3JavaTranslator(log, z3Context);
 		try {
 			instance.getExpression().accept(translator);
 		} catch (VisitorException x) {
@@ -144,7 +144,9 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 		try {
 			z3Solver.reset();
 			for (BoolExpr core : coreClauseMappings.keySet()) {
-				z3Solver.assertAndTrack(translator.getAssertions().get(coreClauseMappings.get(core)), core);
+				BoolExpr boolExpr = translator.getAssertions().get(coreClauseMappings.get(core));
+				log.debug("assertion: {}  core: {}", boolExpr, core);
+				z3Solver.assertAndTrack(boolExpr, core);
 			}
 		} catch (Z3Exception e1) {
 			log.log(Level.WARN, "Error in Z3" + e1.getMessage());
@@ -198,7 +200,7 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 		}
 		satTimeConsumption += System.currentTimeMillis() - startTime;
 		timeConsumption += System.currentTimeMillis() - startTime;
-		return new ModelCore(false, model, null);
+		return new ModelCore(true, model, null);
 	}
 
 }

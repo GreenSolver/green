@@ -52,6 +52,16 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 		super.report(reporter);
 	}
 
+	/**
+	 * Return the logic to be used for the solver. The default is to return
+	 * "{@code QF_LIA}" for linear integer arithmetic.
+	 *
+	 * @return solver logic
+	 */
+	protected String getLogic() {
+		return "QF_LIA";
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -71,7 +81,10 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 			b.append("(set-option :auto-config false)"); // get a smaller core
 			// b.append("(set-option :relevancy 0)"); // get a smaller core
 			// b.append("(set-option :solver false)"); // get a smaller core
-			b.append("(set-logic QF_LIA)");
+			String logic = getLogic();
+			if (logic != null) {
+				b.append("(set-logic ").append(logic).append(')');
+			}
 			b.append(Misc.join(translator.getVariableDefinitions(), " "));
 			b.append(Misc.join(translator.getVariableBounds(), " "));
 			b.append(Misc.join(translator.getAssertions(), " "));
@@ -125,7 +138,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 
 		private void addBound(String op1, String name, int bound, String suffix, IntVariable var, Operator op2) {
 			StringBuilder b = new StringBuilder().append('(');
-			b.append(op1).append('(').append(name).append(' ');
+			b.append(op1).append(' ').append(name).append(' ');
 			b.append(transformNegative(bound)).append(')');
 			String boundStr = b.toString();
 			b.setLength(0);

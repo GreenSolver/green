@@ -73,6 +73,7 @@ public class SATZ3Service extends SATSMTLIBService {
 	 */
 	@Override
 	protected Boolean resolve(String smtQuery) {
+		log.trace("smtQuery: {}", smtQuery);
 		long startTime = System.currentTimeMillis();
 		String output = "";
 		try {
