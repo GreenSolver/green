@@ -13,6 +13,11 @@ import za.ac.sun.cs.green.expr.Variable;
 public class ModelEntry extends Entry implements Serializable {
 
 	/**
+	 * Generated id for serialization.
+	 */
+	private static final long serialVersionUID = -4236947173041586106L;
+
+	/**
 	 * The model stored in this entry.
 	 */
 	private final Map<Variable, Constant> model;
@@ -84,7 +89,13 @@ public class ModelEntry extends Entry implements Serializable {
 	@Override
 	public String toString0() {
 		StringBuilder s = new StringBuilder();
-		s.append("model=").append(new TreeMap<>(getModel()));
+		s.append("model=");
+		Map<Variable, Constant> model = getModel();
+		if (model == null) {
+			s.append("null");
+		} else {
+			s.append(new TreeMap<>(model));
+		}
 		s.append(", size=").append(getModelSize());
 		return s.toString();
 	}

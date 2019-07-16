@@ -74,8 +74,8 @@ public class ModelZ3RealServiceTest {
 	@Test
 	public void test01() {
 		RealVariable v = new RealVariable("v", -99.0, 99.0, 32);
-		RealConstant cm0_5 = new RealConstant(-0.5);
-		Operation o = Operation.le(v, cm0_5);
+		RealConstant cm0x5 = new RealConstant(-0.5);
+		Operation o = Operation.le(v, cm0x5);
 		checkSat(o, m -> {
 			double w = ((RealConstant) m.get(v)).getValue();
 			return (w >= -99) && (w <= 99) && (w <= -0.5);
@@ -117,8 +117,8 @@ public class ModelZ3RealServiceTest {
 		IntVariable v1 = new IntVariable("v1", 0, 50);
 		IntConstant c2 = new IntConstant(2);
 		RealVariable v2 = new RealVariable("v2", 0.0, 50.0, 32);
-		RealConstant c25_5 = new RealConstant(25.5);
-		Operation t1 = Operation.gt(v2, c25_5);
+		RealConstant c25x5 = new RealConstant(25.5);
+		Operation t1 = Operation.gt(v2, c25x5);
 		Operation t2 = Operation.lt(v1, c2);
 		Operation t3 = Operation.ne(v1, v2);
 		Operation o = Operation.and(Operation.and(t1, t2), t3);
@@ -147,9 +147,9 @@ public class ModelZ3RealServiceTest {
 	public void test04() {
 		IntVariable v = new IntVariable("v", 0, 2);
 		IntConstant c1 = new IntConstant(1);
-		RealConstant c1_5 = new RealConstant(1.5);
+		RealConstant c1x5 = new RealConstant(1.5);
 		Operation o1 = Operation.gt(v, c1);
-		Operation o2 = Operation.lt(v, c1_5);
+		Operation o2 = Operation.lt(v, c1x5);
 		Operation o = Operation.and(o1, o2);
 		checkUnsat(o);
 	}

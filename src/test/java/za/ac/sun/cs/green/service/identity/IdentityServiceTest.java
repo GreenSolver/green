@@ -38,9 +38,10 @@ public class IdentityServiceTest {
 	 * Green server with the identity service.
 	 */
 	public static Green solver1;
-	
+
 	/**
-	 * Create and configure the two Green solvers, one with and one without the identity service.
+	 * Create and configure the two Green solvers, one with and one without the
+	 * identity service.
 	 */
 	@BeforeClass
 	public static void initialize() {
@@ -50,7 +51,7 @@ public class IdentityServiceTest {
 		props.setProperty("green.service.idtest", "(choco)");
 		props.setProperty("green.service.idtest.choco", "za.ac.sun.cs.green.service.choco4.SATChoco4Service");
 		new Configuration(solver0, props).configure();
-		
+
 		solver1 = new Green("GREEN-TEST");
 		props.setProperty("green.service.idtest", "(identity choco)");
 		props.setProperty("green.service.idtest.identity", "za.ac.sun.cs.green.service.identity.IdentityService");
@@ -100,7 +101,7 @@ public class IdentityServiceTest {
 		Operation o = Operation.and(o1, o2);
 		check(o, true);
 	}
-	
+
 	/**
 	 * Test:
 	 * 
@@ -117,7 +118,7 @@ public class IdentityServiceTest {
 		Operation o = Operation.eq(c1, c2);
 		check(o, true);
 	}
-	
+
 	/**
 	 * Test:
 	 * 
@@ -134,7 +135,7 @@ public class IdentityServiceTest {
 		Operation o = Operation.eq(c1, c2);
 		check(o, false);
 	}
-	
+
 	/**
 	 * Test:
 	 * 
@@ -155,7 +156,7 @@ public class IdentityServiceTest {
 		Operation o = Operation.and(o1, o2);
 		check(o, false);
 	}
-	
+
 	// ======================================================================
 	//
 	// TEST SUPPORT ROUTINES
@@ -163,10 +164,11 @@ public class IdentityServiceTest {
 	// ======================================================================
 
 	/**
-	 * Check that satisfiability of the expression with and without the identity service and check that these two results are the same.
+	 * Check that satisfiability of the expression with and without the identity
+	 * service and check that these two results are the same.
 	 *
 	 * @param expression expression to check
-	 * @param result expected result
+	 * @param result     expected result
 	 */
 	private void check(Expression expression, boolean result) {
 		Object result0 = new Instance(solver0, null, expression).request("idtest");

@@ -253,7 +253,7 @@ public abstract class ModelCoreService extends BasicService {
 	 * deterministic, this should not cause problems.
 	 *
 	 * @param instance Green instance to solve
-	 * @return the result of the computation as a {@link ModelCore}
+	 * @return result of the computation as a {@link ModelCore}
 	 */
 	protected ModelCore solve1(Instance instance) {
 		long startTime = System.currentTimeMillis();

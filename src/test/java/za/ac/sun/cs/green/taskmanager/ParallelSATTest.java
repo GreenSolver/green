@@ -22,7 +22,6 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
-import za.ac.sun.cs.green.taskmanager.ParallelTaskManager;
 import za.ac.sun.cs.green.util.Configuration;
 
 /**
