@@ -172,7 +172,7 @@ public class Instance {
 	/**
 	 * Retrieve satellite data for this instance.
 	 * 
-	 * @param the key for the data
+	 * @param key key for the data
 	 * @return value of the data
 	 */
 	public Object getData(Object key) {
