@@ -31,7 +31,6 @@
  * internal processing.</li>
  * 
  * </ul>
- * 
  */
 
 package za.ac.sun.cs.green;

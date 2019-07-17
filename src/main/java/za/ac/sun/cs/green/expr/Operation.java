@@ -1,16 +1,36 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.expr;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Representation of an operation with one operators and one or more operands.
+ */
 public class Operation extends Expression {
 
+	/**
+	 * Required for serialization.
+	 */
 	private static final long serialVersionUID = -7494964897567521035L;
 
+	/**
+	 * Position of operators.
+	 */
 	public enum Fix {
 		PREFIX, INFIX, POSTFIX;
 	}
 
+	/**
+	 * Available operators.
+	 */
 	public enum Operator {
 		// @formatter:off
 		EQ("==", 2, Fix.INFIX),
@@ -88,54 +108,145 @@ public class Operation extends Expression {
 		NOTREGIONMATCHES("NOTREGIONMATCHES", 6, Fix.POSTFIX);
     	// @formatter:on
 
+		/**
+		 * String representation of the operator.
+		 */
 		private final String string;
 
-		private final int maxArity;
+		/**
+		 * Arity of the operator. If the operator can take a variable number of
+		 * operands, the value of this field is the maximum.
+		 */
+		private final int arity;
 
+		/**
+		 * Position of the operator relative to the operands.
+		 */
 		private final Fix fix;
 
-		Operator(String string, int maxArity) {
+		/**
+		 * Create a new operator with the given string representation and arity. The
+		 * default position of {@link Fix#PREFIX} is assumed.
+		 * 
+		 * @param string
+		 *               string representation of the operator
+		 * @param arity
+		 *               arity of the operator
+		 */
+		Operator(final String string, final int arity) {
 			this.string = string;
-			this.maxArity = maxArity;
+			this.arity = arity;
 			fix = Fix.PREFIX;
 		}
 
-		Operator(String string, int maxArity, Fix fix) {
+		/**
+		 * Create a new operator with the given string representation, arity, and
+		 * position.
+		 * 
+		 * @param string
+		 *               string representation of the operator
+		 * @param arity
+		 *               arity of the operator
+		 * @param fix
+		 *               position of the operator relative to its operands
+		 */
+		Operator(final String string, final int arity, final Fix fix) {
 			this.string = string;
-			this.maxArity = maxArity;
+			this.arity = arity;
 			this.fix = fix;
 		}
 
+		/**
+		 * Return the string representation of the operator.
+		 *
+		 * @return string representation of the operator
+		 *
+		 * @see java.lang.Enum#toString()
+		 */
 		@Override
 		public String toString() {
 			return string;
 		}
 
+		/**
+		 * Return the arity of the operator.
+		 *
+		 * @return arity of the operator
+		 */
 		public int getArity() {
-			return maxArity;
+			return arity;
 		}
 
+		/**
+		 * Return the position of the operator.
+		 *
+		 * @return position of the operator
+		 */
 		public Fix getFix() {
 			return fix;
 		}
 
 	}
 
+	/**
+	 * Integer constant 0.
+	 */
 	public static final IntConstant ZERO = new IntConstant(0);
+
+	/**
+	 * Integer constant 1.
+	 */
 	public static final IntConstant ONE = new IntConstant(1);
+
+	/**
+	 * Expression to represent the boolean constant {@code false}.
+	 */
 	public static final Expression FALSE = new Operation(Operator.EQ, ZERO, ONE);
+
+	/**
+	 * Expression to represent the boolean constant {@code true}.
+	 */
 	public static final Expression TRUE = new Operation(Operator.EQ, ZERO, ZERO);
 
+	/**
+	 * Hash code for this operation. It is only computed once and the initial value
+	 * of -1 signifies that it is not yet computed.
+	 */
 	private int hashCode = -1;
+
+	/**
+	 * The operator associated with this operation.
+	 */
 	private final Operator operator;
-	// private String stringRep = null;
+
+	/**
+	 * Array of operands for this operation.
+	 */
 	private final Expression[] operands;
 
+	/**
+	 * Construct an operation with the given operator and operands.
+	 * 
+	 * @param operator
+	 *                 operation for this operation
+	 * @param operands
+	 *                 array of operands for this operation
+	 */
 	public Operation(final Operator operator, Expression... operands) {
 		this.operator = operator;
 		this.operands = operands;
 	}
 
+	/**
+	 * Apply the operator to the operands, simplify constant expression when
+	 * feasible, and return the resulting expression.
+	 *
+	 * @param operator
+	 *                 operator to apply
+	 * @param operands
+	 *                 array of operands to apply operator to
+	 * @return resulting expression
+	 */
 	public static Expression apply(Operator operator, Expression... operands) {
 		switch (operator) {
 		case ADD:
@@ -143,33 +254,62 @@ public class Operation extends Expression {
 			for (Expression operand : operands) {
 				if (operand instanceof IntConstant) {
 					result += ((IntConstant) operand).getValue();
-//				} else if (operand instanceof IntegerConstant) {
-//					result += ((IntegerConstant) operand).getValue();
 				} else {
 					return new Operation(operator, operands);
 				}
 			}
-			// TODO
-			// return new IntegerConstant(result, Long.SIZE);
 			return new IntConstant((int) result);
 		default:
 			return new Operation(operator, operands);
 		}
 	}
 
+	/**
+	 * Return the operator of the operation.
+	 *
+	 * @return operator of the operation
+	 */
 	public Operator getOperator() {
 		return operator;
 	}
 
+	/**
+	 * Return the number of operands. In most cases, this should be equal to the
+	 * arity of the operator.
+	 *
+	 * @return number of operands
+	 */
 	public int getOperandCount() {
 		return operands.length;
 	}
 
+	/**
+	 * Return the specified operand.
+	 *
+	 * @param index
+	 *              number of the operand (0, 1, ...)
+	 * @return index-th operand
+	 */
+	public Expression getOperand(int index) {
+		if ((index < 0) || (index >= operands.length)) {
+			return null;
+		} else {
+			return operands[index];
+		}
+	}
+
+	/**
+	 * Return an {@link Iterable} instance over the operands.
+	 *
+	 * @return {@link Iterable} over operands
+	 */
 	public Iterable<Expression> getOperands() {
 		return new Iterable<Expression>() {
+
 			@Override
 			public Iterator<Expression> iterator() {
 				return new Iterator<Expression>() {
+
 					private int index = 0;
 
 					@Override
@@ -195,14 +335,17 @@ public class Operation extends Expression {
 		};
 	}
 
-	public Expression getOperand(int index) {
-		if ((index < 0) || (index >= operands.length)) {
-			return null;
-		} else {
-			return operands[index];
-		}
-	}
-
+	/**
+	 * Accept a visitor. It straightforwardly pre-visits the operation, visits each
+	 * of the operands in turn, and then post-visits the operation.
+	 *
+	 * @param visitor
+	 *                expression visitor
+	 * @throws VisitorException
+	 *                          passed on from the visitor
+	 *
+	 * @see za.ac.sun.cs.green.expr.Expression#accept(za.ac.sun.cs.green.expr.Visitor)
+	 */
 	@Override
 	public void accept(Visitor visitor) throws VisitorException {
 		visitor.preVisit(this);
@@ -212,27 +355,17 @@ public class Operation extends Expression {
 		visitor.postVisit(this);
 	}
 
-	// @Override
-	// public int compareTo(Expression expression) {
-	// Operation operation = (Operation) expression;
-	// int result = operator.compareTo(operation.operator);
-	// if (result != 0) {
-	// return result;
-	// }
-	// if (operands.length < operation.operands.length) {
-	// return -1;
-	// } else if (operands.length > operation.operands.length) {
-	// return 1;
-	// }
-	// for (int i = 0; i < operands.length; i++) {
-	// result = operands[i].compareTo(operation.operands[i]);
-	// if (result != 0) {
-	// return result;
-	// }
-	// }
-	// return 0;
-	// }
-
+	/**
+	 * Checks if this operation is equal to another. Operations are equal if and
+	 * only if they have the same operator and same number of operands, and each of
+	 * the corresponding operands are equal.
+	 *
+	 * @param object
+	 *               potential operation to compare to
+	 * @return {@code true} if and only if the operations are effectively equal
+	 *
+	 * @see za.ac.sun.cs.green.expr.Expression#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object object) {
 		if (object instanceof Operation) {
@@ -254,6 +387,13 @@ public class Operation extends Expression {
 		}
 	}
 
+	/**
+	 * Calculate, if necessary, and return the hash code.
+	 *
+	 * @return operation hash code
+	 *
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		// TODO
@@ -268,22 +408,14 @@ public class Operation extends Expression {
 
 	}
 
-//	private StringBuilder strRep() {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append(operands[0].getString());
-//		for (int i = 1, n = operands.length; i < n; i++) {
-//			sb.append(' ').append(operands[i].getString());
-//		}
-//		return sb;
-//	}
-//
-//	public String getString() {
-//		if (stringRep == null) {
-//			stringRep = strRep().toString();
-//		}
-//		return stringRep;
-//	}
-
+	/**
+	 * Return a string representation of the operation. This method takes into
+	 * account the operator and its position and parentheses for operands.
+	 *
+	 * @return string representation
+	 *
+	 * @see za.ac.sun.cs.green.expr.Expression#toString0()
+	 */
 	@Override
 	public String toString0() {
 		StringBuilder sb = new StringBuilder();
@@ -348,68 +480,208 @@ public class Operation extends Expression {
 	//
 	// ======================================================================
 
+	/**
+	 * Construct an operation "{@code a == b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation eq(Expression left, Expression right) {
 		return new Operation(Operator.EQ, left, right);
 	}
 
+	/**
+	 * Construct an operation "{@code a != b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation ne(Expression left, Expression right) {
 		return new Operation(Operator.NE, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a < b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation lt(Expression left, Expression right) {
 		return new Operation(Operator.LT, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a <= b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation le(Expression left, Expression right) {
 		return new Operation(Operator.LE, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a > b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation gt(Expression left, Expression right) {
 		return new Operation(Operator.GT, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a >= b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation ge(Expression left, Expression right) {
 		return new Operation(Operator.GE, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a && b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation and(Expression left, Expression right) {
 		return new Operation(Operator.AND, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a || b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation or(Expression left, Expression right) {
 		return new Operation(Operator.OR, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a => b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation implies(Expression left, Expression right) {
 		return new Operation(Operator.IMPLIES, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code !a}".
+	 *
+	 * @param operand
+	 *                single operand of the operation
+	 * @return resulting operation
+	 */
 	public static Operation not(Expression operand) {
 		return new Operation(Operator.NOT, operand);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a + b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation add(Expression left, Expression right) {
 		return new Operation(Operator.ADD, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a - b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation sub(Expression left, Expression right) {
 		return new Operation(Operator.SUB, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a * b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation mul(Expression left, Expression right) {
 		return new Operation(Operator.MUL, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a / b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation div(Expression left, Expression right) {
 		return new Operation(Operator.DIV, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code a % b}".
+	 *
+	 * @param left
+	 *              first operand
+	 * @param right
+	 *              second operand
+	 * @return resulting operation
+	 */
 	public static Operation mod(Expression left, Expression right) {
 		return new Operation(Operator.MOD, left, right);
 	}
-	
+
+	/**
+	 * Construct an operation "{@code -a}" (unary minus).
+	 *
+	 * @param operand
+	 *                single operand of the operation
+	 * @return resulting operation
+	 */
 	public static Operation neg(Expression operand) {
 		return new Operation(Operator.NEG, operand);
 	}
-	
+
 }

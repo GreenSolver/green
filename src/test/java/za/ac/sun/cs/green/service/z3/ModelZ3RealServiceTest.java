@@ -73,7 +73,7 @@ public class ModelZ3RealServiceTest {
 	 */
 	@Test
 	public void test01() {
-		RealVariable v = new RealVariable("v", -99.0, 99.0, 32);
+		RealVariable v = new RealVariable("v", -99.0, 99.0);
 		RealConstant cm0x5 = new RealConstant(-0.5);
 		Operation o = Operation.le(v, cm0x5);
 		checkSat(o, m -> {
@@ -116,7 +116,7 @@ public class ModelZ3RealServiceTest {
 	public void test03() {
 		IntVariable v1 = new IntVariable("v1", 0, 50);
 		IntConstant c2 = new IntConstant(2);
-		RealVariable v2 = new RealVariable("v2", 0.0, 50.0, 32);
+		RealVariable v2 = new RealVariable("v2", 0.0, 50.0);
 		RealConstant c25x5 = new RealConstant(25.5);
 		Operation t1 = Operation.gt(v2, c25x5);
 		Operation t2 = Operation.lt(v1, c2);

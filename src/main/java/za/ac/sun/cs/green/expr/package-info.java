@@ -6,16 +6,12 @@
  * Licensed under GNU Lesser General Public License, version 3.
  * See LICENSE.md file in the project root for full license information.
  */
-package za.ac.sun.cs.green.expr;
 
 /**
- * Abstract parent class of constants.
+ * Classes for representing expression in the GREEN library. There is support
+ * for integer, real, and string constants, and for boolean, integer, real, and
+ * string variables. The package also contains definitions for visitors an their
+ * exceptions.
  */
-public abstract class Constant extends Expression {
 
-	/**
-	 * Required for serialization.
-	 */
-	private static final long serialVersionUID = -4896515695474700055L;
-
-}
+package za.ac.sun.cs.green.expr;
