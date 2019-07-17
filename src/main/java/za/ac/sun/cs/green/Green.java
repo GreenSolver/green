@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green;
 
 import java.lang.management.ManagementFactory;
@@ -25,8 +33,6 @@ import za.ac.sun.cs.green.util.Reporter;
  * and likewise for problem instances. One software system may, if it wishes,
  * have more than Green instance. However, their services and problems are
  * entirely independent are not easily interchangeable.
- *
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
 public class Green {
 
@@ -64,12 +70,12 @@ public class Green {
 	 * Properties that may be passed down to components.
 	 */
 	private Properties properties = null;
-	
+
 	/**
 	 * Constructs a Green solver instance with the given name. The name can be
 	 * anything whatsoever and is mainly used to obtain a unique logger.
 	 *
-	 * @param solverName the name of the solver
+	 * @param solverName name of the solver
 	 */
 	public Green(String solverName, Logger logger) {
 		this.solverName = solverName;
@@ -84,14 +90,17 @@ public class Green {
 	 * Constructs a Green solver instance with the given name. The name can be
 	 * anything whatsoever and is mainly used to obtain a unique logger.
 	 *
-	 * @param solverName the name of the solver
+	 * @param solverName name of the solver
 	 */
 	public Green(String solverName) {
 		this(solverName, LogManager.getLogger(solverName));
 	}
 
 	/**
-	 * Constructs an anonymous -- but unique -- instance of a Green solver.
+	 * Constructs an anonymous -- but unique -- instance of a Green solver with a
+	 * specified logger.
+	 *
+	 * @param logger {@link Logger} to use
 	 */
 	public Green(Logger logger) {
 		this(ManagementFactory.getRuntimeMXBean().getName(), logger);
@@ -117,7 +126,7 @@ public class Green {
 	/**
 	 * Returns the name of this solver.
 	 *
-	 * @return the name of the solver
+	 * @return name of the solver
 	 */
 	public String getSolverName() {
 		return solverName;
@@ -136,7 +145,7 @@ public class Green {
 	 * Sets a {@link TaskManager} for this Green solver instance. By default, a new
 	 * {@link SerialTaskManager} is created for a new Green solver instance.
 	 *
-	 * @param taskManager the new task manager
+	 * @param taskManager new task manager
 	 */
 	public void setTaskManager(final TaskManager taskManager) {
 		this.taskManager = taskManager;
@@ -146,7 +155,7 @@ public class Green {
 	 * Returns the current {@link TaskManager} associated with this Green solver
 	 * instance.
 	 *
-	 * @return the current task manager
+	 * @return current task manager
 	 */
 	public TaskManager getTaskManager() {
 		return taskManager;
@@ -156,7 +165,7 @@ public class Green {
 	 * Sets a {@link Store} for this Green solver instance. By default, a
 	 * {@link NullStore} is created for a new Green solver instance.
 	 *
-	 * @param store the new store
+	 * @param store new store
 	 */
 	public void setStore(final Store store) {
 		this.store = store;
@@ -165,7 +174,7 @@ public class Green {
 	/**
 	 * Returns the current {@link Store} associated with this Green solver instance.
 	 *
-	 * @return the current store
+	 * @return current store
 	 */
 	public Store getStore() {
 		return store;
@@ -177,8 +186,8 @@ public class Green {
 	 * high-level service such as "sat". The task manager takes care of the applying
 	 * the services - and their subservices - to the problem instance.
 	 *
-	 * @param serviceName the name of a service
-	 * @return the set of {@link Service}s associated with the given name
+	 * @param serviceName name of a service
+	 * @return set of {@link Service}s associated with the given name
 	 */
 	public Set<Service> getService(String serviceName) {
 		return services0.get(serviceName);
@@ -190,7 +199,7 @@ public class Green {
 	 * need to be applied to a problem instance or sub-instance.
 	 *
 	 * @param service a service
-	 * @return the set of sub-{@link Service}s associated with the given service
+	 * @return set of sub-{@link Service}s associated with the given service
 	 */
 	public Set<Service> getService(Service service) {
 		return services1.get(service);
@@ -210,7 +219,7 @@ public class Green {
 	 * The usage idiom for Green is that each service passed to this routine or the
 	 * {@link #registerService(Service, Service)} routine is unique.
 	 *
-	 * @param serviceName the name of a (high-level) service
+	 * @param serviceName name of a (high-level) service
 	 * @param subService  another service to associate with the name
 	 */
 	public void registerService(String serviceName, Service subService) {
@@ -226,7 +235,8 @@ public class Green {
 	 * @param subService another service to associate with the given service
 	 */
 	public void registerService(Service service, Service subService) {
-		log.info("register service: name=\"{}\", subservice={}", service.getClass().getName(), subService.getClass().getName());
+		log.info("register service: name=\"{}\", subservice={}", service.getClass().getName(),
+				subService.getClass().getName());
 		services1.computeIfAbsent(service, k -> new HashSet<>()).add(subService);
 	}
 
@@ -236,8 +246,8 @@ public class Green {
 	 * This is fully generalized so that the response is described merely as an
 	 * {@link Object}.
 	 *
-	 * @param serviceName the name of the service
-	 * @param instance    the problem instance
+	 * @param serviceName name of the service
+	 * @param instance    problem instance
 	 * @return an object that represents the Green solver's response to the request
 	 */
 	public Object handleRequest(String serviceName, Instance instance) {
@@ -300,7 +310,7 @@ public class Green {
 	 * Generates a report using the given {@link Reporter}. This mechanism allows
 	 * clients to process the report in whatever way they see fit.
 	 *
-	 * @param reporter the {@link Reporter} for the report
+	 * @param reporter {@link Reporter} for the report
 	 */
 	public void report(Reporter reporter) {
 		taskManager.report(reporter);
@@ -336,14 +346,13 @@ public class Green {
 		taskManager.shutdown();
 	}
 
-	
 	/**
 	 * Return the properties for this solver.
 	 *
 	 * @param properties new properties
 	 */
 	public Properties getProperties() {
-		return properties;		
+		return properties;
 	}
 
 	/**
@@ -352,7 +361,7 @@ public class Green {
 	 * @param properties new properties
 	 */
 	public void setProperties(Properties properties) {
-		this.properties = properties;		
+		this.properties = properties;
 	}
-	
+
 }

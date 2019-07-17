@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green;
 
 import java.util.Hashtable;
@@ -14,8 +22,6 @@ import za.ac.sun.cs.green.expr.Operation;
  * parent instance (that may contain additional expressions that is combined
  * with the instance expression) and satellite data (that services can set to
  * aid with the solution.
- * 
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
 public class Instance {
 
@@ -62,9 +68,9 @@ public class Instance {
 	 * parent is {@code null}, the source is set to {@code null}. In all cases, the
 	 * source will be changed to this instance itself when a service is requested.
 	 * 
-	 * @param solver     the solver that must solve the instance
+	 * @param solver     solver that must solve the instance
 	 * @param parent     associated parent instance
-	 * @param expression the expression
+	 * @param expression expression particular to this instance
 	 */
 	public Instance(final Green solver, final Instance parent, final Expression expression) {
 		this.solver = solver;
@@ -79,10 +85,10 @@ public class Instance {
 	/**
 	 * Create an instance of a problem to solve.
 	 * 
-	 * @param solver     the solver that must solve the instance
-	 * @param source     the source instance that spawned this instance
+	 * @param solver     solver that must solve the instance
+	 * @param source     source instance that spawned this instance
 	 * @param parent     associated parent instance
-	 * @param expression the expression
+	 * @param expression expression particular to this instance
 	 */
 	public Instance(final Green solver, final Instance source, final Instance parent, final Expression expression) {
 		this.solver = solver;
@@ -141,8 +147,8 @@ public class Instance {
 	/**
 	 * Request that the solver apply a defined service to this instance
 	 * 
-	 * @param serviceName the name of the defined service
-	 * @return the result of the service
+	 * @param serviceName name of the defined service
+	 * @return result of the service
 	 */
 	public Object request(String serviceName) {
 		log.info("[{}] request \"{}\"", this, serviceName);
@@ -155,8 +161,8 @@ public class Instance {
 	/**
 	 * Set satellite data for this instance.
 	 * 
-	 * @param key   the key for the data
-	 * @param value the value for the data
+	 * @param key   key for the data
+	 * @param value value for the data
 	 */
 	public void setData(Object key, Object value) {
 		log.trace("[{}] set satellite [{}] -> [{}]", this, key, value);
@@ -166,14 +172,18 @@ public class Instance {
 	/**
 	 * Retrieve satellite data for this instance.
 	 * 
-	 * @param key the key for the data
-	 * @return the value of the data
+	 * @param the key for the data
+	 * @return value of the data
 	 */
 	public Object getData(Object key) {
 		return data.get(key);
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Hash this instance: either 0 if the expression is null or the same as the
+	 * hash code of the expression.
+	 *
+	 * @return a hash code value for this object
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -185,7 +195,12 @@ public class Instance {
 		}
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Check if this instance is equal to another.
+	 *
+	 * @param obj object to compare to
+	 * @return {@code true} if and only if the instances are effectively equal
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
