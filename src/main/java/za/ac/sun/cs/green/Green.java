@@ -349,7 +349,7 @@ public class Green {
 	/**
 	 * Return the properties for this solver.
 	 *
-	 * @param properties new properties
+	 * @return current properties
 	 */
 	public Properties getProperties() {
 		return properties;
