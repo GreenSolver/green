@@ -86,7 +86,7 @@ public class Factorizer {
 	// ======================================================================
 
 	/**
-	 * Visitor that traverses an expression, picks up propositions, and groups
+	 * Visitor that traverses an expression, picks up propositions, and groups.
 	 */
 	private static class CollectionVisitor extends Visitor {
 

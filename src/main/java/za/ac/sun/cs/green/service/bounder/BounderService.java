@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.bounder;
 
 import java.util.Collections;
@@ -19,6 +27,8 @@ import za.ac.sun.cs.green.service.BasicService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
+ * Associate bounds with variables.
+ * 
  * It is often desirable to explicitly add variable bounds to an expression. For
  * example, "x==y" could become "(x==y)&(x>0)&(x<10)&(y>0)&(y<10)". This is
  * necessary in many cases where variables with different bounds occur within a
@@ -30,54 +40,99 @@ import za.ac.sun.cs.green.util.Reporter;
  * instance. It is added to the parent because we do not want to influence any
  * slicing tools. And it is added to a new instance, so that the original
  * instance is not distorted in any way.
- * 
- * At the moment, the service operates only on integer variables.
- * 
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
  */
 public class BounderService extends BasicService {
 
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
+
 	/**
-	 * Number of times the bounder has been invoked.
+	 * Number of times this service has been invoked.
 	 */
-	private int invocationCount = 0;
+	protected int invocationCount = 0;
 
 	/**
 	 * Total number of variables processed.
 	 */
-	private int totalVariableCount = 0;
-	private long timeConsumption = 0;
+	protected int totalVariableCount = 0;
 
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
+
+	/**
+	 * Milliseconds spent to process requests.
+	 */
+	protected long serviceTimeConsumption = 0;
+
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
+
+	/**
+	 * Construct an instance of the bounder service.
+	 *
+	 * @param solver
+	 *               associated Green solver
+	 */
 	public BounderService(Green solver) {
 		super(solver);
 	}
 
+	/**
+	 * Report the statistics gathered.
+	 *
+	 * @param reporter
+	 *                 the mechanism through which reporting is done
+	 *
+	 * @see za.ac.sun.cs.green.service.BasicService#report(za.ac.sun.cs.green.util.Reporter)
+	 */
+	@Override
+	public void report(Reporter reporter) {
+		reporter.setContext(getClass().getSimpleName());
+		reporter.report("invocationCount", invocationCount);
+		reporter.report("totalVariableCount", totalVariableCount);
+		reporter.report("serviceTimeConsumption", serviceTimeConsumption);
+	}
+
+	/**
+	 * Process an incoming request. This checks if the instance contains satellite
+	 * data for the solution, and, if not, solves the instance itself. This amounts
+	 * to adding the bounds as expressions to a new instance of the incoming
+	 * problem.
+	 * 
+	 * @param instance
+	 *                 problem to solve
+	 * @return singleton set with new bounded instance
+	 *
+	 * @see za.ac.sun.cs.green.service.BasicService#processRequest(za.ac.sun.cs.green.Instance)
+	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
 		long start = System.currentTimeMillis();
-		@SuppressWarnings("unchecked")
-		Set<Instance> result = (Set<Instance>) instance.getData(getClass());
-		if (result == null) {
-			Expression e = bound(instance.getFullExpression());
-			final Instance p = instance.getParent();
-			if (p != null) {
-				e = new Operation(Operation.Operator.AND, p.getFullExpression(), e);
+		invocationCount++;
+		Object result = instance.getData(getClass());
+		if (!(result instanceof Set<?>)) {
+			Expression boundedExpression = bound(instance.getFullExpression());
+			final Instance parent = instance.getParent();
+			if (parent != null) {
+				boundedExpression = Operation.and(parent.getFullExpression(), boundedExpression);
 			}
-			final Instance q = new Instance(getSolver(), instance.getSource(), null, e);
+			final Instance q = new Instance(getSolver(), instance.getSource(), null, boundedExpression);
 			final Instance i = new Instance(getSolver(), instance.getSource(), q, instance.getExpression());
 			result = Collections.singleton(i);
 			instance.setData(getClass(), result);
 		}
-		timeConsumption += (System.currentTimeMillis() - start);
-		return result;
-	}
-
-	@Override
-	public void report(Reporter reporter) {
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("invocations", invocationCount);
-		reporter.report("totalVariables", totalVariableCount);
-		reporter.report("timeConsumption", timeConsumption);
+		serviceTimeConsumption += (System.currentTimeMillis() - start);
+		return (Set<Instance>) result;
 	}
 
 	/**
@@ -85,72 +140,89 @@ public class BounderService extends BasicService {
 	 * conjuncts that encode the minimum and maximum bounds on the variables. Then
 	 * return a new expression which consists of the conjunction of the bounds.
 	 * 
-	 * @param expression the input expression
+	 * @param expression
+	 *                   the input expression
 	 * @return bound conjuncts for all of the variables in the input
 	 */
 	private Expression bound(Expression expression) {
-		invocationCount++;
-		Expression e = null;
+		Expression newExpression = null;
 		try {
-			Set<Variable> variables = new VariableCollector().getVariables(expression);
+			Set<Variable> variables = new VariableCollectorVisitor().getVariables(expression);
 			totalVariableCount += variables.size();
-			for (Variable v : variables) {
-				if (v instanceof IntVariable) {
-					IntVariable iv = (IntVariable) v;
-					Operation lower = new Operation(Operation.Operator.GE, iv, new IntConstant(iv.getLowerBound()));
-					Operation upper = new Operation(Operation.Operator.LE, iv, new IntConstant(iv.getUpperBound()));
-					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
-					if (e == null) {
-						e = bound;
+			for (Variable variable : variables) {
+				if (variable instanceof IntVariable) {
+					IntVariable i = (IntVariable) variable;
+					Operation lower = Operation.ge(i, new IntConstant(i.getLowerBound()));
+					Operation upper = Operation.le(i, new IntConstant(i.getUpperBound()));
+					Operation bound = Operation.and(lower, upper);
+					if (newExpression == null) {
+						newExpression = bound;
 					} else {
-						e = new Operation(Operation.Operator.AND, e, bound);
+						newExpression = Operation.and(newExpression, bound);
 					}
-//				} else if (v instanceof IntegerVariable) {
-//					IntegerVariable iv = (IntegerVariable) v;
-//					Operation lower = new Operation(Operation.Operator.GE, iv,
-//							new IntegerConstant(iv.getLowerBound(), iv.getSize()));
-//					Operation upper = new Operation(Operation.Operator.LE, iv,
-//							new IntegerConstant(iv.getUpperBound(), iv.getSize()));
-//					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
-//					if (e == null) {
-//						e = bound;
-//					} else {
-//						e = new Operation(Operation.Operator.AND, e, bound);
-//					}
-				} else if (v instanceof RealVariable) {
-					RealVariable iv = (RealVariable) v;
-					Operation lower = new Operation(Operation.Operator.GE, iv, new RealConstant(iv.getLowerBound()));
-					Operation upper = new Operation(Operation.Operator.LE, iv, new RealConstant(iv.getUpperBound()));
-					Operation bound = new Operation(Operation.Operator.AND, lower, upper);
-					if (e == null) {
-						e = bound;
+				} else if (variable instanceof RealVariable) {
+					RealVariable r = (RealVariable) variable;
+					Operation lower = Operation.ge(r, new RealConstant(r.getLowerBound()));
+					Operation upper = Operation.le(r, new RealConstant(r.getUpperBound()));
+					Operation bound = Operation.and(lower, upper);
+					if (newExpression == null) {
+						newExpression = bound;
 					} else {
-						e = new Operation(Operation.Operator.AND, e, bound);
+						newExpression = Operation.and(newExpression, bound);
 					}
 				} else {
-					log.warn("NOT adding bounds for non-integer variable \"{}\"", v.getName());
+					log.warn("NOT adding bounds for variable \"{}\"", variable.getName());
 				}
 			}
 		} catch (VisitorException x) {
 			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
-		return (e == null) ? Operation.TRUE : e;
+		return (newExpression == null) ? Operation.TRUE : newExpression;
 	}
 
-	private static class VariableCollector extends Visitor {
+	// ======================================================================
+	//
+	// COLLECT VARIABLES IN EXPRESSION
+	//
+	// ======================================================================
 
+	/**
+	 * Visitor that traverses an expression, collecting variables.
+	 */
+	private static class VariableCollectorVisitor extends Visitor {
+
+		/**
+		 * Variables encountered in expression.
+		 */
 		private final Set<Variable> variables;
 
-		VariableCollector() {
+		/**
+		 * Create a variable collector visitor.
+		 */
+		VariableCollectorVisitor() {
 			variables = new HashSet<Variable>();
 		}
 
+		/**
+		 * Return the variables inside an expression.
+		 *
+		 * @param expression expression to traverse over
+		 * @return the set of variables
+		 * @throws VisitorException never
+		 */
 		public Set<Variable> getVariables(Expression expression) throws VisitorException {
 			variables.clear();
 			expression.accept(this);
 			return variables;
 		}
 
+		/**
+		 * Add variable to set.
+		 *
+		 * @param variable variable encountered
+		 *
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Variable)
+		 */
 		@Override
 		public void postVisit(Variable variable) {
 			variables.add(variable);
