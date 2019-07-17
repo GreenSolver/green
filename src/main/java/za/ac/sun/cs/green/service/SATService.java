@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service;
 
 import java.util.Set;
@@ -118,6 +126,12 @@ public abstract class SATService extends BasicService {
 	 */
 	protected long keyTimeConsumption = 0;
 
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
+
 	/**
 	 * Construct an instance of a SAT service.
 	 *
@@ -127,11 +141,13 @@ public abstract class SATService extends BasicService {
 		super(solver);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Report the statistics gathered.
 	 *
-	 * @see za.ac.sun.cs.green.service.BasicService#report(za.ac.sun.cs.green.util.
-	 * Reporter)
+	 * @param reporter
+	 *                 the mechanism through which reporting is done
+	 *
+	 * @see za.ac.sun.cs.green.service.BasicService#report(za.ac.sun.cs.green.util.Reporter)
 	 */
 	@Override
 	public void report(Reporter reporter) {
@@ -156,24 +172,19 @@ public abstract class SATService extends BasicService {
 		super.report(reporter);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Process an incoming request. This checks if the instance contains satellite
+	 * data for the solution, and, if not, solves the instance by invoking
+	 * {@link #solve0(Instance)}, and sets the satellite data itself.
+	 * 
+	 * Because this is a leaf method (and is not expected to delegate the request),
+	 * it always returns {@code null}.
 	 *
-	 * @see
-	 * za.ac.sun.cs.green.service.BasicService#allChildrenDone(za.ac.sun.cs.green.
-	 * Instance, java.lang.Object)
-	 */
-	@Override
-	public Object allChildrenDone(Instance instance, Object result) {
-		return instance.getData(getClass());
-	}
-
-	/*
-	 * (non-Javadoc)
+	 * @param instance
+	 *                 problem to solve
+	 * @return always {@code null}
 	 *
-	 * @see
-	 * za.ac.sun.cs.green.service.BasicService#processRequest(za.ac.sun.cs.green.
-	 * Instance)
+	 * @see za.ac.sun.cs.green.service.BasicService#processRequest(za.ac.sun.cs.green.Instance)
 	 */
 	@Override
 	public Set<Instance> processRequest(Instance instance) {
@@ -209,7 +220,8 @@ public abstract class SATService extends BasicService {
 	 * <p>
 	 * Note that some subclasses modify this behaviour.
 	 *
-	 * @param instance Green instance to solve
+	 * @param instance
+	 *                 problem to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
 	 *         mean UNSAT
 	 */
@@ -247,7 +259,8 @@ public abstract class SATService extends BasicService {
 	 * method is invoked but before it starts its execution. Since the answer is
 	 * deterministic, this should not cause problems.
 	 *
-	 * @param instance Green instance to solve
+	 * @param instance
+	 *                 problem to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
 	 *         mean UNSAT
 	 */
@@ -259,13 +272,33 @@ public abstract class SATService extends BasicService {
 	}
 
 	/**
-	 * Do the actual work to solve a Green instance.
+	 * Abstract method that does the actual work to solve a Green instance.
 	 *
-	 * @param instance Green instance to solve
+	 * @param instance
+	 *                 problem to solve
 	 * @return the result of the computation: {@code true} mean SAT, {@code false}
 	 *         mean UNSAT
 	 */
 	protected abstract Boolean solve(Instance instance);
+
+	/**
+	 * Handle the completion of a request by returning the solution stored inside
+	 * the satellite data of the GREEN problem.
+	 *
+	 * @param instance
+	 *                 original problem to solve
+	 * @param result
+	 *                 result from subservices (assumed to be {@code null}
+	 * @return the result of the computation: {@code true} mean SAT, {@code false}
+	 *         mean UNSAT
+	 *
+	 * @see za.ac.sun.cs.green.service.BasicService#allChildrenDone(za.ac.sun.cs.green.Instance,
+	 *      java.lang.Object)
+	 */
+	@Override
+	public Object allChildrenDone(Instance instance, Object result) {
+		return instance.getData(getClass());
+	}
 
 	/**
 	 * Perform some consistency checks.

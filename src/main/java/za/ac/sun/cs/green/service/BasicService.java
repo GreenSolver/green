@@ -33,19 +33,19 @@ import za.ac.sun.cs.green.util.Reporter;
  * As implemented, {@link #processRequest(Instance)} returns {@code null}, which
  * the standard task managers interpret to mean that the service has "handled"
  * the request, processed the input instance in some way, and is ready to
- * deliver a result. No child service is invoked, since there is no sub-instance
+ * deliver a result. No child service is invoked, since there is no subinstance
  * to pass along to them.
  * 
  * <p>
  * As implemented here, {@link #childDone(Instance, Service, Instance, Object)}
  * returns whatever result it receives as input. The standard task managers
  * interpret this to mean that the child has successfully "handled" its
- * sub-instance and that the result it computed also qualifies as a result for
+ * subinstance and that the result it computed also qualifies as a result for
  * the current instance of the current service. The task manager may decide not
  * to invoke any further children for the current service since this (possibly
  * first) result already serves as an answer. In the case of a parallel task
  * manager, it may decide to terminate other children that are already
- * processing their sub-instances.
+ * processing their subinstances.
  * 
  * <p>
  * Finally, {@link #allChildrenDone(Instance, Object)} gets a last opportunity
@@ -75,7 +75,7 @@ public abstract class BasicService implements Service {
 	 * attributes.
 	 * 
 	 * @param solver
-	 *            the {@link Green} solver this service will be added to
+	 *               the {@link Green} solver this service will be added to
 	 */
 	public BasicService(final Green solver) {
 		this.solver = solver;
@@ -95,12 +95,12 @@ public abstract class BasicService implements Service {
 
 	/**
 	 * This fallback implementation of {@link #processRequest(Instance)} returns
-	 * {@code null}. See the class comment for a description of what effect this
-	 * may have.
+	 * {@code null}. See the class comment for a description of what effect this may
+	 * have.
 	 * 
 	 * @param instance
-	 *            the instance to solve
-	 * @return a set of sub-instances passed to sub-services
+	 *                 the instance to solve
+	 * @return a set of subinstances passed to subservices
 	 * 
 	 * @see za.ac.sun.cs.green.Service#processRequest(za.ac.sun.cs.green.Instance)
 	 */
@@ -111,18 +111,20 @@ public abstract class BasicService implements Service {
 
 	/**
 	 * This fallback implementation of
-	 * {@link #childDone(Instance, Service, Instance, Object)} simply returns
-	 * the result computed by the child service. See the class comment for a
-	 * description of what effect this may have.
+	 * {@link #childDone(Instance, Service, Instance, Object)} simply returns the
+	 * result computed by the child service. See the class comment for a description
+	 * of what effect this may have.
 	 * 
 	 * @param instance
-	 *            the input instance
+	 *                    the input instance
 	 * @param subService
-	 *            the sub-service (i.e., child service) that computed a result
+	 *                    the subservice (i.e., child service) that computed a
+	 *                    result
 	 * @param subInstance
-	 *            the sub-instance which this service passed to the sub-service
+	 *                    the subinstance which this service passed to the
+	 *                    subservice
 	 * @param result
-	 *            the result return by the sub-service
+	 *                    the result return by the subservice
 	 * @return a new (intermediary) result
 	 * 
 	 * @see za.ac.sun.cs.green.Service#childDone(za.ac.sun.cs.green.Instance,
@@ -130,20 +132,18 @@ public abstract class BasicService implements Service {
 	 *      java.lang.Object)
 	 */
 	@Override
-	public Object childDone(Instance instance, Service subService,
-			Instance subInstance, Object result) {
+	public Object childDone(Instance instance, Service subService, Instance subInstance, Object result) {
 		return result;
 	}
 
 	/**
-	 * This fallback implementation of
-	 * {@link #allChildrenDone(Instance, Object)} simply returns the result
-	 * without modification.
+	 * This fallback implementation of {@link #allChildrenDone(Instance, Object)}
+	 * simply returns the result without modification.
 	 * 
 	 * @param instance
-	 *            the input instance
+	 *                 the input instance
 	 * @param result
-	 *            the result computed so far by this service
+	 *                 the result computed so far by this service
 	 * @return the final result
 	 * 
 	 * @see za.ac.sun.cs.green.Service#allChildrenDone(za.ac.sun.cs.green.Instance,
@@ -168,7 +168,7 @@ public abstract class BasicService implements Service {
 	 * parameter and does nothing.
 	 * 
 	 * @param reporter
-	 *            the mechanism through which reporting is done
+	 *                 the mechanism through which reporting is done
 	 * 
 	 * @see za.ac.sun.cs.green.Service#report(za.ac.sun.cs.green.util.Reporter)
 	 */

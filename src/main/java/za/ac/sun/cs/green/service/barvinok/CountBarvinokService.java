@@ -128,7 +128,7 @@ public class CountBarvinokService extends CountService {
 	}
 
 	@Override
-	protected Apint solve(Instance instance) {
+	protected Apint count(Instance instance) {
 		return new HMatrix().count(instance.getExpression());
 	}
 

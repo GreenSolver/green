@@ -6,7 +6,6 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Visitor;
 import za.ac.sun.cs.green.expr.VisitorException;
-import za.ac.sun.cs.green.parser.isl.Parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +38,7 @@ public class ISLTranslator {
 	 * @return hashmap of cases to formulas.
 	 */
 	public HashMap<Expression, Expression> translate(String input) {
-		Parser p = new Parser(input);
+		ISLParser p = new ISLParser(input);
 		p.parse();
 		return p.getCases();
 	}

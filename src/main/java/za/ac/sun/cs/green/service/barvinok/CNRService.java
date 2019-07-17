@@ -231,7 +231,7 @@ public class CNRService extends CountService {
 	public Set<Instance> processRequest(Instance instance) {
 		Apint result = (Apint) instance.getData(getClass());
 		if (result == null) {
-			result = solve(instance);
+			result = count(instance);
 			if (result != null) {
 				instance.setData(getClass(), result);
 			}
@@ -239,7 +239,7 @@ public class CNRService extends CountService {
 		return null;
 	}
 
-	protected Apint solve(Instance instance) {
+	protected Apint count(Instance instance) {
 		// Wrapper function to calculate time consumption.
 		invocationCount++;
 		long startTime = System.currentTimeMillis();

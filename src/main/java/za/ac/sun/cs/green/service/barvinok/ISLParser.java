@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.parser.isl;
+package za.ac.sun.cs.green.service.barvinok;
 
 import java.util.HashMap;
 
@@ -12,20 +12,20 @@ import za.ac.sun.cs.green.expr.Operation;
  * @author: JH Taljaard.
  * @contributor: Jaco Geldenhuys
  *
- *               Description: Parser for the isl output of Barvinok.
+ *               Description: ISLParser for the isl output of Barvinok.
  */
-public class Parser {
+public class ISLParser {
 
 	private HashMap<Expression, Expression> cases;
-	private final Scanner s;
+	private final ISLScanner s;
 
-	public Parser(Scanner scanner) {
+	public ISLParser(ISLScanner scanner) {
 		this.s = scanner;
 		init();
 	}
 
-	public Parser(String input) {
-		this.s = new Scanner(input);
+	public ISLParser(String input) {
+		this.s = new ISLScanner(input);
 		init();
 	}
 
@@ -48,30 +48,30 @@ public class Parser {
 	 * Function from EBNF: output ::= [ params "->" ] "{" body { ";" body } "}"
 	 */
 	private void parseOutput() {
-		if (s.next() == Scanner.LBRACKET) {
+		if (s.next() == ISLScanner.LBRACKET) {
 			parseParams();
-			s.expect(Scanner.ARROW);
+			s.expect(ISLScanner.ARROW);
 		}
-		s.expect(Scanner.LBRACE);
+		s.expect(ISLScanner.LBRACE);
 		parseBody(cases);
-		while (s.next() == Scanner.SEMICOLON) {
-			s.expect(Scanner.SEMICOLON);
+		while (s.next() == ISLScanner.SEMICOLON) {
+			s.expect(ISLScanner.SEMICOLON);
 			parseBody(cases);
 		}
-		s.expect(Scanner.RBRACE);
+		s.expect(ISLScanner.RBRACE);
 	}
 
 	/**
 	 * Function from EBNF: params ::= "[" variable { "," variable } "]"
 	 */
 	private void parseParams() {
-		s.expect(Scanner.LBRACKET);
-		s.expect(Scanner.VARIABLE);
-		while (s.next() == Scanner.COMMA) {
-			s.expect(Scanner.COMMA);
-			s.expect(Scanner.VARIABLE);
+		s.expect(ISLScanner.LBRACKET);
+		s.expect(ISLScanner.VARIABLE);
+		while (s.next() == ISLScanner.COMMA) {
+			s.expect(ISLScanner.COMMA);
+			s.expect(ISLScanner.VARIABLE);
 		}
-		s.expect(Scanner.RBRACKET);
+		s.expect(ISLScanner.RBRACKET);
 	}
 
 	/**
@@ -81,8 +81,8 @@ public class Parser {
 	 */
 	private void parseBody(HashMap<Expression, Expression> cases) {
 		Expression caseValue = parseExpr();
-		if (s.next() == Scanner.COLON) {
-			s.expect(Scanner.COLON);
+		if (s.next() == ISLScanner.COLON) {
+			s.expect(ISLScanner.COLON);
 			Expression caseCondition = parseExpr();
 			cases.put(caseCondition, caseValue);
 		} else {
@@ -98,8 +98,8 @@ public class Parser {
 	private Expression parseExpr() {
 		Expression l = parseExpr0();
 		while (true) {
-			if (s.next() == Scanner.AND) {
-				s.expect(Scanner.AND);
+			if (s.next() == ISLScanner.AND) {
+				s.expect(ISLScanner.AND);
 				Expression r = parseExpr0();
 				l = new Operation(Operation.Operator.AND, l, r);
 			} else {
@@ -119,28 +119,28 @@ public class Parser {
 		Expression r;
 
 		while (true) {
-			if (s.next() == Scanner.EQ) {
-				s.expect(Scanner.EQ);
+			if (s.next() == ISLScanner.EQ) {
+				s.expect(ISLScanner.EQ);
 				r = parseExpr1();
 				l = new Operation(Operation.Operator.EQ, l, r);
-			} else if (s.next() == Scanner.LT) {
-				s.expect(Scanner.LT);
+			} else if (s.next() == ISLScanner.LT) {
+				s.expect(ISLScanner.LT);
 				r = parseExpr1();
 				l = new Operation(Operation.Operator.LT, l, r);
-			} else if (s.next() == Scanner.LE) {
-				s.expect(Scanner.LE);
+			} else if (s.next() == ISLScanner.LE) {
+				s.expect(ISLScanner.LE);
 				r = parseExpr1();
 				l = new Operation(Operation.Operator.LE, l, r);
-			} else if (s.next() == Scanner.GT) {
-				s.expect(Scanner.GT);
+			} else if (s.next() == ISLScanner.GT) {
+				s.expect(ISLScanner.GT);
 				r = parseExpr1();
 				l = new Operation(Operation.Operator.GT, l, r);
-			} else if (s.next() == Scanner.GE) {
-				s.expect(Scanner.GE);
+			} else if (s.next() == ISLScanner.GE) {
+				s.expect(ISLScanner.GE);
 				r = parseExpr1();
 				l = new Operation(Operation.Operator.GE, l, r);
-			} else if (s.next() == Scanner.NE) {
-				s.expect(Scanner.NE);
+			} else if (s.next() == ISLScanner.NE) {
+				s.expect(ISLScanner.NE);
 				r = parseExpr1();
 				l = new Operation(Operation.Operator.NE, l, r);
 			} else {
@@ -158,12 +158,12 @@ public class Parser {
 	private Expression parseExpr1() {
 		Expression l = parseTerm();
 		while (true) {
-			if (s.next() == Scanner.PLUS) {
-				s.expect(Scanner.PLUS);
+			if (s.next() == ISLScanner.PLUS) {
+				s.expect(ISLScanner.PLUS);
 				Expression r = parseTerm();
 				l = new Operation(Operation.Operator.ADD, l, r);
-			} else if (s.next() == Scanner.MINUS) {
-				s.expect(Scanner.MINUS);
+			} else if (s.next() == ISLScanner.MINUS) {
+				s.expect(ISLScanner.MINUS);
 				Expression r = parseTerm();
 				l = new Operation(Operation.Operator.SUB, l, r);
 			} else {
@@ -181,15 +181,15 @@ public class Parser {
 	private Expression parseTerm() {
 		Expression l = parseTerm1();
 		while (true) {
-			if (s.next() == Scanner.MUL) {
-				s.expect(Scanner.MUL);
+			if (s.next() == ISLScanner.MUL) {
+				s.expect(ISLScanner.MUL);
 				Expression r = parseTerm1();
 				l = new Operation(Operation.Operator.MUL, l, r);
-			} else if (s.next() == Scanner.DIV) {
-				s.expect(Scanner.DIV);
+			} else if (s.next() == ISLScanner.DIV) {
+				s.expect(ISLScanner.DIV);
 				Expression r = parseTerm1();
 				l = new Operation(Operation.Operator.DIV, l, r);
-			} else if (s.next() == Scanner.VARIABLE || s.next() == Scanner.LPAREN || s.next() == Scanner.FLOOR) {
+			} else if (s.next() == ISLScanner.VARIABLE || s.next() == ISLScanner.LPAREN || s.next() == ISLScanner.FLOOR) {
 				l = parseTerm1();
 			} else {
 				break;
@@ -206,8 +206,8 @@ public class Parser {
 	private Expression parseTerm1() {
 		Expression l = parseFactor();
 		while (true) {
-			if (s.next() == Scanner.POW) {
-				s.expect(Scanner.POW);
+			if (s.next() == ISLScanner.POW) {
+				s.expect(ISLScanner.POW);
 				Expression r = parseFactor();
 				l = new Operation(Operation.Operator.POWER, l, r);
 			} else {
@@ -225,24 +225,24 @@ public class Parser {
 	 */
 	private Expression parseFactor() {
 		Expression l;
-		if (s.next() == Scanner.INTEGER) {
+		if (s.next() == ISLScanner.INTEGER) {
 			int i = s.expectInteger();
 			l = new IntConstant(i);
-		} else if (s.next() == Scanner.VARIABLE) {
+		} else if (s.next() == ISLScanner.VARIABLE) {
 			String v = s.expectVariable();
 			l = new IntVariable(v, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		} else if (s.next() == Scanner.FLOOR) {
-			s.expect(Scanner.FLOOR);
+		} else if (s.next() == ISLScanner.FLOOR) {
+			s.expect(ISLScanner.FLOOR);
 			l = parseFloor();
-		} else if (s.next() == Scanner.LPAREN) {
-			s.expect(Scanner.LPAREN);
+		} else if (s.next() == ISLScanner.LPAREN) {
+			s.expect(ISLScanner.LPAREN);
 			l = parseExpr();
-			s.expect(Scanner.RPAREN);
-		} else if (s.next() == Scanner.MINUS) {
-			s.expect(Scanner.MINUS);
+			s.expect(ISLScanner.RPAREN);
+		} else if (s.next() == ISLScanner.MINUS) {
+			s.expect(ISLScanner.MINUS);
 			l = parseExpr();
-		} else if (s.next() == Scanner.NOT) {
-			s.expect(Scanner.NOT);
+		} else if (s.next() == ISLScanner.NOT) {
+			s.expect(ISLScanner.NOT);
 			l = parseExpr();
 			l = new Operation(Operation.Operator.NOT, l);
 		} else {
@@ -259,11 +259,11 @@ public class Parser {
 	 */
 	private Expression parseFloor() {
 		Expression l;
-		if (s.next() == Scanner.LPAREN) {
-			s.expect(Scanner.LPAREN);
+		if (s.next() == ISLScanner.LPAREN) {
+			s.expect(ISLScanner.LPAREN);
 			l = parseExpr();
 			l = new Operation(Operation.Operator.FLOOR, l);
-			s.expect(Scanner.RPAREN);
+			s.expect(ISLScanner.RPAREN);
 		} else {
 			throw new RuntimeException("expected a left parenthesis");
 		}

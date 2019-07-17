@@ -1,4 +1,4 @@
-package za.ac.sun.cs.green.parser.isl;
+package za.ac.sun.cs.green.service.barvinok;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -11,7 +11,7 @@ import java.io.StringReader;
  * @author: JH Taljaard (USnr 18509193)
  * @contributor: Jaco Geldenhuys
  */
-public class Scanner {
+public class ISLScanner {
 
 	public static final int UNKNOWN = 0;
 	public static final int EOF = 1;
@@ -56,12 +56,12 @@ public class Scanner {
 
 	private String nextVar = null;
 
-	public Scanner(Reader reader) {
+	public ISLScanner(Reader reader) {
 		this.reader = reader;
 		readNextToken();
 	}
 
-	public Scanner(String input) {
+	public ISLScanner(String input) {
 		this(new StringReader(input));
 	}
 
