@@ -44,6 +44,8 @@ javadoc {
 	options.memberLevel = JavadocMemberLevel.PRIVATE
 	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' , 'za.ac.sun.cs.green.' ]
 	options.tags = [ 'result:m:"Result:"' ]
+	options.overview = 'src/main/resources/overview.html'
+	title = 'GREEN API'
 }
 
 tasks.register("javadocApi", Javadoc) {
