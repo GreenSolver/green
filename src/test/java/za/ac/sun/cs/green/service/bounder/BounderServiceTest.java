@@ -93,7 +93,7 @@ public class BounderServiceTest {
 		Operation o = Operation.eq(v, c0);
 		check(o, "v==0.0", "v==0.0", "v>=0.0", "v<=99.0");
 	}
-	
+
 	// ======================================================================
 	//
 	// TEST SUPPORT ROUTINES
