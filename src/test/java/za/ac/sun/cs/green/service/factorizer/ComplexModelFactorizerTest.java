@@ -1,32 +1,53 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.factorizer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
+import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
+import za.ac.sun.cs.green.expr.Variable;
+import za.ac.sun.cs.green.service.ModelService.Model;
 import za.ac.sun.cs.green.util.Configuration;
 
+/**
+ * Complex tests for the model factorizer.
+ */
 public class ComplexModelFactorizerTest {
 
+	/**
+	 * The canonizer to use.  The other choice is just the identity service.
+	 */
 	private static final String CANONIZER = "za.ac.sun.cs.green.service.canonizer.ModelCanonizerService";
-
 	// private static final String CANONIZER = "za.ac.sun.cs.green.service.identity.IdentityService";
 	
+	/**
+	 * The Green instance used throughout the test.
+	 */
 	public static Green solver;
 
+	/**
+	 * Set up the Green instance.
+	 */
 	@BeforeClass
 	public static void initialize() {
 		solver = new Green("GREEN-TEST");
@@ -41,135 +62,109 @@ public class ComplexModelFactorizerTest {
 		config.configure();
 	}
 
-	@AfterClass
-	public static void report() {
-		solver.report();
-	}
-
-	private void check(Expression expression, Expression parentExpression, boolean expected) {
-		Instance p = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
-		Instance i = new Instance(solver, p, expression);
-		Object result = i.request("sat");
-		assertNotNull(result);
-		assertEquals(Boolean.class, result.getClass());
-		assertEquals(expected, result);
-	}
-
-	private void checkVal(Expression expression, Expression parentExpression, IntVariable var, int low, int high) {
-		Instance p = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
-		Instance i = new Instance(solver, p, expression);
-		Object result = i.request("model");
-		assertNotNull(result);
-		@SuppressWarnings("unchecked")
-		Map<IntVariable, Object> res = (Map<IntVariable, Object>) result;
-		for (Map.Entry<IntVariable, Object> entry : res.entrySet()) {
-			System.out.println(" variable " + entry.getKey() + " = " + entry.getValue());
-		}
-		int value = (Integer) res.get(var);
-		System.out.println(" variable " + var + " = " + value + " -> [" + low + "," + high + "]");
-		assertTrue(value >= low && value <= high);
-	}
-
-	@SuppressWarnings("unused")
-	private void checkModel(Expression expression, IntVariable v, int value) {
-		checkVal(expression, null, v, value, value);
-	}
-
-	private void checkModelRange(Expression expression, IntVariable v, int low, int high) {
-		checkVal(expression, null, v, low, high);
-	}
-
-	@SuppressWarnings("unused")
-	private void checkSat(Expression expression) {
-		check(expression, null, true);
-	}
-
-	@SuppressWarnings("unused")
-	private void checkUnsat(Expression expression) {
-		check(expression, null, false);
-	}
-
-	@SuppressWarnings("unused")
-	private void checkSat(Expression expression, Expression parentExpression) {
-		check(expression, parentExpression, true);
-	}
-
-	@SuppressWarnings("unused")
-	private void checkUnsat(Expression expression, Expression parentExpression) {
-		check(expression, parentExpression, false);
-	}
+	// ======================================================================
+	//
+	// ACTUAL TESTS
+	//
+	// ======================================================================
 
 	/**
 	 * Check the following system of equations:
 	 * 
+	 * <pre>
 	 * (v0 <= v1) && (v1 <= v2) && ... && (vN-1 <= v0) && (vN < 10)
+	 * (v0, v1, ..., vN in {0..99})
+	 * </pre>
 	 * 
-	 * vi = 0..99
-	 * 
-	 * Should be satisfiable.
+	 * @result any model that satisfies the constraints
 	 */
 	@Test
 	public void test01() {
 		final int n = 10;
+		final int top = 10;
 		IntVariable[] v = new IntVariable[n + 1];
 		for (int i = 0; i < n + 1; i++) {
 			v[i] = new IntVariable("v" + i, 0, 99);
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			o[i] = new Operation(Operation.Operator.LE, v[i], v[(i + 1) % n]);
+			o[i] = Operation.le(v[i], v[(i + 1) % n]);
 		}
-		IntConstant c10 = new IntConstant(10);
-		o[n] = new Operation(Operation.Operator.LT, v[n], c10);
+		IntConstant ctop = new IntConstant(top);
+		o[n] = Operation.lt(v[n], ctop);
 		Operation oo = o[0];
 		for (int i = 1; i <= n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+			oo = Operation.and(oo, o[i]);
 		}
-		// checkSat(o[N], oo);
-		checkModelRange(oo, v[0], 0, 99);
+		checkSat(oo, m -> {
+			int prev = ((IntConstant) m.get(v[0])).getValue();
+			for (int i = 1; i <= n; i++) {
+				int next = ((IntConstant) m.get(v[i])).getValue();
+				if (!(prev <= next)) {
+					return false;
+				}
+				prev = next;
+			}
+			return prev <= 10;
+		});
 	}
 
 	/**
 	 * Check the following system of equations:
 	 * 
+	 * <pre>
 	 * (v0 <= v1) && (v1 <= v2) && ... && (vN-1 <= v0) && (vN < 10) && (vN > 5)
+	 * (v0, v1, ..., vN in {0..99})
+	 * </pre> 
 	 * 
-	 * vi = 0..99
-	 * 
-	 * Should be satisfiable.
+	 * @result any model that satisfies the constraints
 	 */
 	@Test
 	public void test01b() {
 		final int n = 10;
+		final int top = 10;
 		IntVariable[] v = new IntVariable[n + 1];
 		for (int i = 0; i < n + 1; i++) {
 			v[i] = new IntVariable("v" + i, 0, 99);
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			o[i] = new Operation(Operation.Operator.LE, v[i], v[(i + 1) % n]);
+			o[i] = Operation.le(v[i], v[(i + 1) % n]);
 		}
-		IntConstant c10 = new IntConstant(10);
-		o[n] = new Operation(Operation.Operator.LT, v[n], c10);
+		IntConstant ctop = new IntConstant(top);
+		o[n] = Operation.lt(v[n], ctop);
 		Operation oo = o[0];
 		for (int i = 1; i <= n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+			oo = Operation.and(oo, o[i]);
 		}
 		IntConstant c5 = new IntConstant(5);
-		Operation ooExtra = new Operation(Operation.Operator.GT, v[n], c5);
-		oo = new Operation(Operation.Operator.AND, oo, ooExtra);
-		checkModelRange(oo, v[n], 5, 10);
+		Operation ooExtra = Operation.gt(v[n], c5);
+		oo = Operation.and(oo, ooExtra);
+		checkSat(oo, m -> {
+			int prev = ((IntConstant) m.get(v[0])).getValue();
+			int first = prev;
+			for (int i = 1; i < n; i++) {
+				int next = ((IntConstant) m.get(v[i])).getValue();
+				if (!(prev <= next)) {
+					return false;
+				}
+				prev = next;
+			}
+			int last = ((IntConstant) m.get(v[n])).getValue();
+			return (prev <= first) && (last <= 10) && (last > 5);
+		});
 	}
 
 	/**
 	 * Check the following system of equations:
 	 * 
+	 * <pre>
 	 * (v0 <= w0) && (w0 <= v0) && (v1 <= w1) && (w1 <= v1) && ... && (vN-1 <= wN-1)
-	 * && (wN-1 <= vN-1)
+	 * (v0, v1, ..., vN-1 in {0..99}) 
+	 * (w0, w1, ..., wN-1 in {0..99}) 
+	 * </pre>
 	 * 
-	 * vi = 0..99 wi = 0..99
-	 * 
-	 * Should be satisfiable.
+	 * @result any model that satisfies the constraints
 	 */
 	@Test
 	public void test04() {
@@ -182,15 +177,63 @@ public class ComplexModelFactorizerTest {
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			Operation o0 = new Operation(Operation.Operator.LE, v[i], w[i]);
-			Operation o1 = new Operation(Operation.Operator.LE, w[i], v[i]);
-			o[i] = new Operation(Operation.Operator.AND, o0, o1);
+			Operation o0 = Operation.le(v[i], w[i]);
+			Operation o1 = Operation.le(w[i], v[i]);
+			o[i] = Operation.and(o0, o1);
 		}
 		Operation oo = o[0];
 		for (int i = 1; i < n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+			oo = Operation.and(oo, o[i]);
 		}
-		checkModelRange(oo, v[0], 0, 99);
+		checkSat(oo, m -> {
+			for (int i = 0; i < n; i++) {
+				int vv = ((IntConstant) m.get(v[i])).getValue();
+				int ww = ((IntConstant) m.get(w[i])).getValue();
+				if (!(vv <= ww)) {
+					return false;
+				}
+			}
+			return true;
+		});
+	}
+
+	// ======================================================================
+	//
+	// TEST SUPPORT ROUTINES
+	//
+	// ======================================================================
+
+	/**
+	 * Check that an expression is satisfiable and that the model produced does
+	 * indeed satisfy the expression. The caller must supply a list of
+	 * {@link Function} that checks that the model is correct.
+	 *
+	 * @param expression expression to solve
+	 * @param checker    {@link Function} that checks that model is correct
+	 */
+	private void checkSat(Expression expression, Function<Map<Variable, Constant>, Boolean> checker) {
+		Instance instance = new Instance(solver, null, expression);
+		assertTrue(instance != null);
+		Object result = instance.request("model");
+		assertTrue(result instanceof Model);
+		Model model = (Model) result;
+		assertTrue(model.isSat());
+		assertTrue(checker.apply(model.getModel()));
+	}
+
+	/**
+	 * Check that an expression is unsatisfiable.
+	 *
+	 * @param expression expression to solve
+	 */
+	@SuppressWarnings("unused")
+	private void checkUnsat(Expression expression) {
+		Instance instance = new Instance(solver, null, expression);
+		assertTrue(instance != null);
+		Object result = instance.request("model");
+		assertTrue(result instanceof Model);
+		Model model = (Model) result;
+		assertFalse(model.isSat());
 	}
 
 }

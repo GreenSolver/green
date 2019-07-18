@@ -1,7 +1,15 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.factorizer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
@@ -16,47 +24,37 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.util.Configuration;
 
+/**
+ * Complex tests for the SAT factorizer.
+ */
 public class ComplexSATFactorizerTest {
 
+	/**
+	 * The Green instance used throughout the test.
+	 */
 	public static Green solver;
 
+	/**
+	 * Set up the Green instance.
+	 */
 	@BeforeClass
 	public static void initialize() {
 		solver = new Green("GREEN-TEST");
 		Properties props = new Properties();
 		props.setProperty("green.services", "sat");
 		props.setProperty("green.service.sat", "(factor (canonize z3))");
-		props.setProperty("green.service.sat.factor", "za.ac.sun.cs.green.service.factorizer.SATOldFactorizerService");
+		props.setProperty("green.service.sat.factor", "za.ac.sun.cs.green.service.factorizer.SATFactorizerService");
 		props.setProperty("green.service.sat.canonize", "za.ac.sun.cs.green.service.canonizer.SATCanonizerService");
 		props.setProperty("green.service.sat.z3", "za.ac.sun.cs.green.service.z3.SATZ3Service");
 		Configuration config = new Configuration(solver, props);
 		config.configure();
 	}
 
-	private void check(Expression expression, Expression parentExpression, boolean expected) {
-		Instance p = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
-		Instance i = new Instance(solver, p, expression);
-		Object result = i.request("sat");
-		assertNotNull(result);
-		assertEquals(Boolean.class, result.getClass());
-		assertEquals(expected, result);
-	}
-
-	private void checkSat(Expression expression) {
-		check(expression, null, true);
-	}
-
-	private void checkUnsat(Expression expression) {
-		check(expression, null, false);
-	}
-
-	private void checkSat(Expression expression, Expression parentExpression) {
-		check(expression, parentExpression, true);
-	}
-
-	private void checkUnsat(Expression expression, Expression parentExpression) {
-		check(expression, parentExpression, false);
-	}
+	// ======================================================================
+	//
+	// ACTUAL TESTS
+	//
+	// ======================================================================
 
 	/**
 	 * Check the following system of equations:
@@ -76,13 +74,13 @@ public class ComplexSATFactorizerTest {
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			o[i] = new Operation(Operation.Operator.LE, v[i], v[(i + 1) % n]);
+			o[i] = Operation.le(v[i], v[(i + 1) % n]);
 		}
 		IntConstant c10 = new IntConstant(10);
-		o[n] = new Operation(Operation.Operator.LT, v[n], c10);
+		o[n] = Operation.lt(v[n], c10);
 		Operation oo = o[0];
-		for (int i = 1; i <= n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+		for (int i = 1; i < n; i++) {
+			oo = Operation.and(oo, o[i]);
 		}
 		checkSat(o[n], oo);
 	}
@@ -105,13 +103,13 @@ public class ComplexSATFactorizerTest {
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			o[i] = new Operation(Operation.Operator.LT, v[i], v[(i + 1) % n]);
+			o[i] = Operation.lt(v[i], v[(i + 1) % n]);
 		}
 		IntConstant c10 = new IntConstant(10);
-		o[n] = new Operation(Operation.Operator.LT, v[n], c10);
+		o[n] = Operation.lt(v[n], c10);
 		Operation oo = o[0];
-		for (int i = 1; i <= n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+		for (int i = 1; i < n; i++) {
+			oo = Operation.and(oo, o[i]);
 		}
 		checkUnsat(o[n], oo);
 	}
@@ -137,13 +135,13 @@ public class ComplexSATFactorizerTest {
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			o[i] = new Operation(Operation.Operator.LT, v[i], v[i + 1]);
+			o[i] = Operation.lt(v[i], v[i + 1]);
 		}
 		IntConstant cN = new IntConstant(n);
-		o[n] = new Operation(Operation.Operator.LT, v[n], cN);
+		o[n] = Operation.lt(v[n], cN);
 		Operation oo = o[0];
-		for (int i = 1; i <= n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+		for (int i = 1; i < n; i++) {
+			oo = Operation.and(oo, o[i]);
 		}
 		checkUnsat(o[n], oo);
 	}
@@ -154,7 +152,7 @@ public class ComplexSATFactorizerTest {
 	 * (v0 <= w0) && (w0 <= v0) && (v1 <= w1) && (w1 <= v1) && ... && (vN-1 <= wN-1)
 	 * && (wN-1 <= vN-1)
 	 * 
-	 * vi = 0..99 wi = 0..99
+	 * vi = 0..99, wi = 0..99
 	 * 
 	 * Should be satisfiable.
 	 */
@@ -169,13 +167,13 @@ public class ComplexSATFactorizerTest {
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			Operation o0 = new Operation(Operation.Operator.LE, v[i], w[i]);
-			Operation o1 = new Operation(Operation.Operator.LE, w[i], v[i]);
-			o[i] = new Operation(Operation.Operator.AND, o0, o1);
+			Operation o0 = Operation.le(v[i], w[i]);
+			Operation o1 = Operation.le(w[i], v[i]);
+			o[i] = Operation.and(o0, o1);
 		}
 		Operation oo = o[0];
 		for (int i = 1; i < n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+			oo = Operation.and(oo, o[i]);
 		}
 		checkSat(oo);
 	}
@@ -201,15 +199,45 @@ public class ComplexSATFactorizerTest {
 		}
 		Operation[] o = new Operation[n + 1];
 		for (int i = 0; i < n; i++) {
-			Operation o0 = new Operation(Operation.Operator.LT, v[i], w[i]);
-			Operation o1 = new Operation(Operation.Operator.LT, w[i], v[i]);
-			o[i] = new Operation(Operation.Operator.AND, o0, o1);
+			Operation o0 = Operation.lt(v[i], w[i]);
+			Operation o1 = Operation.lt(w[i], v[i]);
+			o[i] = Operation.and(o0, o1);
 		}
 		Operation oo = o[0];
 		for (int i = 1; i < n; i++) {
-			oo = new Operation(Operation.Operator.AND, oo, o[i]);
+			oo = Operation.and(oo, o[i]);
 		}
 		checkUnsat(oo);
+	}
+
+	// ======================================================================
+	//
+	// TEST SUPPORT ROUTINES
+	//
+	// ======================================================================
+
+	private void check(Expression expression, Expression parentExpression, boolean expected) {
+		Instance p = (parentExpression == null) ? null : new Instance(solver, null, parentExpression);
+		Instance i = new Instance(solver, p, expression);
+		Object result = i.request("sat");
+		assertTrue(result instanceof Boolean);
+		assertEquals(expected, result);
+	}
+
+	private void checkSat(Expression expression) {
+		check(expression, null, true);
+	}
+
+	private void checkUnsat(Expression expression) {
+		check(expression, null, false);
+	}
+
+	private void checkSat(Expression expression, Expression parentExpression) {
+		check(expression, parentExpression, true);
+	}
+
+	private void checkUnsat(Expression expression, Expression parentExpression) {
+		check(expression, parentExpression, false);
 	}
 
 }

@@ -152,8 +152,8 @@ public class FactorizerService extends BasicService {
 	 * It is expected that subclasses of this class many implement additional logic.
 	 *
 	 * @param instance    input instance
-	 * @param subService  subservice (= child service) that computed a result
-	 * @param subInstance subinstance which this service passed to the subservice
+	 * @param subservice  subservice (= child service) that computed a result
+	 * @param subinstance subinstance which this service passed to the subservice
 	 * @param result      result return by the sub-service
 	 * @return a new (intermediary) result
 	 *
@@ -184,8 +184,8 @@ public class FactorizerService extends BasicService {
 	 * returns the result returned from the child service.
 	 *
 	 * @param instance    input instance
-	 * @param subService  subservice (= child service) that computed a result
-	 * @param subInstance subinstance which this service passed to the subservice
+	 * @param subservice  subservice (= child service) that computed a result
+	 * @param subinstance subinstance which this service passed to the subservice
 	 * @param result      result return by the sub-service
 	 * @return a new (intermediary) result
 	 */

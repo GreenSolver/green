@@ -32,7 +32,8 @@ public class ModelFactorizerService extends FactorizerService {
 	/**
 	 * Constructor for the model factorizer service.
 	 *
-	 * @param solver the {@link Green} solver this service will be added to
+	 * @param solver
+	 *               the {@link Green} solver this service will be added to
 	 */
 	public ModelFactorizerService(Green solver) {
 		super(solver);
@@ -43,7 +44,8 @@ public class ModelFactorizerService extends FactorizerService {
 	 * does) by creating a satellite data item where the model for all of the
 	 * factors is stored.
 	 *
-	 * @param instance the instance to factorize
+	 * @param instance
+	 *                 the instance to factorize
 	 * @return set of factors as instances
 	 *
 	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#processRequest0(za.ac.sun.cs.green.Instance)
@@ -58,10 +60,14 @@ public class ModelFactorizerService extends FactorizerService {
 	 * Handle a partial result (for a single factor). This amounts to returning a
 	 * "{@code false}" result as soon as a factor is not satisfiable.
 	 *
-	 * @param instance    input instance
-	 * @param subService  subservice (= child service) that computed a result
-	 * @param subInstance subinstance which this service passed to the subservice
-	 * @param result      result return by the sub-service
+	 * @param instance
+	 *                    input instance
+	 * @param subservice
+	 *                    subservice (= child service) that computed a result
+	 * @param subinstance
+	 *                    subinstance which this service passed to the subservice
+	 * @param result
+	 *                    result return by the sub-service
 	 * @return a new (intermediary) result
 	 *
 	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#childDone(za.ac.sun.cs.green.Instance,
@@ -82,10 +88,14 @@ public class ModelFactorizerService extends FactorizerService {
 	 * Handle a new result by merging its model with the model for all factors
 	 * stored in the instance's satellite data.
 	 *
-	 * @param instance    input instance
-	 * @param subService  subservice (= child service) that computed a result
-	 * @param subInstance subinstance which this service passed to the subservice
-	 * @param result      result return by the sub-service
+	 * @param instance
+	 *                    input instance
+	 * @param subservice
+	 *                    subservice (= child service) that computed a result
+	 * @param subinstance
+	 *                    subinstance which this service passed to the subservice
+	 * @param result
+	 *                    result return by the sub-service
 	 * @return a new (intermediary) result
 	 *
 	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#handleNewChild(za.ac.sun.cs.green.Instance,
@@ -95,13 +105,39 @@ public class ModelFactorizerService extends FactorizerService {
 	@Override
 	protected Object handleNewChild(Instance instance, Service subservice, Instance subinstance, Object result) {
 		if (result instanceof Model) {
+			Model model = (Model) result;
 			@SuppressWarnings("unchecked")
-			Map<Variable, Constant> model = (Map<Variable, Constant>) instance.getData(FACTOR_MODELS);
-			model.putAll(((Model) result).getModel());
-			return model;
-		} else {
-			return result;
+			Map<Variable, Constant> wholeModel = (Map<Variable, Constant>) instance.getData(FACTOR_MODELS);
+			wholeModel.putAll(model.getModel());
 		}
+		return result;
+	}
+
+	/**
+	 * Check there are unsolved factors and a {@code null} result is returned and,
+	 * if so, issue a warning. This is perhaps an error, but it may also indicate
+	 * that the Green pipeline is not able to handle an instance.
+	 *
+	 * @param instance
+	 *                 input instance
+	 * @param result
+	 *                 result computed so far by this service
+	 * @return final result
+	 * 
+	 * @see za.ac.sun.cs.green.service.BasicService#allChildrenDone(za.ac.sun.cs.green.Instance,
+	 *      java.lang.Object)
+	 */
+	@Override
+	public Object allChildrenDone(Instance instance, Object result) {
+		if (result instanceof Model) {
+			Model model = (Model) result;
+			if (model.isSat()) {
+				@SuppressWarnings("unchecked")
+				Map<Variable, Constant> wholeModel = (Map<Variable, Constant>) instance.getData(FACTOR_MODELS);
+				return new Model(true, wholeModel);
+			}
+		}
+		return result;
 	}
 
 }

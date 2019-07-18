@@ -65,7 +65,7 @@ public class FactorizerTest {
 	public void test01() {
 		IntVariable v = new IntVariable("v", 0, 99);
 		IntConstant c0 = new IntConstant(0);
-		Operation o = new Operation(Operation.Operator.EQ, v, c0);
+		Operation o = Operation.eq(v, c0);
 		check(o, setof(o));
 	}
 
@@ -83,9 +83,9 @@ public class FactorizerTest {
 		IntVariable v = new IntVariable("v", 0, 99);
 		IntConstant c0 = new IntConstant(0);
 		IntConstant c10 = new IntConstant(10);
-		Operation o1 = new Operation(Operation.Operator.EQ, v, c0);
-		Operation o2 = new Operation(Operation.Operator.LT, v, c10);
-		Operation o = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.eq(v, c0);
+		Operation o2 = Operation.lt(v, c10);
+		Operation o = Operation.and(o1, o2);
 		check(o, setof(o1, o2));
 	}
 
@@ -103,9 +103,9 @@ public class FactorizerTest {
 		IntVariable v = new IntVariable("v", 0, 99);
 		IntVariable w = new IntVariable("w", 0, 99);
 		IntConstant c0 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v, c0);
-		Operation o2 = new Operation(Operation.Operator.GT, w, v);
-		Operation o = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.eq(v, c0);
+		Operation o2 = Operation.gt(w, v);
+		Operation o = Operation.and(o1, o2);
 		check(o, setof(o1, o2));
 	}
 
@@ -123,9 +123,9 @@ public class FactorizerTest {
 		IntVariable v = new IntVariable("v", 0, 99);
 		IntVariable w = new IntVariable("w", 0, 99);
 		IntConstant c0 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.EQ, v, c0);
-		Operation o2 = new Operation(Operation.Operator.GT, w, c0);
-		Operation o = new Operation(Operation.Operator.AND, o1, o2);
+		Operation o1 = Operation.eq(v, c0);
+		Operation o2 = Operation.gt(w, c0);
+		Operation o = Operation.and(o1, o2);
 		check(o, setof(o1), setof(o2));
 	}
 
@@ -145,13 +145,13 @@ public class FactorizerTest {
 		IntVariable c = new IntVariable("c", 0, 99);
 		IntVariable d = new IntVariable("d", 0, 99);
 		IntVariable e = new IntVariable("e", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.GT, a, b);
-		Operation o2 = new Operation(Operation.Operator.GT, b, c);
-		Operation o3 = new Operation(Operation.Operator.GT, c, d);
-		Operation o4 = new Operation(Operation.Operator.GT, d, e);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		Operation o = new Operation(Operation.Operator.AND, o1, o234);
+		Operation o1 = Operation.gt(a, b);
+		Operation o2 = Operation.gt(b, c);
+		Operation o3 = Operation.gt(c, d);
+		Operation o4 = Operation.gt(d, e);
+		Operation o34 = Operation.and(o3, o4);
+		Operation o234 = Operation.and(o2, o34);
+		Operation o = Operation.and(o1, o234);
 		check(o, setof(o1, o2, o3, o4));
 	}
 
@@ -172,13 +172,13 @@ public class FactorizerTest {
 		IntVariable c = new IntVariable("c", 0, 99);
 		IntVariable d = new IntVariable("d", 0, 99);
 		IntVariable e = new IntVariable("e", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.GT, d, e);
-		Operation o2 = new Operation(Operation.Operator.GT, c, d);
-		Operation o3 = new Operation(Operation.Operator.GT, b, c);
-		Operation o4 = new Operation(Operation.Operator.GT, a, b);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o234 = new Operation(Operation.Operator.AND, o2, o34);
-		Operation o = new Operation(Operation.Operator.AND, o1, o234);
+		Operation o1 = Operation.gt(d, e);
+		Operation o2 = Operation.gt(c, d);
+		Operation o3 = Operation.gt(b, c);
+		Operation o4 = Operation.gt(a, b);
+		Operation o34 = Operation.and(o3, o4);
+		Operation o234 = Operation.and(o2, o34);
+		Operation o = Operation.and(o1, o234);
 		check(o, setof(o1, o2, o3, o4));
 	}
 
@@ -198,13 +198,13 @@ public class FactorizerTest {
 		IntVariable c = new IntVariable("c", 0, 99);
 		IntVariable d = new IntVariable("d", 0, 99);
 		IntVariable e = new IntVariable("e", 0, 99);
-		Operation o1 = new Operation(Operation.Operator.GT, a, b);
-		Operation o2 = new Operation(Operation.Operator.GT, b, c);
-		Operation o3 = new Operation(Operation.Operator.GT, c, d);
-		Operation o4 = new Operation(Operation.Operator.GT, d, e);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o234 = new Operation(Operation.Operator.OR, o2, o34);
-		Operation o = new Operation(Operation.Operator.AND, o1, o234);
+		Operation o1 = Operation.gt(a, b);
+		Operation o2 = Operation.gt(b, c);
+		Operation o3 = Operation.gt(c, d);
+		Operation o4 = Operation.gt(d, e);
+		Operation o34 = Operation.and(o3, o4);
+		Operation o234 = Operation.or(o2, o34);
+		Operation o = Operation.and(o1, o234);
 		check(o, setof(o1, o234));
 	}
 
@@ -225,14 +225,51 @@ public class FactorizerTest {
 		IntVariable d = new IntVariable("d", 0, 99);
 		IntVariable e = new IntVariable("e", 0, 99);
 		IntConstant c0 = new IntConstant(0);
-		Operation o1 = new Operation(Operation.Operator.GT, a, c0);
-		Operation o2 = new Operation(Operation.Operator.GT, b, c);
-		Operation o3 = new Operation(Operation.Operator.GT, c, d);
-		Operation o4 = new Operation(Operation.Operator.GT, d, e);
-		Operation o34 = new Operation(Operation.Operator.AND, o3, o4);
-		Operation o234 = new Operation(Operation.Operator.OR, o2, o34);
-		Operation o = new Operation(Operation.Operator.AND, o1, o234);
+		Operation o1 = Operation.gt(a, c0);
+		Operation o2 = Operation.gt(b, c);
+		Operation o3 = Operation.gt(c, d);
+		Operation o4 = Operation.gt(d, e);
+		Operation o34 = Operation.and(o3, o4);
+		Operation o234 = Operation.or(o2, o34);
+		Operation o = Operation.and(o1, o234);
 		check(o, setof(o1), setof(o234));
+	}
+	
+	/**
+	 * Check an example with a duplicate conjunct. 
+	 *
+	 * <pre>
+	 * (a == 0) && (a == 0)
+	 * </pre>
+	 * 
+	 * @result <code>(a==0)</code>
+	 */
+	@Test
+	public void test07() {
+		IntVariable a = new IntVariable("a", 0, 99);
+		IntConstant c0 = new IntConstant(0);
+		Operation o1 = Operation.eq(a, c0);
+		Operation o = Operation.and(o1, o1);
+		check(o, setof(o1));
+	}
+	
+	/**
+	 * Check an example with a duplicate conjunct. 
+	 *
+	 * <pre>
+	 * (a == 0) && (a == 0)
+	 * </pre>
+	 * 
+	 * @result <code>(a==0)</code>
+	 */
+	@Test
+	public void test07a() {
+		IntVariable a = new IntVariable("a", 0, 99);
+		IntConstant c0 = new IntConstant(0);
+		Operation o1 = Operation.eq(a, c0);
+		Operation o2 = Operation.eq(a, c0);
+		Operation o = Operation.and(o1, o2);
+		check(o, setof(o1));
 	}
 	
 	// ======================================================================

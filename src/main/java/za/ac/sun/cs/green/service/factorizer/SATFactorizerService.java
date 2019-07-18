@@ -20,7 +20,8 @@ public class SATFactorizerService extends FactorizerService {
 	/**
 	 * Constructor for the SAT factorizer service.
 	 * 
-	 * @param solver the {@link Green} solver this service will be added to
+	 * @param solver
+	 *               the {@link Green} solver this service will be added to
 	 */
 	public SATFactorizerService(Green solver) {
 		super(solver);
@@ -30,10 +31,14 @@ public class SATFactorizerService extends FactorizerService {
 	 * Handle a partial result (for a single factor). This amounts to returning a
 	 * "{@code false}" result as soon as a factor is not satisfiable.
 	 *
-	 * @param instance    input instance
-	 * @param subService  subservice (= child service) that computed a result
-	 * @param subInstance subinstance which this service passed to the subservice
-	 * @param result      result return by the sub-service
+	 * @param instance
+	 *                    input instance
+	 * @param subservice
+	 *                    subservice (= child service) that computed a result
+	 * @param subinstance
+	 *                    subinstance which this service passed to the subservice
+	 * @param result
+	 *                    result return by the sub-service
 	 * @return a new (intermediary) result
 	 *
 	 * @see za.ac.sun.cs.green.service.factorizer.FactorizerService#childDone(za.ac.sun.cs.green.Instance,

@@ -238,16 +238,19 @@ public class Factorizer {
 
 		/**
 		 * Add a new element to the set of all elements. The new element is put in a
-		 * singleton set of its own, and given the rank 0.
+		 * singleton set of its own, and given the rank 0.  If the element is already present, it is ignored.
 		 *
 		 * @param element new element to add
 		 */
 		public void addElement(T element) {
-			if (parentMap.containsKey(element)) {
-				throw new IllegalArgumentException("element is already contained in UnionFind: " + element);
+			// OLD:
+			// if (parentMap.containsKey(element)) {
+			// 	throw new IllegalArgumentException("element is already contained in UnionFind: " + element);
+			// }
+			if (!parentMap.containsKey(element)) {
+				parentMap.put(element, element);
+				rankMap.put(element, 0);
 			}
-			parentMap.put(element, element);
-			rankMap.put(element, 0);
 		}
 
 		/**
