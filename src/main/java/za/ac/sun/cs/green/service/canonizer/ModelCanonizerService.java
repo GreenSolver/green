@@ -25,6 +25,9 @@ import za.ac.sun.cs.green.service.ModelService.Model;
  */
 public class ModelCanonizerService extends SATCanonizerService {
 
+	/**
+	 * Key for satellite data for renaming mapping.
+	 */
 	private static final String RENAME = "RENAME";
 
 	// ======================================================================

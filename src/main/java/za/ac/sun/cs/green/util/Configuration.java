@@ -628,7 +628,7 @@ public class Configuration {
 		 * @param representation
 		 *                       a string representation of the token
 		 */
-		private Token(String representation) {
+		Token(String representation) {
 			this.representation = representation;
 		}
 

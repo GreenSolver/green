@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.barvinok;
 
 import org.apache.commons.exec.CommandLine;
@@ -36,141 +44,26 @@ import java.util.Set;
 import java.util.Stack;
 
 /**
- * <ul>
- * <li>CNR -- Count and Recur</li>
- * <li>Get the recurring function from Barvinok.</li>
- * <li>Use the recurring function to calculate the SAT count value.</li>
- * <li>Stores the recurring function for reuse.</li>
- * </ul>
- *
- * [Dependency]
- * <ul>
- * <li>Barvinok library installation: http://barvinok.gforge.inria.fr/ Which
- * depends on:
- * <ul>
- * <li>GMP:
- * https://gmplib.org/list-archives/gmp-announce/2014-March/000042.html</li>
- * <li>NTL:</li>
- * </ul>
- * </li>
- * <li>A script file (barviscc) is needed to pass the input from the Sevice to
- * Barvinok. The iscc tool of Barvinok is called to get the recurring
- * function.</li>
- * </ul>
- *
- * Script file (basic):
+ * Barvinok command-line parametric count service. Instead of straightforwardly
+ * computing the number of models that satisfy a system of constraints, this
+ * service computes a function that, when evaluated, gives the count of models.
  * 
- * <pre>
- * /path/to/iscc < $1
- * </pre>
- *
- * Script file (verbose):
- * 
- * <pre>
- * ############################################
- * #!/bin/sh
- *
- * WORKDIR=/full/path/to/lib/barvinok-0.39
- * FILE=${1}
- * OUTFILE=${WORKDIR}/`basename ${FILE}`.`date +'%s'`
- *
- * cat ${FILE} > ${OUTFILE}.original
- * ${WORKDIR}/iscc < ${FILE} > ${OUTFILE}.postiscc
- * cat ${OUTFILE}.postiscc
- * ###########################################
- * </pre>
- * 
- * The DEFAULT_CNR_PATH must be appropriately updated such that it points to
- * <code>isccpath</code> the script file.
- *
- * @date: 2017/07/26
- * @author: JH Taljaard (USnr 18509193)
- * @contributor: Willem Visser (2018, 2019) (supervisor)
- * @contributor: Jaco Geldenhuys (2017) (supervisor)
+ * The function is stored and re-evaluated when the solution for a similar set
+ * of equations is requested.
  */
-public class CNRService extends CountService {
+public class CountBarvinokParametricService extends CountService {
 
-	// private static final Boolean DEBUG = false;
+	// ======================================================================
+	//
+	// FIELDS
+	//
+	// ======================================================================
 
-	/*
-	 * File where the iscc input is stored.
+	/**
+	 * Combination of the Barvinok parametric executable, options, and the filename,
+	 * all separated by spaces.
 	 */
-	private static final String DRIVE = new File("").getAbsolutePath();
-
-//    private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
-	private static final String DIRECTORY = DRIVE + "/out";
-
-	/*
-	 * The location of the iscc executable file.
-	 */
-	// private final String DEFAULT_CNR_PATH;
-	private static final String CNR_PATH = "barvinokisccpath";
-	private static final String RESOURCE_NAME = "build.properties";
-
-	private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
-
-	private static final int RANDOM = new Random().nextInt(9);
-
-	private static final String DIRNAME = String.format("%s/%s%s", DIRECTORY, DATE, RANDOM);
-
-	private static String directory = null;
-
-	static {
-		File d = new File(DIRNAME);
-		if (!d.exists()) {
-			if (d.mkdir()) {
-				directory = DIRNAME;
-			} else {
-				directory = DIRECTORY;
-			}
-		}
-	}
-
-	private static final String FILENAME = directory + "/iscc-barvinok.in";
-
-	/*
-	 * Options passed to the Barvinok executable.
-	 */
-	private static final String DEFAULT_BARVINOK_ARGS = " ";
-
-	/*
-	 * Combination of the Barvinok executable, options, and the filename, all
-	 * separated by spaces.
-	 */
-	private final String barvinokCommand;
-
-	/*
-	 * Logger.
-	 */
-	private Logger log;
-
-	/*
-	 * ##################################################################
-	 * #################### For logging purposes ########################
-	 * ##################################################################
-	 */
-
-	/*
-	 * Execution Time of the service.
-	 */
-	private long timeConsumption = 0;
-
-	/*
-	 * Total number of times a formula is retrieved from Redis.
-	 */
-	private static int cacheHitCount = 0;
-
-	/*
-	 * Total number of times a formula is not in Redis.
-	 */
-	private static int cacheMissCount = 0;
-
-	/*
-	 * Total number of time the service is invoked.
-	 */
-	private int invocationCount = 0;
-
-	/* ################################################################## */
+	private final String barvinokParametricCommand;
 
 	/*
 	 * Contains the model to use for the expression evaluator
@@ -188,132 +81,68 @@ public class CNRService extends CountService {
 	 */
 	protected static ArrayList<IntVariable> bounds;
 
-	public CNRService(Green solver, Properties properties) {
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
+
+	/**
+	 * Construct an instance of the Barvinok parametric command-line counting service.
+	 * 
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
+	 */
+	public CountBarvinokParametricService(Green solver, Properties properties) {
 		super(solver);
-		log = solver.getLogger();
-
-		// String barvPath = new File("").getAbsolutePath() +
-		// "/lib/barvinok-0.39/barviscc";
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		InputStream resourceStream;
-		try {
-			resourceStream = loader.getResourceAsStream(RESOURCE_NAME);
-			if (resourceStream == null) {
-				// If properties are correct, override with that specified path.
-				resourceStream = new FileInputStream((new File("").getAbsolutePath()) + "/" + RESOURCE_NAME);
-
-			}
-			if (resourceStream != null) {
-				properties.load(resourceStream);
-				// barvPath = properties.getProperty(CNR_PATH);
-				resourceStream.close();
-			}
-		} catch (IOException x) {
-			// ignore
-		}
-
-		// DEFAULT_CNR_PATH = barvPath;
-
-		String p = properties.getProperty("green.barvinok.path", CNR_PATH);
-		String a = properties.getProperty("green.barvinok.args", DEFAULT_BARVINOK_ARGS);
-		barvinokCommand = p + ' ' + a + FILENAME;
-
-		log.debug("barvinokCommand=" + barvinokCommand);
-		log.debug("directory=" + directory);
+		String p = properties.getProperty("green.barvinok_parametric.path");
+		String a = properties.getProperty("green.barvinok_parametric.args");
+		barvinokParametricCommand = p + ' ' + a;
+		log.trace("barvinokParametricCommand={}", barvinokParametricCommand);
 	}
 
+	/**
+	 *
+	 *
+	 * @param instance
+	 * @return
+	 *
+	 * @see za.ac.sun.cs.green.service.CountService#count(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
-	public Object allChildrenDone(Instance instance, Object result) {
-		return instance.getData(getClass());
-	}
-
-	@Override
-	public Set<Instance> processRequest(Instance instance) {
-		Apint result = (Apint) instance.getData(getClass());
-		if (result == null) {
-			result = count(instance);
-			if (result != null) {
-				instance.setData(getClass(), result);
-			}
-		}
-		return null;
-	}
-
 	protected Apint count(Instance instance) {
-		// Wrapper function to calculate time consumption.
-		invocationCount++;
-		long startTime = System.currentTimeMillis();
-		Apint count = null;
-
-		count = solve0(instance);
-		timeConsumption += System.currentTimeMillis() - startTime;
-
-		return count;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Apint solve0(Instance instance) {
 		String result = "";
 		vars = new HashMap<>();
 		bounds = new ArrayList<>();
 		HashMap<Expression, Expression> cases = null;
 
-		if (store != null) {
-			// check in store
-//			cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().getString());
-			cases = (HashMap<Expression, Expression>) store.get(instance.getFullExpression().toString());
-
-			if (cases == null) {
-				// not in store
-				cacheMissCount++;
-				try {
-					// translate to barvinok & add bounds
-					result = translate(instance);
-
-					// invoke barvinok
-					result = invokeISCC(result);
-
-					if (result.startsWith("{", 0)) {
-						// has count
-						int lastBracket = result.lastIndexOf('}');
-						result = result.substring(1, lastBracket).trim();
-					} else if (result.startsWith("[", 0)) {
-						// has formula
-						// translate (to green)
-						cases = translate(result);
-
-						// add to store
-						// key: query; value: case -> expression tree
+		try {
+			// translate to barvinok & add bounds
+			result = translate(instance);
+			
+			// invoke barvinok
+			result = invokeISCC(result);
+			
+			if (result.startsWith("{", 0)) {
+				// has count
+				int lastBracket = result.lastIndexOf('}');
+				result = result.substring(1, lastBracket).trim();
+			} else if (result.startsWith("[", 0)) {
+				// has formula
+				// translate (to green)
+				cases = translate(result);
+				
+				// add to store
+				// key: query; value: case -> expression tree
 //						store.put(instance.getFullExpression().getString(), cases);
-						store.put(instance.getFullExpression().toString(), cases);
-					}
-				} catch (TranslatorUnsupportedOperation x) {
-					log.warn(x.getMessage(), x);
-				} catch (VisitorException x) {
-					log.fatal("encountered an exception -- this should not be happening!", x);
-				}
-			} else {
-				// else :: in store
-				cacheHitCount++;
+				store.put(instance.getFullExpression().toString(), cases);
 			}
-
-		} else {
-			// just call main stuff
-			try {
-				result = translate(instance);
-				result = invokeISCC(result);
-				if (result.startsWith("{", 0)) {
-					// has count
-					int lastBracket = result.lastIndexOf('}');
-					result = result.substring(1, lastBracket).trim();
-				} else if (result.startsWith("[", 0)) {
-					// has formula
-					// translate (to green)
-					cases = translate(result);
-				}
-			} catch (VisitorException e) {
-				e.printStackTrace();
-			}
+		} catch (TranslatorUnsupportedOperation x) {
+			log.warn(x.getMessage(), x);
+		} catch (VisitorException x) {
+			log.fatal("encountered an exception -- this should not be happening!", x);
 		}
 
 		try {
@@ -348,28 +177,29 @@ public class CNRService extends CountService {
 	 * processes the output, and returns the number of satisfying solutions as a
 	 * string.
 	 *
-	 * @param input the Barvinok input
+	 * @param input
+	 *              the Barvinok input
 	 * @return the number of satisfying solutions as a string
 	 */
 	private String invokeISCC(String input) {
 		String result = "";
 		try {
 			// First store the input in a file
-			File file = new File(FILENAME);
-			if (file.exists()) {
-				file.delete();
-			}
-			file.createNewFile();
-			FileWriter writer = new FileWriter(file);
-			writer.write(input);
-			writer.close();
-			// Now invoke Barvinok
+//			File file = new File(FILENAME);
+//			if (file.exists()) {
+//				file.delete();
+//			}
+//			file.createNewFile();
+//			FileWriter writer = new FileWriter(file);
+//			writer.write(input);
+//			writer.close();
+//			// Now invoke Barvinok
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			DefaultExecutor executor = new DefaultExecutor();
 			executor.setStreamHandler(new PumpStreamHandler(outputStream));
-			executor.setWorkingDirectory(new File(directory));
+//			executor.setWorkingDirectory(new File(directory));
 			executor.setExitValues(null);
-			executor.execute(CommandLine.parse(barvinokCommand));
+			executor.execute(CommandLine.parse(barvinokParametricCommand));
 			result = outputStream.toString();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -387,13 +217,10 @@ public class CNRService extends CountService {
 	}
 
 	@Override
-	public void report(Reporter reporter) {
-		reporter.setContext(getClass().getSimpleName());
-		reporter.report("invocations", invocationCount);
-		reporter.report("cacheHitCount", cacheHitCount);
-		reporter.report("cacheMissCount", cacheMissCount);
-		reporter.report("timeConsumption", timeConsumption);
+	public Object allChildrenDone(Instance instance, Object result) {
+		return instance.getData(getClass());
 	}
+
 }
 
 class EvaluatorVisitor extends Visitor {

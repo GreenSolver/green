@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.choco4;
 
 import java.util.HashMap;
@@ -13,13 +21,32 @@ import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelService;
+import za.ac.sun.cs.green.service.ModelService.Model;
 
-public class ModelChocoService extends ModelService {
+/**
+ * Choco4 model service.
+ */
+public class ModelChoco4Service extends ModelService {
 
-	public ModelChocoService(Green solver) {
+	/**
+	 * Construct an instance of the Choco4 model service.
+	 * 
+	 * @param solver
+	 *               associated GREEN solver
+	 */
+	public ModelChoco4Service(Green solver) {
 		super(solver);
 	}
 
+	/**
+	 * Encode the problem in Choco4 and solve it.
+	 *
+	 * @param instance
+	 *                 problem to solve
+	 * @return result of the computation as a {@link Model}
+	 *
+	 * @see za.ac.sun.cs.green.service.ModelService#model(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
 	protected Model model(Instance instance) {
 		try {

@@ -1,29 +1,32 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.barvinok;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.Logger;
 import org.apfloat.Apint;
 
 import za.ac.sun.cs.green.Green;
@@ -34,103 +37,66 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.service.CountService;
 
-/***
- * [Dependencies] - Barvinok library installation:
- * http://barvinok.gforge.inria.fr/ Which depends on: || GMP:
- * https://gmplib.org/list-archives/gmp-announce/2014-March/000042.html || NTL:
- * http://www.shoup.net/ntl/download.html - A script file (barvlatte) is needed
- * to pass the input from the Service to Barvinok.
- *
- * Script contents:
- * 
- * <pre>
- * #################################
- * #!/bin/sh
- * WORKDIR=/full/path/to/lib/barvinok-0.39
- * FILE=${1}
- * ${WORKDIR}/latte2polylib.pl ${FILE} > $1a
- * ${WORKDIR}/barvinok_count < $1a
- * #################################
- * </pre>
+/**
+ * Barvinok command-line count service.
  */
-
 public class CountBarvinokService extends CountService {
 
-	/**
-	 * Directory where the Barvinok output file is stored.
-	 */
-	private static final String DIRECTORY = System.getProperty("java.io.tmpdir");
-
-	/**
-	 * Date used for naming Barvinok output directory
-	 */
-	private static final String DATE = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
-
-	/**
-	 * Random number used for naming Barvinok output directory
-	 */
-	private static final int RANDOM = new Random().nextInt(9);
-
-	/**
-	 * Directory where we attempt to place the Barvinok output files
-	 */
-	private static final String DIRNAME = String.format("%s/%s%s", DIRECTORY, DATE, RANDOM);
-
-	private static String directory = null;
-
-	static {
-		File d = new File(DIRNAME);
-		if (!d.exists()) {
-			if (d.mkdir()) {
-				directory = DIRNAME;
-			} else {
-				directory = DIRECTORY;
-			}
-		}
-	}
-
-	/**
-	 * File where the Barvinok input is stored.
-	 */
-	// private static final String FILENAME = directory + "/probsymbc-barvinok.in";
+	// ======================================================================
+	//
+	// FIELDS
+	//
+	// ======================================================================
 
 	/**
 	 * Combination of the Barvinok executable, options, and the filename, all
 	 * separated by spaces.
 	 */
-	private final String barvinokCommand;
+	protected final String barvinokCommand;
 
-//	/**
-//	 * Perl script to transform latte to barvinok This will be removed later just a
-//	 * hack to get barvinok to work quickly
-//	 */
-//	private final String barvinokTransformScript;
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
 
 	/**
-	 * Logger.
+	 * Construct an instance of the Barvinok command-line counting service.
+	 * 
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
-	private Logger log;
-
 	public CountBarvinokService(Green solver, Properties properties) {
 		super(solver);
-		log = solver.getLogger();
 		String p = properties.getProperty("green.barvinok.path");
 		String a = properties.getProperty("green.barvinok.args");
 		barvinokCommand = p + ' ' + a;
-
-//		String script = p.substring(0, p.lastIndexOf('/'));
-//		barvinokTransformScript = script + "/latte2polylib.pl " + FILENAME + " > " + FILENAME + "2";
 		log.trace("barvinokCommand={}", barvinokCommand);
-		log.trace("directory={}", directory);
-//		log.debug("barvinokCommand=" + barvinokCommand);
-//		log.debug("barvinokScript=" + barvinokTransformScript);
-//		log.debug("directory=" + directory);
 	}
 
+	/**
+	 * Do the work of converting an instance to a set of equations that Barvinok is
+	 * prepared to accept, send the equations to Barvinok on the command line, and
+	 * collect and return the result.
+	 *
+	 * @param instance
+	 *                 problem to solve
+	 * @return number of satisfying models for the problem
+	 *
+	 * @see za.ac.sun.cs.green.service.CountService#count(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
 	protected Apint count(Instance instance) {
 		return new HMatrix().count(instance.getExpression());
 	}
+
+	// ======================================================================
+	//
+	// MATRIX ROWS
+	//
+	// ======================================================================
 
 	/**
 	 * A row that may appear in a matrix. It stores a mapping from variables to
@@ -174,7 +140,8 @@ public class CountBarvinokService extends CountService {
 		/**
 		 * Constructor for the row.
 		 * 
-		 * @param type the type of the row
+		 * @param type
+		 *             the type of the row
 		 */
 		HRow(Operation.Operator type) {
 			assert (type == Operation.Operator.EQ) || (type == Operation.Operator.NE) || (type == Operation.Operator.LT)
@@ -193,8 +160,10 @@ public class CountBarvinokService extends CountService {
 		 * variable is <code>null</code>, the coefficient is taken to be the constant
 		 * coefficient.
 		 * 
-		 * @param variable    the variable
-		 * @param coefficient the coefficient for the variable
+		 * @param variable
+		 *                    the variable
+		 * @param coefficient
+		 *                    the coefficient for the variable
 		 */
 		public void put(IntVariable variable, int coefficient) {
 			assert !fixed;
@@ -211,8 +180,10 @@ public class CountBarvinokService extends CountService {
 		 * variable is <code>null</code>, the coefficient is taken to be the constant
 		 * coefficient.
 		 * 
-		 * @param variable    the variable
-		 * @param coefficient the coefficient for the variable
+		 * @param variable
+		 *                    the variable
+		 * @param coefficient
+		 *                    the coefficient for the variable
 		 */
 		public void put(IntVariable variable, IntConstant coefficient) {
 			put(variable, coefficient.getValue());
@@ -224,8 +195,10 @@ public class CountBarvinokService extends CountService {
 		 * coefficient. If the given variable is <code>null</code>, the coefficient is
 		 * taken to be the constant coefficient.
 		 * 
-		 * @param variable the variable
-		 * @param delta    the value to add to the variable's coefficient
+		 * @param variable
+		 *                 the variable
+		 * @param delta
+		 *                 the value to add to the variable's coefficient
 		 */
 		public void add(IntVariable variable, int delta) {
 			assert !fixed;
@@ -247,8 +220,10 @@ public class CountBarvinokService extends CountService {
 		 * coefficient. If the given variable is <code>null</code>, the coefficient is
 		 * taken to be the constant coefficient.
 		 * 
-		 * @param variable the variable
-		 * @param delta    the value to add to the variable's coefficient
+		 * @param variable
+		 *                 the variable
+		 * @param delta
+		 *                 the value to add to the variable's coefficient
 		 */
 		@SuppressWarnings("unused")
 		// Not used at the moment
@@ -261,7 +236,8 @@ public class CountBarvinokService extends CountService {
 		 * <code>null</code>, the constant coefficient is returned. If the variable has
 		 * no associated coefficient, the value 0 is returned.
 		 * 
-		 * @param variable the given variable
+		 * @param variable
+		 *                 the given variable
 		 * @return the coefficient associated with the variable (or 0)
 		 */
 		public int get(IntVariable variable) {
@@ -336,6 +312,12 @@ public class CountBarvinokService extends CountService {
 
 	}
 
+	// ======================================================================
+	//
+	// MATRIX
+	//
+	// ======================================================================
+
 	/**
 	 * A representation of a conjunction of constraints. Each constraint is
 	 * represented by an instance of an {@link HRow}. The rows are placed into sets
@@ -348,53 +330,43 @@ public class CountBarvinokService extends CountService {
 		/**
 		 * The set of rows of the equal-to type.
 		 */
-		private Set<HRow> eqRows;
+		private final Set<HRow> eqRows = new HashSet<>();
 
 		/**
 		 * The set of rows of the not-equal-to type.
 		 */
-		private Set<HRow> neRows;
+		private final Set<HRow> neRows = new HashSet<>();
 
 		/**
 		 * The set of rows of the less-than type.
 		 */
-		private Set<HRow> ltRows;
+		private final Set<HRow> ltRows = new HashSet<>();
 
 		/**
 		 * The set of variables that are present in all calls to LattE.
 		 */
-		private Set<IntVariable> allVariables;
+		private final Set<IntVariable> allVariables = new HashSet<>();
 
 		/**
 		 * The set of variables that are present in every call to LattE.
 		 */
-		private Set<IntVariable> commonVariables;
+		private final Set<IntVariable> commonVariables = new HashSet<>();
 
 		/**
 		 * The number of times each variable occurs in the constraints that are present
 		 * in every call to LattE.
 		 */
-		private Map<IntVariable, Integer> commonOccurences;
+		private final Map<IntVariable, Integer> commonOccurences = new HashMap<>();
 
-		private Map<IntVariable, Apint> variableRange;
+		/**
+		 * Number of difference values each variable can assume.
+		 */
+		private final Map<IntVariable, Apint> variableRange = new HashMap<>();
 
 		/**
 		 * The correction that is applied to subset results.
 		 */
 		private Apint correction;
-
-		/**
-		 * Constructor for an H-matrix.
-		 */
-		HMatrix() {
-			eqRows = new HashSet<HRow>();
-			neRows = new HashSet<HRow>();
-			ltRows = new HashSet<HRow>();
-			allVariables = new HashSet<IntVariable>();
-			commonVariables = new HashSet<IntVariable>();
-			commonOccurences = new HashMap<IntVariable, Integer>();
-			variableRange = new HashMap<IntVariable, Apint>();
-		}
 
 		/**
 		 * Constructs the rows of the matrix by recursively exploring the expression. It
@@ -407,7 +379,8 @@ public class CountBarvinokService extends CountService {
 		 * term ::= integer_constant | integer_constant * variable
 		 * </pre>
 		 * 
-		 * @param operation the expression to explore
+		 * @param operation
+		 *                  the expression to explore
 		 */
 		private void explore(Operation operation) {
 			Operation.Operator op = operation.getOperator();
@@ -439,8 +412,10 @@ public class CountBarvinokService extends CountService {
 		 * term ::= integer_constant | integer_constant * variable
 		 * </pre>
 		 * 
-		 * @param row        the row to which the term information is added
-		 * @param expression the term to process
+		 * @param row
+		 *                   the row to which the term information is added
+		 * @param expression
+		 *                   the term to process
 		 */
 		private void explore0(HRow row, Expression expression) {
 			if (expression instanceof IntConstant) {
@@ -458,7 +433,8 @@ public class CountBarvinokService extends CountService {
 		 * and then adding it to the appropriate set, based on its type. The variables
 		 * of the row is added to the set of variables.
 		 * 
-		 * @param row the row to add to the matrix
+		 * @param row
+		 *            the row to add to the matrix
 		 */
 		private void register(HRow row) {
 			row.fix();
@@ -488,7 +464,8 @@ public class CountBarvinokService extends CountService {
 		/**
 		 * Counts the number solutions that satisfy the expression.
 		 * 
-		 * @param expression the expression to satisfy
+		 * @param expression
+		 *                   the expression to satisfy
 		 * @return the number of satisfying solutions
 		 */
 		public Apint count(Expression expression) {
@@ -509,10 +486,15 @@ public class CountBarvinokService extends CountService {
 			return n;
 		}
 
+		/**
+		 * Convert the constraints captured by the matrix rows to a string.
+		 *
+		 * @param neRows rows to convert
+		 * @return Barvinok input equivalent of rows as a string
+		 */
 		private String generateConstraints(Set<HRow> neRows) {
 			// Now generate the constraints
 			SortedSet<String> constraints = new TreeSet<String>();
-			Set<String> eqConstraints = new HashSet<String>();
 			// Construct the set of variables and list of columns
 			Set<IntVariable> variables = new HashSet<IntVariable>(commonVariables);
 			List<IntVariable> columns = new LinkedList<IntVariable>(variables);
@@ -525,6 +507,7 @@ public class CountBarvinokService extends CountService {
 				}
 			}
 			Collections.sort(columns, new Comparator<IntVariable>() {
+
 				@Override
 				public int compare(IntVariable v1, IntVariable v2) {
 					int k1 = occurences.get(v1);
@@ -549,55 +532,43 @@ public class CountBarvinokService extends CountService {
 			// with the less-than constraints
 			for (HRow r : ltRows) {
 				StringBuilder c = new StringBuilder();
-				c.append(r.get(null));
+				c.append('1');
 				for (IntVariable v : columns) {
-					c.append('\t').append(r.get(v));
+					c.append(' ').append(r.get(v));
 				}
+				c.append(' ').append(r.get(null));
 				constraints.add(c.toString());
 			}
 			// Emit the equal-to constraints
 			for (HRow r : eqRows) {
 				StringBuilder c = new StringBuilder();
-				c.append(r.get(null));
+				c.append('0');
 				for (IntVariable v : columns) {
-					c.append('\t').append(r.get(v));
+					c.append(' ').append(r.get(v));
 				}
+				c.append(' ').append(r.get(null));
 				String s = c.toString();
 				constraints.add(s);
-				eqConstraints.add(s);
 			}
 			// Emit the not-equal-to constraints
 			for (HRow r : neRows) {
 				StringBuilder c = new StringBuilder();
-				c.append(r.get(null));
+				c.append('0');
 				for (IntVariable v : columns) {
-					c.append('\t').append(r.get(v));
+					c.append(' ').append(r.get(v));
 				}
+				c.append(' ').append(r.get(null));
 				String s = c.toString();
 				constraints.add(s);
-				eqConstraints.add(s);
 			}
 			// Construct the final string version
 			int numColumns = columns.size() + 1;
 			int numRows = constraints.size();
-			int numEqRows = eqConstraints.size();
 			StringBuilder c = new StringBuilder();
 			c.append(numRows).append(' ');
-			c.append(numColumns).append('\n');
-			StringBuilder e = new StringBuilder();
-			e.append("linearity ").append(numEqRows);
-			int n = 0;
+			c.append(numColumns + 1).append('\n');
 			for (String s : constraints) {
-				n++;
-				// c.append('1').append('\t');
 				c.append(s).append('\n');
-				if (eqConstraints.contains(s)) {
-					e.append(' ').append(n);
-				}
-			}
-			if (numEqRows > 0) {
-				e.append('\n');
-				c.append(e);
 			}
 			return c.toString();
 		}
@@ -607,7 +578,8 @@ public class CountBarvinokService extends CountService {
 		 * present, the store is checked first. If the answer is not already present, it
 		 * is calculated and added to the store.
 		 * 
-		 * @param input the LattE input as an H-matrix
+		 * @param input
+		 *              the LattE input as an H-matrix
 		 * @return the number of satisfying solutions as an {@link Apint}
 		 */
 		private Apint processInput(String input) {
@@ -627,7 +599,8 @@ public class CountBarvinokService extends CountService {
 		 * Stores the input in a file, invokes LattE on the file, captures and processes
 		 * the output, and returns the number of satisfying solutions as a string.
 		 * 
-		 * @param input the LattE input as an H-matrix
+		 * @param input
+		 *              the LattE input as an H-matrix
 		 * @return the number of satisfying solutions as a string
 		 */
 		private String invokeBarvinok(String input) {
@@ -640,7 +613,6 @@ public class CountBarvinokService extends CountService {
 				stdin.write((input + "\n").getBytes());
 				stdin.flush();
 				String output = outReader.readLine();
-
 				if (!output.startsWith("POLYHEDRON")) {
 					stdin.close();
 					stdout.close();
@@ -664,55 +636,15 @@ public class CountBarvinokService extends CountService {
 				log.trace("IO EXCEPTION", x);
 			}
 			return null;
-
-//			// System.out.println(">>> INVOKING Barvinok Latte:");
-//			// System.out.println(input);
-//			String result = "";
-//			try {
-//				// First store the input in a file
-//				File file = new File(FILENAME);
-//				if (file.exists()) {
-//					file.delete();
-//				}
-//				file.createNewFile();
-//				FileWriter writer = new FileWriter(file);
-//				writer.write(input);
-//				writer.close();
-//				// Now invoke Barvinok
-//				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//				DefaultExecutor executor = new DefaultExecutor();
-//				executor.setStreamHandler(new PumpStreamHandler(outputStream));
-//				executor.setWorkingDirectory(new File(directory));
-//				executor.setExitValues(null);
-//				executor.execute(CommandLine.parse(barvinokCommand));
-//				result = outputStream.toString();
-//			} catch (ExecuteException e) {
-//				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
-//				e.printStackTrace();
-//				throw new RuntimeException();
-//			} catch (IOException e) {
-//				System.out.println("LattECounter : caught " + e.getClass() + " while executing " + FILENAME);
-//				e.printStackTrace();
-//				throw new RuntimeException();
-//			}
-//			// Process Barvinok's output
-//			// System.out.println(result);
-//			if (!result.startsWith("POLYHEDRON", 0)) {
-//				System.out.println("Barvinok Failed! ");
-//				throw new RuntimeException();
-//			}
-//			int lastSpace = result.lastIndexOf(' ');
-//			int secondLastSpace = result.substring(0, lastSpace).lastIndexOf(' ');
-//			result = result.substring(secondLastSpace + 1, lastSpace);
-//			int newlineIndex = result.indexOf("\n");
-//			if (newlineIndex != -1) {
-//				result = result.substring(newlineIndex + 1);
-//				// System.out.println(result);
-//			}
-//			return result;
 		}
 
 	}
+
+	// ======================================================================
+	//
+	// ITERATOR OVER ALL SUBSETS OF A SET
+	//
+	// ======================================================================
 
 	/**
 	 * Generic class to iterate over all subsets of a given set. Note that the empty
@@ -725,7 +657,8 @@ public class CountBarvinokService extends CountService {
 	 * }
 	 * </pre>
 	 * 
-	 * @param <T> the base type of element
+	 * @param <T>
+	 *            the base type of element
 	 */
 	private static class Subsetter<T> {
 
@@ -755,7 +688,8 @@ public class CountBarvinokService extends CountService {
 		 * Constructor for the subsetter. Class fields are initialized but no heavy
 		 * computation is performed.
 		 * 
-		 * @param wholeSet the whole set over which subsets are taken
+		 * @param wholeSet
+		 *                 the whole set over which subsets are taken
 		 */
 		Subsetter(Set<T> wholeSet) {
 			list = new LinkedList<T>(wholeSet);

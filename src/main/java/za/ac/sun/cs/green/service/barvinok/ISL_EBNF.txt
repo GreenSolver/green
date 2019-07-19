@@ -1,7 +1,28 @@
-// @author:         JH Taljaard.
-// @contributor:    Jaco Geldenhuys
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 
+// ======================================================================
+//
+// This file describes a hand-derived EBNF grammar for the output of the
+// Barvinok system.
+//
+// Author: JH Taljaard.
+// Contributor: Jaco Geldenhuys
+//
+// ======================================================================
+
+// ----------------------------------------------------------------------
+//
 // PARSER
+//
+// ----------------------------------------------------------------------
+
 <output>    ::= [ <params> "->" ] "{" <body> { ";" <body> } "}"
 <params>    ::= "[" <variable> { "," <variable> } "]"
 
@@ -14,7 +35,12 @@
 <factor>    ::= <integer> | <variable> | <floor> | "(" <expr> ")" | "-" <expr> | "not" <expr>
 <floor>     ::= "floor" "(" <expr> ")"
 
+// ----------------------------------------------------------------------
+//
 // SCANNER
+//
+// ----------------------------------------------------------------------
+
 <variable>  ::= <letter> { <letter> | <digit> }
 <integer>   ::= <digit> { <digit> }
 

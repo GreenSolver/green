@@ -280,7 +280,7 @@ public abstract class ModelService extends BasicService {
 	 *
 	 * @param instance
 	 *                 problem to solve
-	 * @return the result of the computation as a {@link Model}
+	 * @return result of the computation as a {@link Model}
 	 */
 	protected abstract Model model(Instance instance);
 
