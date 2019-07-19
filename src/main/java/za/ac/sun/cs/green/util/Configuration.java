@@ -260,12 +260,9 @@ public class Configuration {
 				solver.setTaskManager(tm);
 			}
 		}
-		p = properties.getProperty("green.store");
-		if (p != null) {
-			Store st = (Store) createInstance(p);
-			if (st != null) {
-				solver.setStore(st);
-			}
+		Store st = loadStore(solver, "green.store");
+		if (st != null) {
+			solver.setStore(st);
 		}
 		p = properties.getProperty("green.services");
 		if (p != null) {
@@ -393,6 +390,111 @@ public class Configuration {
 	 * @return the loaded class or {@code null} if something went wrong
 	 */
 	private Class<?> loadClass(String className) {
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		if ((className != null) && (className.length() > 0)) {
+			try {
+				return loader.loadClass(className);
+			} catch (ClassNotFoundException x) {
+				log.fatal("class not found: " + className, x);
+			} catch (ExceptionInInitializerError x) {
+				log.fatal("class not found: " + className, x);
+			}
+		}
+		return null;
+	}
+
+	// ======================================================================
+	//
+	// STATIC VERSIONS OF CLASS LOADING METHODS
+	//
+	// ======================================================================
+
+	/**
+	 * Statically load a store with an optional name. This allows us to load a store
+	 * when specified as
+	 * 
+	 * <pre>
+	 * green.store = za.ac.sun.cs.green.store.SomeStore
+	 * </pre>
+	 *
+	 * but it also handles named stores arranged in hierarchies:
+	 * 
+	 * <pre>
+	 * green.store = myStore
+	 * green.store.myStore = za.ac.sun.cs.green.store.SomeStore
+	 * 
+	 * green.store.myStore.store = yourStore
+	 * green.store.yourStore = za.ac.sun.cs.green.store.OtherStore
+	 * 
+	 * green.store.yourStore.store = za.ac.sun.cs.green.store.AnotherStore
+	 * green.store.yourStore.port = 1234
+	 * </pre>
+	 *
+	 * @param solver
+	 *               the associated GREEN solver
+	 * @param prefix
+	 *               the prefix for the store class or name
+	 * @return loaded store if found
+	 */
+	public static Store loadStore(final Green solver, final String prefix) {
+		Properties properties = solver.getProperties();
+		String storeName = properties.getProperty(prefix);
+		Store store = null;
+		if (storeName != null) {
+			String storeClass = properties.getProperty("green.store." + storeName, storeName);
+			store = (Store) createInstance0(solver, storeClass);
+		}
+		return store;
+	}
+
+	/**
+	 * Statically create an instance of a given class.
+	 * 
+	 * @param objectName
+	 *                   the name of the class
+	 * @return the new instance
+	 */
+	public static Object createInstance0(final Green solver, String objectName) {
+		Logger log = solver.getLogger();
+		Class<?> classx = loadClass0(log, objectName);
+		try {
+			Constructor<?> constructor = null;
+			try {
+				constructor = classx.getConstructor(Green.class);
+				return constructor.newInstance(solver);
+			} catch (NoSuchMethodException x) {
+				// ignore
+			}
+			try {
+				constructor = classx.getConstructor(Green.class, Properties.class);
+				return constructor.newInstance(solver, solver.getProperties());
+			} catch (NoSuchMethodException x) {
+				log.fatal("constructor not found: " + objectName, x);
+			}
+		} catch (SecurityException x) {
+			log.fatal("constructor not found: " + objectName, x);
+		} catch (IllegalArgumentException x) {
+			log.fatal("constructor error: " + objectName, x);
+		} catch (InstantiationException x) {
+			log.fatal("constructor error: " + objectName, x);
+		} catch (IllegalAccessException x) {
+			log.fatal("constructor error: " + objectName, x);
+		} catch (InvocationTargetException x) {
+			log.fatal("constructor error: " + objectName, x);
+		}
+		return null;
+	}
+
+	/**
+	 * Statically load a given class.
+	 * 
+	 * @param log
+	 *                  logging mechanism
+	 * @param className
+	 *                  the class to load
+	 * @return the loaded class or {@code null} if something went wrong
+	 */
+	private static Class<?> loadClass0(final Logger log, final String className) {
 		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		if ((className != null) && (className.length() > 0)) {
 			try {
