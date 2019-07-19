@@ -253,6 +253,8 @@ public class Configuration {
 			Configurator.setLevel(log.getName(), Level.getLevel(p));
 			log.info("green.log.level is deprecated -- IGNORED");
 		}
+		// We set the properties as soon as possible, after the log.
+		solver.setProperties(properties);
 		p = properties.getProperty("green.taskmanager");
 		if (p != null) {
 			TaskManager tm = (TaskManager) createInstance(p);
@@ -274,7 +276,6 @@ public class Configuration {
 				}
 			}
 		}
-		solver.setProperties(properties);
 	}
 
 	/**
@@ -441,8 +442,14 @@ public class Configuration {
 		String storeName = properties.getProperty(prefix);
 		Store store = null;
 		if (storeName != null) {
-			String storeClass = properties.getProperty("green.store." + storeName, storeName);
-			store = (Store) createInstance0(solver, storeClass);
+			String storeClass = properties.getProperty("green.store." + storeName);
+			if (storeClass == null) {
+				store = (Store) createInstance0(solver, storeClass);
+				store.setName(null);
+			} else {
+				store = (Store) createInstance0(solver, storeClass);
+				store.setName(storeName);
+			}
 		}
 		return store;
 	}

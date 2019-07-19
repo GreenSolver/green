@@ -1,38 +1,22 @@
 package za.ac.sun.cs.green.store.memstore;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.store.BasicStore;
-import za.ac.sun.cs.green.store.redis.RedisStore;
+import za.ac.sun.cs.green.store.Store;
+import za.ac.sun.cs.green.util.Configuration;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
  * Implementation of a {@link BasicStore} that caches its results in memory and
- * falls back on a {@link RedisStore}. At the end of Green's use, the cached
- * results are flushed back to redis.
+ * falls back on a secondary {@link Store}. When flushing, stored information
+ * are written to the secondary store.
  */
 public class MemStore extends BasicStore {
-
-	/**
-	 * The in-memory cache.
-	 */
-	protected final Map<String, Object> db = new HashMap<>();
-
-	/**
-	 * The redis store to fall back on.
-	 */
-	protected final RedisStore redisStore;
-
-	/**
-	 * Cached status of this store.
-	 */
-	protected Boolean isSet = null;
 
 	// ======================================================================
 	//
@@ -41,9 +25,9 @@ public class MemStore extends BasicStore {
 	// ======================================================================
 
 	/**
-	 * Number of times {@code get()} is called.
+	 * Number of times {@code get())} is called.
 	 */
-	private int getCount = 0;
+	protected int getCount = 0;
 
 	/**
 	 * Number of times {@code put()} is called.
@@ -59,7 +43,7 @@ public class MemStore extends BasicStore {
 	/**
 	 * Milliseconds spent on operations.
 	 */
-	private long timeConsumption = 0;
+	private long storeTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent on {@code get()} operations.
@@ -72,144 +56,136 @@ public class MemStore extends BasicStore {
 	private long putTimeConsumption = 0;
 
 	/**
-	 * Constructor to create memory store
-	 *
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the store
+	 * Milliseconds spent on flushing to secondary store.
 	 */
-	public MemStore(Green solver, Properties properties) {
+	private long flushTimeConsumption = 0;
+	
+	// ======================================================================
+	//
+	// FIELDS
+	//
+	// ======================================================================
+
+	/**
+	 * The in-memory cache.
+	 */
+	protected final Map<String, Object> memoryStore = new HashMap<>();
+
+	/**
+	 * The secondary store to fall back on.
+	 */
+	protected Store secondaryStore;
+
+	/**
+	 * Constructor to create an in-memory store.
+	 *
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the store
+	 */
+	public MemStore(final Green solver) {
 		super(solver);
-		redisStore = new RedisStore(solver, "localhost", 6379);
+		secondaryStore = null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.store.Store#report(za.ac.sun.cs.green.util.Reporter)
+	/**
+	 * Constructor to create a named in-memory store.
+	 *
+	 * @param solver
+	 *                   associated Green solver
+	 * @param name name of the store
+	 * @param properties
+	 *                   properties used to construct the store
 	 */
+	@Override
+	public void setName(final String name) {
+		secondaryStore = Configuration.loadStore(solver, "green.store." + name + ".secondary");
+		super.setName(name);
+	}
+	
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
 		reporter.report("getCount", getCount);
 		reporter.report("putCount", putCount);
-		reporter.report("timeConsumption", timeConsumption);
+		reporter.report("storeTimeConsumption", storeTimeConsumption);
 		reporter.report("  getTimeConsumption", getTimeConsumption);
 		reporter.report("  putTimeConsumption", putTimeConsumption);
+		reporter.report("  flushTimeConsumption", flushTimeConsumption);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
+	 * Return the value for the key if it is present in the memory store. If not,
+	 * check for the key in the secondary store. If found, add the key-value pair to
+	 * the memory store and return the value.
+	 *
+	 * @param key
+	 *            the key to use for the lookup
+	 * @return the object that is stored with the key or {@code null} if no
+	 *         association is found
+	 *
 	 * @see za.ac.sun.cs.green.store.Store#get(java.lang.String)
 	 */
 	@Override
 	public synchronized Object get(String key) {
 		long startTime = System.currentTimeMillis();
 		getCount++;
-		Object s = db.get(key);
-		if (s == null) {
-			// Greedy approach:
-			// if the solution is not in the in-memory cache,
-			// look for it in redis (persistent store)
-			// and add to cache
-			if (redisStore.isSet()) {
-				s = redisStore.get(key);
-				if (s != null) {
-					db.put(key, s);
-				}
+		Object value = memoryStore.get(key);
+		if ((value == null) && (secondaryStore != null)) {
+			value = secondaryStore.get(key);
+			if (value != null) {
+				memoryStore.put(key, value);
 			}
 		}
 		getTimeConsumption += System.currentTimeMillis() - startTime;
-		timeConsumption += System.currentTimeMillis() - startTime;
-		return s;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
+		return value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.store.Store#put(java.lang.String,
-	 * java.io.Serializable)
-	 */
 	@Override
 	public synchronized void put(String key, Serializable value) {
 		long startTime = System.currentTimeMillis();
 		putCount++;
-		// Unnecessary to convert to Base64 string
-		db.put(key, value);
+		memoryStore.put(key, value);
 		putTimeConsumption += System.currentTimeMillis() - startTime;
-		timeConsumption += System.currentTimeMillis() - startTime;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.store.Store#keySet()
-	 */
 	@Override
 	public Set<String> keySet() {
-		if (db.keySet().isEmpty()) {
-			if (redisStore.isSet()) {
-				return redisStore.keySet();
-			} else {
-				return Collections.emptySet();
-			}
-		} else {
-			return db.keySet();
+		Set<String> keySet = memoryStore.keySet();
+		if (keySet.isEmpty() && (secondaryStore != null)) {
+			keySet = secondaryStore.keySet();
 		}
+		return keySet;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.store.Store#flushAll()
+	/**
+	 * Write all stored information to the secondary store, if any.  The in-memory store is NOT cleared.
+	 *
+	 * @see za.ac.sun.cs.green.store.BasicStore#flushAll()
 	 */
 	@Override
 	public void flushAll() {
 		long startTime = System.currentTimeMillis();
-		flushAllToRedis();
-		timeConsumption += System.currentTimeMillis() - startTime;
+		if (secondaryStore != null) {
+			memoryStore.forEach((k, v) -> secondaryStore.put(k, (Serializable) v));
+		}
+		flushTimeConsumption += System.currentTimeMillis() - startTime;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.store.Store#clear()
+	/**
+	 * This operation clears the in-memory store but does not affect the secondary store, if any.
+	 *
+	 * @see za.ac.sun.cs.green.store.BasicStore#clear()
 	 */
 	@Override
 	public void clear() {
 		long startTime = System.currentTimeMillis();
-		db.clear();
-		if (redisStore.isSet()) {
-			redisStore.clear();
-		}
-		timeConsumption += System.currentTimeMillis() - startTime;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.store.Store#isSet()
-	 */
-	@Override
-	public boolean isSet() {
-		if (isSet == null) {
-			try {
-				db.get("foo");
-				isSet = true;
-			} catch (Exception e) {
-				isSet = false;
-			}
-		}
-		return isSet;
-	}
-
-	/**
-	 * Write all of the entries in the in-memory cache to the redis store.
-	 */
-	protected void flushAllToRedis() {
-		if (redisStore.isSet()) {
-			db.forEach((k, v) -> redisStore.put(k, (Serializable) v));
-		}
+		memoryStore.clear();
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 }
