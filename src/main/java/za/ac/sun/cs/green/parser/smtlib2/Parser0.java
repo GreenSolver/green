@@ -2,8 +2,6 @@ package za.ac.sun.cs.green.parser.smtlib2;
 
 import java.util.logging.Logger;
 
-import za.ac.sun.cs.green.util.NullLogger;
-
 public class Parser0 {
 
 	private final Scanner0 scanner;
@@ -16,7 +14,7 @@ public class Parser0 {
 	}
 
 	public Parser0(Scanner0 scanner) {
-		this(scanner, new NullLogger());
+		this(scanner, null);
 	}
 
 	public void parse() throws ParseException {

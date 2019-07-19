@@ -1,14 +1,31 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.util;
 
 /**
- * Pair of values.
+ * Generic pair of values.
  *
- * @author: Andrea Aquino
- * @author: Jaco Geldenhuys <geld@sun.ac.za> (contributor)
+ * Based on code by Andrea Aquino.
+ *
+ * @param <L> type of first component
+ * @param <R> type of second component
  */
 public class Pair<L, R> {
 
+	/**
+	 * First component of pair.
+	 */
 	private L left;
+
+	/**
+	 * Second component of pair.
+	 */
 	private R right;
 
 	/**
@@ -58,6 +75,13 @@ public class Pair<L, R> {
 		this.right = right;
 	}
 
+	/**
+	 * Return a hash code for the pair based on the hash codes of the components.
+	 *
+	 * @return hash code for the pair
+	 *
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -67,6 +91,14 @@ public class Pair<L, R> {
 		return result;
 	}
 
+	/**
+	 * Checks if this pair is equal to another pair based on the equality of the components.
+	 *
+	 * @param other other (potential) pair
+	 * @return {@code true} if and only if the pairs are equal
+	 *
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -95,6 +127,13 @@ public class Pair<L, R> {
 		}
 	}
 
+	/**
+	 * Return a string representation for the pair.
+	 *
+	 * @return string representation of pair
+	 *
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return String.format("(%s, %s)", this.getL(), this.getR());

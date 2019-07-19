@@ -7,7 +7,6 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelService;
-import za.ac.sun.cs.green.util.Misc;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
@@ -23,7 +22,8 @@ public abstract class ModelSMTLIBService extends ModelService {
 	/**
 	 * Construct an instance of a model SMTLIB service.
 	 *
-	 * @param solver associated Green solver
+	 * @param solver
+	 *               associated Green solver
 	 */
 	public ModelSMTLIBService(Green solver) {
 		super(solver);
@@ -70,7 +70,7 @@ public abstract class ModelSMTLIBService extends ModelService {
 			if (logic != null) {
 				b.append("(set-logic ").append(logic).append(')');
 			}
-			b.append(Misc.join(translator.getVariableDefinitions(), " "));
+			b.append(String.join(" ", translator.getVariableDefinitions()));
 			b.append("(assert ").append(translator.getTranslation()).append(')');
 			b.append("(check-sat)");
 			translationTimeConsumption += System.currentTimeMillis() - startTime;
@@ -88,8 +88,10 @@ public abstract class ModelSMTLIBService extends ModelService {
 	 * {@link Model} that contains a flag to indicate the satisfiability of an
 	 * expression and, if it is satisfiable, a model.
 	 * 
-	 * @param smtQuery  query (expression) in SMTLIB format
-	 * @param variables mapping from variables to variable names
+	 * @param smtQuery
+	 *                  query (expression) in SMTLIB format
+	 * @param variables
+	 *                  mapping from variables to variable names
 	 * @return a {@link Model} or {@code null} if no answer can be determined
 	 */
 	protected abstract Model resolve(String smtQuery, Map<Variable, String> variables);

@@ -1,3 +1,11 @@
+/*
+ * This file is part of the Green library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.util;
 
 import java.io.ByteArrayInputStream;
@@ -67,8 +75,10 @@ public class Configuration {
 	/**
 	 * Construct a configuration instance.
 	 * 
-	 * @param solver     the Green solver to configure
-	 * @param properties the properties to configure with
+	 * @param solver
+	 *                   the Green solver to configure
+	 * @param properties
+	 *                   the properties to configure with
 	 */
 	public Configuration(final Green solver, final Properties properties) {
 		this.solver = solver;
@@ -104,8 +114,10 @@ public class Configuration {
 	 * (after removing the "<code>$</code>") even if it already exists. In other
 	 * words, this indicates that the property should be overwritten.
 	 *
-	 * @param log        the logger
-	 * @param properties the properties to which the defaults are added
+	 * @param log
+	 *                   the logger
+	 * @param properties
+	 *                   the properties to which the defaults are added
 	 */
 	public static void loadDefaults(Logger log, Properties properties) {
 		Properties homeProperties = loadPropertiesFromFile(log, HOME_GREEN_DIRECTORY + "green.properties");
@@ -123,8 +135,10 @@ public class Configuration {
 	/**
 	 * Copy (some) properties to the official set of properties.
 	 * 
-	 * @param properties    the target for new properties
-	 * @param newProperties the source for new properties
+	 * @param properties
+	 *                      the target for new properties
+	 * @param newProperties
+	 *                      the source for new properties
 	 */
 	private static void loadDefaults(Properties properties, Properties newProperties) {
 		if (newProperties != null) {
@@ -144,8 +158,10 @@ public class Configuration {
 	/**
 	 * Load properties from a named file.
 	 * 
-	 * @param log      the logger
-	 * @param filename the name of the file
+	 * @param log
+	 *                 the logger
+	 * @param filename
+	 *                 the name of the file
 	 * @return the set of properties (or {@code null})
 	 */
 	public static Properties loadPropertiesFromFile(Logger log, String filename) {
@@ -165,8 +181,10 @@ public class Configuration {
 	/**
 	 * Load properties from a named resource.
 	 * 
-	 * @param log          the logger
-	 * @param resourceName the name of the resource
+	 * @param log
+	 *                     the logger
+	 * @param resourceName
+	 *                     the name of the resource
 	 * @return the set of properties (or {@code null})
 	 */
 	private static Properties loadPropertiesFromResource(Logger log, String resourceName) {
@@ -184,9 +202,11 @@ public class Configuration {
 	/**
 	 * Load properties from an input stream.
 	 * 
-	 * @param inputStream the input stream
+	 * @param inputStream
+	 *                    the input stream
 	 * @return the set of properties
-	 * @throws IOException if the input stream cannot be read
+	 * @throws IOException
+	 *                     if the input stream cannot be read
 	 */
 	private static Properties loadPropertiesFromStream(InputStream inputStream) throws IOException {
 		Properties properties = new Properties();
@@ -197,7 +217,8 @@ public class Configuration {
 	/**
 	 * Load properties from a string.
 	 * 
-	 * @param propertiesString the string with the properties
+	 * @param propertiesString
+	 *                         the string with the properties
 	 * @return the set of properties
 	 */
 	@SuppressWarnings("unused")
@@ -220,7 +241,8 @@ public class Configuration {
 	 * Based on the values of these properties, various routines are called in the
 	 * Green instance.
 	 * 
-	 * @param loadDefaults whether or not default properties should be loaded
+	 * @param loadDefaults
+	 *                     whether or not default properties should be loaded
 	 */
 	public void configure(boolean loadDefaults) {
 		if (loadDefaults) {
@@ -268,8 +290,10 @@ public class Configuration {
 	/**
 	 * Used internally to register Green services.
 	 * 
-	 * @param serviceName the name of the service to register
-	 * @throws ParseException if the properties contain badly-formatted service
+	 * @param serviceName
+	 *                    the name of the service to register
+	 * @throws ParseException
+	 *                        if the properties contain badly-formatted service
 	 *                        specifications
 	 */
 	private void configure(String serviceName) throws ParseException {
@@ -288,9 +312,12 @@ public class Configuration {
 	 * Used internally to register Green services. It recursively walks three the
 	 * tree of service definitions.
 	 * 
-	 * @param rootName  the name of the root service
-	 * @param service   the name of the subservice
-	 * @param parseTree the tree of service definitions
+	 * @param rootName
+	 *                  the name of the root service
+	 * @param service
+	 *                  the name of the subservice
+	 * @param parseTree
+	 *                  the tree of service definitions
 	 */
 	private void configure(String rootName, Service service, ParseTree parseTree) {
 		for (ParseTree p : parseTree.getChildren()) {
@@ -303,9 +330,12 @@ public class Configuration {
 	/**
 	 * Return the value of a property as an integer.
 	 * 
-	 * @param properties   the properties to consult
-	 * @param key          the name of the property
-	 * @param defaultValue the default value is the key is not found
+	 * @param properties
+	 *                     the properties to consult
+	 * @param key
+	 *                     the name of the property
+	 * @param defaultValue
+	 *                     the default value is the key is not found
 	 * @return the integer value
 	 */
 	public static int getIntegerProperty(Properties properties, String key, int defaultValue) {
@@ -321,7 +351,8 @@ public class Configuration {
 	/**
 	 * Create an instance of a given class.
 	 * 
-	 * @param objectName the name of the class
+	 * @param objectName
+	 *                   the name of the class
 	 * @return the new instance
 	 */
 	private Object createInstance(String objectName) {
@@ -357,7 +388,8 @@ public class Configuration {
 	/**
 	 * Load a given class.
 	 * 
-	 * @param className the class to load
+	 * @param className
+	 *                  the class to load
 	 * @return the loaded class or {@code null} if something went wrong
 	 */
 	private Class<?> loadClass(String className) {
@@ -380,25 +412,56 @@ public class Configuration {
 	//
 	// ======================================================================
 
+	/**
+	 * GREEN service tree.
+	 */
 	private class ParseTree {
 
+		/**
+		 * The service stored in this node.
+		 */
 		private final Service service;
 
+		/**
+		 * The child services for this node,
+		 */
 		private final Set<ParseTree> children;
 
+		/**
+		 * Construct a node in the service parse tree.
+		 * 
+		 * @param service
+		 *                service for the node
+		 */
 		ParseTree(final Service service) {
 			this.service = service;
 			children = new HashSet<Configuration.ParseTree>();
 		}
 
+		/**
+		 * Add a child service to this node.
+		 *
+		 * @param child
+		 *              child service
+		 */
 		public void addChild(ParseTree child) {
 			children.add(child);
 		}
 
+		/**
+		 * Return the child service of this node as a set.
+		 *
+		 * @return set of child services
+		 */
 		public Set<ParseTree> getChildren() {
 			return children;
 		}
 
+		/**
+		 * Return the service stored in this node.
+		 *
+		 * @return node service
+		 */
 		public Service getService() {
 			return service;
 		}
@@ -411,9 +474,23 @@ public class Configuration {
 	//
 	// ======================================================================
 
-	@SuppressWarnings("serial")
+	/**
+	 * An exception that represents a parse error that occurred while reading the
+	 * specification of a GREEN service.
+	 */
 	private class ParseException extends Exception {
 
+		/**
+		 * Required for serialization.
+		 */
+		private static final long serialVersionUID = 7249730234672500827L;
+
+		/**
+		 * Construct a new parse exception.
+		 * 
+		 * @param string
+		 *               exception message
+		 */
 		ParseException(String string) {
 			super(string);
 		}
@@ -426,22 +503,57 @@ public class Configuration {
 	//
 	// ======================================================================
 
+	/**
+	 * Parser for the specification of GREEN services.
+	 */
 	private class Parser {
 
+		/**
+		 * Name of the overall service.
+		 */
 		private final String rootName;
 
+		/**
+		 * Scanner for tokens of service.
+		 */
 		private final Scanner scanner;
 
+		/**
+		 * Create a service parser with the given service name and given input string.
+		 * 
+		 * @param rootName
+		 *                 name of the service
+		 * @param input
+		 *                 input string for the parser
+		 * @throws ParseException
+		 *                        when a parse error occurs
+		 */
 		Parser(final String rootName, final String input) throws ParseException {
 			this.rootName = rootName;
 			scanner = new Scanner(input);
 		}
 
+		/**
+		 * Initiate parsing and return the resulting service tree.
+		 *
+		 * @return the service parse tree that results from parsing the input string
+		 * @throws ParseException
+		 *                        when a parse error occurs
+		 */
 		public ParseTree parse() throws ParseException {
 			return parse(null);
 		}
 
-		public ParseTree parse(Service service) throws ParseException {
+		/**
+		 * Internal routine to recursively parse a service definition.
+		 *
+		 * @param service
+		 *                service at the root of the parse tree
+		 * @return service parse tree
+		 * @throws ParseException
+		 *                        when a parse error occurs
+		 */
+		private ParseTree parse(Service service) throws ParseException {
 			ParseTree t = new ParseTree(service);
 			while ((scanner.next() != Token.EOS) && (scanner.next() != Token.RPAREN)) {
 				if (scanner.next() == Token.NAME) {
@@ -467,6 +579,16 @@ public class Configuration {
 			return t;
 		}
 
+		/**
+		 * Look up an instance of a service given its name and the name of the root
+		 * service.
+		 *
+		 * @param rootName
+		 *                    name of root service
+		 * @param serviceName
+		 *                    name of particular service
+		 * @return instance of particular service
+		 */
 		private Service lookup(String rootName, String serviceName) {
 			String s = properties.getProperty("green.service." + rootName + "." + serviceName);
 			if (s != null) {
@@ -483,15 +605,40 @@ public class Configuration {
 	//
 	// ======================================================================
 
+	/**
+	 * Tokens used for parsing service specifications.
+	 */
 	public enum Token {
-		LPAREN("\"(\""), RPAREN("\")\""), NAME("a name"), EOS("the end of input"), UNKNOWN("an unknown token");
+		// @formatter:off
+		LPAREN("\"(\""),
+		RPAREN("\")\""),
+		NAME("a name"),
+		EOS("the end of input"),
+		UNKNOWN("an unknown token");
+		// @formatter:on
 
+		/**
+		 * A string representation of the token.
+		 */
 		private final String representation;
 
-		Token(String representation) {
+		/**
+		 * Construct a new token.
+		 * 
+		 * @param representation
+		 *                       a string representation of the token
+		 */
+		private Token(String representation) {
 			this.representation = representation;
 		}
 
+		/**
+		 * Return the string representation of the token.
+		 *
+		 * @return token's string representation
+		 *
+		 * @see java.lang.Enum#toString()
+		 */
 		@Override
 		public String toString() {
 			return representation;
@@ -505,18 +652,45 @@ public class Configuration {
 	//
 	// ======================================================================
 
+	/**
+	 * Scanner for the specification of GREEN services.
+	 */
 	private class Scanner {
 
+		/**
+		 * Input string to parse.
+		 */
 		private final String input;
 
+		/**
+		 * Position of next character to parse in input string.
+		 */
 		private int position;
 
+		/**
+		 * Identity of most recently scanned token.
+		 */
 		private Token nextToken;
 
+		/**
+		 * Next character to scan.
+		 */
 		private char nextChar;
 
+		/**
+		 * Most recently scanned name (when {@linkplain #nextToken} is
+		 * {@linkplain Token#NAME}).
+		 */
 		private String nextName;
 
+		/**
+		 * Create a new scanner that will scan the given input string.
+		 * 
+		 * @param input
+		 *              string to scan
+		 * @throws ParseException
+		 *                        when a parse error occurs
+		 */
 		Scanner(final String input) throws ParseException {
 			this.input = input;
 			position = 0;
@@ -526,10 +700,24 @@ public class Configuration {
 			scan();
 		}
 
+		/**
+		 * Return the original input string.
+		 *
+		 * @return original input
+		 */
 		public String getInput() {
 			return input;
 		}
 
+		/**
+		 * Check that the next token is the same as the given parameter, and scan past
+		 * it.
+		 *
+		 * @param token
+		 *              expected token
+		 * @throws ParseException
+		 *                        if the next token in the input is not as expected
+		 */
 		public void expect(Token token) throws ParseException {
 			if (nextToken != token) {
 				throw new ParseException("Expected " + token + " but found " + nextToken + " in \"" + input + "\"");
@@ -537,17 +725,35 @@ public class Configuration {
 			scan();
 		}
 
+		/**
+		 * Check that the next token is a name and return it.
+		 *
+		 * @return the name that appears next in the input
+		 * @throws ParseException
+		 *                        if the next token in the input is not a name
+		 */
 		public String expectName() throws ParseException {
 			String n = nextName;
 			expect(Token.NAME);
 			return n;
 		}
 
+		/**
+		 * Return the next token.
+		 *
+		 * @return next token in the input
+		 */
 		public Token next() {
 			return nextToken;
 		}
 
-		public void scan() throws ParseException {
+		/**
+		 * Scan the next token.
+		 *
+		 * @throws ParseException
+		 *                        if an unrecognized token is encountered
+		 */
+		private void scan() throws ParseException {
 			nextToken = Token.UNKNOWN;
 			while (nextToken == Token.UNKNOWN) {
 				if (nextChar == '\0') {
@@ -574,7 +780,10 @@ public class Configuration {
 			}
 		}
 
-		public void readNext() {
+		/**
+		 * Read the next character.
+		 */
+		private void readNext() {
 			if (position == input.length()) {
 				nextChar = '\0';
 			} else {

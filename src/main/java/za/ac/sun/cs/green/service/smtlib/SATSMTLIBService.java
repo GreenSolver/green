@@ -4,7 +4,6 @@ import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.SATService;
-import za.ac.sun.cs.green.util.Misc;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
@@ -30,7 +29,8 @@ public abstract class SATSMTLIBService extends SATService {
 	/**
 	 * Construct an instance of a SAT SMTLIB service.
 	 *
-	 * @param solver associated Green solver
+	 * @param solver
+	 *               associated Green solver
 	 */
 	public SATSMTLIBService(Green solver) {
 		super(solver);
@@ -78,7 +78,7 @@ public abstract class SATSMTLIBService extends SATService {
 			if (logic != null) {
 				b.append("(set-logic ").append(logic).append(')');
 			}
-			b.append(Misc.join(translator.getVariableDefinitions(), " "));
+			b.append(String.join(" ", translator.getVariableDefinitions()));
 			b.append("(assert ").append(translator.getTranslation()).append(')');
 			b.append("(check-sat)");
 			String translation = b.toString();
@@ -100,7 +100,8 @@ public abstract class SATSMTLIBService extends SATService {
 	 * or unsatisfiable ({@code false}), or {@code null} if no answer can be
 	 * determined.
 	 * 
-	 * @param smtQuery query (expression) in SMTLIB format
+	 * @param smtQuery
+	 *                 query (expression) in SMTLIB format
 	 * @return a {@link Boolean} to indicate satisfiability of the expression, or
 	 *         {@code null} if no answer can be determined
 	 */

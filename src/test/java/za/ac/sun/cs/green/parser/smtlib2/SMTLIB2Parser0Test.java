@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import za.ac.sun.cs.green.util.NullLogger;
-
 public class SMTLIB2Parser0Test {
 
 	private static final boolean DO_LOG = false;
@@ -23,7 +21,7 @@ public class SMTLIB2Parser0Test {
 			log.setUseParentHandlers(false);
 			log.setLevel(Level.ALL);
 		} else {
-			log = new NullLogger();
+			log = null;
 		}
 	}
 

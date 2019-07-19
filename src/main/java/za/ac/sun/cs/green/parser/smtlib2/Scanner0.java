@@ -5,8 +5,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.logging.Logger;
 
-import za.ac.sun.cs.green.util.NullLogger;
-
 public class Scanner0 {
 
 	/**
@@ -59,7 +57,7 @@ public class Scanner0 {
 	}
 
 	public Scanner0(Reader reader) throws ParseException {
-		this(reader, new NullLogger());
+		this(reader, null);
 	}
 
 	public Scanner0(String query, Logger log) throws ParseException {
@@ -71,7 +69,7 @@ public class Scanner0 {
 	}
 
 	public Scanner0(String query) throws ParseException {
-		this(query, new NullLogger());
+		this(query, null);
 	}
 
 	/**

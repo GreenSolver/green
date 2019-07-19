@@ -15,7 +15,6 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
-import za.ac.sun.cs.green.util.Misc;
 import za.ac.sun.cs.green.util.Pair;
 import za.ac.sun.cs.green.util.Reporter;
 
@@ -85,9 +84,9 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 			if (logic != null) {
 				b.append("(set-logic ").append(logic).append(')');
 			}
-			b.append(Misc.join(translator.getVariableDefinitions(), " "));
-			b.append(Misc.join(translator.getVariableBounds(), " "));
-			b.append(Misc.join(translator.getAssertions(), " "));
+			b.append(String.join(" ", translator.getVariableDefinitions()));
+			b.append(String.join(" ", translator.getVariableBounds()));
+			b.append(String.join(" ", translator.getAssertions()));
 			// b.append("(assert ").append(translator.getTranslation()).append(')');
 			b.append("(check-sat)");
 			translationTimeConsumption += System.currentTimeMillis() - startTime;
