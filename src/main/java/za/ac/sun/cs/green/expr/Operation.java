@@ -1,5 +1,5 @@
 /*
- * This file is part of the Green library, https://greensolver.github.io/green/
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
  *
  * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
  *
