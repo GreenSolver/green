@@ -1,7 +1,16 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.store.redis;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
@@ -15,42 +24,18 @@ import za.ac.sun.cs.green.util.Configuration;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis
- * (<code>http://www.redis.io</code>).
- * 
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
+ * An implementation of a {@link Store} based on Lettuce
+ * (<a href="https://lettuce.io"><code>https://lettuce.io</code></a>)
+ * that connects to a redis server
+ * (<a href="http://www.redis.io"><code>http://www.redis.io</code></a>).
  */
 public class RedisLettuceStore extends BasicStore {
 
-	/**
-	 * Representation of the Redis client.
-	 */
-	private final RedisClient redisClient;
-
-	/**
-	 * Connection to the Redis server.
-	 */
-	private final StatefulRedisConnection<String, String> redisConnection;
-
-	/**
-	 * Synchronous Redis command channel.
-	 */
-	private final RedisCommands<String, String> syncCommands;
-
-	/**
-	 * Asynchronous Redis command channel.
-	 */
-	private final RedisAsyncCommands<String, String> asyncCommands;
-
-	/**
-	 * Number of times <code>get(...)</code> was called.
-	 */
-	private int retrievalCount = 0;
-
-	/**
-	 * Number of times <code>put(...)</code> was called.
-	 */
-	private int insertionCount = 0;
+	// ======================================================================
+	//
+	// CONSTANTS THAT DEFINE THE BEHAVIOUR OF REDIS
+	//
+	// ======================================================================
 
 	/**
 	 * The default host of the redis server.
@@ -62,32 +47,92 @@ public class RedisLettuceStore extends BasicStore {
 	 */
 	private static final int DEFAULT_REDIS_PORT = 6379;
 
-	private long timePut = 0;
-	private long timeGet = 0;
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
 
 	/**
-	 * Constructor to create a default connection to a redis store running on the
-	 * local computer.
+	 * Number of times {@code get())} is called.
 	 */
-	public RedisLettuceStore(Green solver, Properties properties) {
+	protected int getCount = 0;
+
+	/**
+	 * Number of times {@code put()} is called.
+	 */
+	protected int putCount = 0;
+
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
+
+	/**
+	 * Milliseconds spent on operations.
+	 */
+	protected long storeTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent on {@code get()} operations.
+	 */
+	protected long getTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent on {@code put()} operations.
+	 */
+	protected long putTimeConsumption = 0;
+
+	// ======================================================================
+	//
+	// FIELDS
+	//
+	// ======================================================================
+
+	/**
+	 * Representation of the Redis client.
+	 */
+	private RedisClient redisClient;
+
+	/**
+	 * Connection to the Redis server.
+	 */
+	private StatefulRedisConnection<String, String> redisConnection;
+
+	/**
+	 * Synchronous Redis command channel.
+	 */
+	private RedisCommands<String, String> syncCommands;
+
+	/**
+	 * Asynchronous Redis command channel.
+	 */
+	private RedisAsyncCommands<String, String> asyncCommands;
+
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
+
+	/**
+	 * Construct a lettuce store. Note that the connection to a running redis database
+	 * is not established until the {@link #setName(String)} method is invoked.
+	 * 
+	 * @param solver
+	 *               associated GREEN solver
+	 */
+	public RedisLettuceStore(Green solver) {
 		super(solver);
-		String h = properties.getProperty("green.redis.host", DEFAULT_REDIS_HOST);
-		int p = Configuration.getIntegerProperty(properties, "green.redis.port", DEFAULT_REDIS_PORT);
-		redisClient = RedisClient.create("redis://" + h + ":" + p + "/0");
-		redisConnection = redisClient.connect();
-		syncCommands = redisConnection.sync();
-		asyncCommands = redisConnection.async();
 	}
 
-	/**
-	 * Constructor to create a connection to a redis store given the host and the
-	 * port.
-	 * 
-	 * @param host the host on which the redis store is running
-	 * @param port the port on which the redis store is listening
-	 */
-	public RedisLettuceStore(Green solver, String host, int port) {
-		super(solver);
+	@Override
+	public void setName(final String name) {
+		Properties properties = solver.getProperties();
+		String prefix = (name != null) ? "green.store." + name : "green.redis";
+		String host = properties.getProperty(prefix + ".host", DEFAULT_REDIS_HOST);
+		int port = Configuration.getIntegerProperty(properties, prefix + ".port", DEFAULT_REDIS_PORT);
 		redisClient = RedisClient.create("redis://" + host + ":" + port + "/0");
 		redisConnection = redisClient.connect();
 		syncCommands = redisConnection.sync();
@@ -97,62 +142,64 @@ public class RedisLettuceStore extends BasicStore {
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
-		reporter.report("retrievalCount", retrievalCount);
-		reporter.report("insertionCount", insertionCount);
-		reporter.report("time for get", timeGet);
-		reporter.report("iime for put", timePut);
+		reporter.report("getCount", getCount);
+		reporter.report("putCount", putCount);
+		reporter.report("storeTimeConsumption", storeTimeConsumption);
+		reporter.report("  getTimeConsumption", getTimeConsumption);
+		reporter.report("  putTimeConsumption", putTimeConsumption);
 	}
 
 	@Override
 	public synchronized Object get(String key) {
-		long start = System.currentTimeMillis();
-		retrievalCount++;
+		long startTime = System.currentTimeMillis();
+		getCount++;
 		try {
-			String s = syncCommands.get(key);
-			timeGet += (System.currentTimeMillis() - start);
-			return (s == null) ? null : fromString(s);
+			String value = syncCommands.get(key);
+			getTimeConsumption += System.currentTimeMillis() - startTime;
+			storeTimeConsumption += System.currentTimeMillis() - startTime;
+			return (value == null) ? null : fromString(value);
 		} catch (IOException x) {
 			log.fatal("io problem", x);
 		} catch (ClassNotFoundException x) {
 			log.fatal("class not found problem", x);
 		}
-		timeGet += (System.currentTimeMillis() - start);
+		getTimeConsumption += System.currentTimeMillis() - startTime;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 		return null;
 	}
 
 	@Override
 	public synchronized void put(String key, Serializable value) {
-		long start = System.currentTimeMillis();
-		insertionCount++;
+		long startTime = System.currentTimeMillis();
+		putCount++;
 		try {
 			asyncCommands.set(key, toString(value));
 		} catch (IOException x) {
 			log.fatal("io problem", x);
 		}
-		timePut += (System.currentTimeMillis() - start);
+		putTimeConsumption += System.currentTimeMillis() - startTime;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 	public void flushAll() {
-		// long start = System.currentTimeMillis();
-		syncCommands.flushall();
-		// timeFlush += (System.currentTimeMillis()-start);
+		long startTime = System.currentTimeMillis();
+		asyncCommands.flushCommands();
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 	@Override
 	public void clear() {
-		// TODO
-	}
-
-	@Override
-	public boolean isSet() {
-		// TODO
-		return redisConnection.isOpen();
+		long startTime = System.currentTimeMillis();
+		syncCommands.flushallAsync();
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 	@Override
 	public Set<String> keySet() {
-		// TODO
-		return null;
+		long startTime = System.currentTimeMillis();
+		Set<String> keySet = new HashSet<>(syncCommands.keys("*"));
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
+		return keySet;
 	}
 
 }

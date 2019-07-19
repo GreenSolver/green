@@ -32,7 +32,7 @@ public class MemStore extends BasicStore {
 	/**
 	 * Number of times {@code put()} is called.
 	 */
-	private int putCount = 0;
+	protected int putCount = 0;
 
 	// ======================================================================
 	//
@@ -43,22 +43,22 @@ public class MemStore extends BasicStore {
 	/**
 	 * Milliseconds spent on operations.
 	 */
-	private long storeTimeConsumption = 0;
+	protected long storeTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent on {@code get()} operations.
 	 */
-	private long getTimeConsumption = 0;
+	protected long getTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent on {@code put()} operations.
 	 */
-	private long putTimeConsumption = 0;
+	protected long putTimeConsumption = 0;
 
 	/**
 	 * Milliseconds spent on flushing to secondary store.
 	 */
-	private long flushTimeConsumption = 0;
+	protected long flushTimeConsumption = 0;
 	
 	// ======================================================================
 	//
@@ -75,6 +75,12 @@ public class MemStore extends BasicStore {
 	 * The secondary store to fall back on.
 	 */
 	protected Store secondaryStore;
+
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
 
 	/**
 	 * Constructor to create an in-memory store.

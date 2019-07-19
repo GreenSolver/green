@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.store.redis;
 
 import java.io.IOException;
@@ -8,40 +16,27 @@ import java.util.Set;
 import redis.clients.jedis.Jedis;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.store.BasicStore;
+import za.ac.sun.cs.green.store.Store;
 import za.ac.sun.cs.green.util.Configuration;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * An implementation of a {@link za.ac.sun.cs.green.store.Store} based on redis
- * (<code>http://www.redis.io</code>).
- * 
- * @author Jaco Geldenhuys <jaco@cs.sun.ac.za>
+ * An implementation of a {@link Store} based on redis
+ * (<a href="http://www.redis.io"><code>http://www.redis.io</code></a>).
  */
 public class RedisStore extends BasicStore {
+
+	// ======================================================================
+	//
+	// CONSTANTS THAT DEFINE THE BEHAVIOUR OF REDIS
+	//
+	// ======================================================================
 
 	/**
 	 * The time (in seconds) of inactivity until the connection to the redis store
 	 * timeout.
 	 */
 	private static final int TIMEOUT = 2000;
-
-	/**
-	 * Connection to the redis store.
-	 */
-	private Jedis db = null;
-	private long timeConsumption = 0;
-	private long getTime = 0;
-	private long putTime = 0;
-	private Boolean set = null;
-	/**
-	 * Number of times <code>get(...)</code> was called.
-	 */
-	private int retrievalCount = 0;
-
-	/**
-	 * Number of times <code>put(...)</code> was called.
-	 */
-	private int insertionCount = 0;
 
 	/**
 	 * The default host of the redis server.
@@ -53,69 +48,131 @@ public class RedisStore extends BasicStore {
 	 */
 	private static final int DEFAULT_REDIS_PORT = 6379;
 
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
+
 	/**
-	 * Constructor to create a default connection to a redis store running on the
-	 * local computer.
+	 * Number of times {@code get())} is called.
 	 */
-	public RedisStore(Green solver, Properties properties) {
+	protected int getCount = 0;
+
+	/**
+	 * Number of times {@code put()} is called.
+	 */
+	protected int putCount = 0;
+
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
+
+	/**
+	 * Milliseconds spent on operations.
+	 */
+	protected long storeTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent on {@code get()} operations.
+	 */
+	protected long getTimeConsumption = 0;
+
+	/**
+	 * Milliseconds spent on {@code put()} operations.
+	 */
+	protected long putTimeConsumption = 0;
+
+	// ======================================================================
+	//
+	// FIELDS
+	//
+	// ======================================================================
+
+	/**
+	 * Connection to the redis store.
+	 */
+	protected Jedis db = null;
+
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
+
+	/**
+	 * Construct a redis store. Note that the connection to a running redis database
+	 * is not established until the {@link #setName(String)} method is invoked.
+	 * 
+	 * @param solver
+	 *               associated GREEN solver
+	 */
+	public RedisStore(Green solver) {
 		super(solver);
-		String h = properties.getProperty("green.redis.host", DEFAULT_REDIS_HOST);
-		int p = Configuration.getIntegerProperty(properties, "green.redis.port", DEFAULT_REDIS_PORT);
-		db = new Jedis(h, p, TIMEOUT);
 	}
 
 	/**
-	 * Constructor to create a connection to a redis store given the host and the
-	 * port.
-	 * 
-	 * @param host the host on which the redis store is running
-	 * @param port the port on which the redis store is listening
+	 * Look up the host and port in the GREEN properties and make a connection to
+	 * the redis server. If the name is {@code null}, the property prefix
+	 * "green.redis" is used. Otherwise, the prefix "green.store.XYZ" is used, where
+	 * "XYZ" is the store name.
+	 *
+	 * @param name
+	 *             store name or {@code null}
+	 *
+	 * @see za.ac.sun.cs.green.store.BasicStore#setName(java.lang.String)
 	 */
-	public RedisStore(Green solver, String host, int port) {
-		super(solver);
+	@Override
+	public void setName(final String name) {
+		Properties properties = solver.getProperties();
+		String prefix = (name != null) ? "green.store." + name : "green.redis";
+		String host = properties.getProperty(prefix + ".host", DEFAULT_REDIS_HOST);
+		int port = Configuration.getIntegerProperty(properties, prefix + ".port", DEFAULT_REDIS_PORT);
 		db = new Jedis(host, port, TIMEOUT);
 	}
 
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
-		reporter.report("timeConsumption", timeConsumption);
-		reporter.report("get", getTime);
-		reporter.report("put", putTime);
-		reporter.report("retrievalCount", retrievalCount);
-		reporter.report("insertionCount", insertionCount);
+		reporter.report("getCount", getCount);
+		reporter.report("putCount", putCount);
+		reporter.report("storeTimeConsumption", storeTimeConsumption);
+		reporter.report("  getTimeConsumption", getTimeConsumption);
+		reporter.report("  putTimeConsumption", putTimeConsumption);
 	}
 
 	@Override
 	public synchronized Object get(String key) {
 		long startTime = System.currentTimeMillis();
-		retrievalCount++;
+		getCount++;
 		try {
-			String s = db.get(key);
-			getTime += (System.currentTimeMillis() - startTime);
-			timeConsumption += (System.currentTimeMillis() - startTime);
-			return (s == null) ? null : fromString(s);
+			String value = db.get(key);
+			getTimeConsumption += System.currentTimeMillis() - startTime;
+			storeTimeConsumption += System.currentTimeMillis() - startTime;
+			return (value == null) ? null : fromString(value);
 		} catch (IOException x) {
 			log.fatal("io problem", x);
 		} catch (ClassNotFoundException x) {
 			log.fatal("class not found problem", x);
 		}
-		getTime += (System.currentTimeMillis() - startTime);
-		timeConsumption += (System.currentTimeMillis() - startTime);
+		getTimeConsumption += System.currentTimeMillis() - startTime;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 		return null;
 	}
 
 	@Override
 	public synchronized void put(String key, Serializable value) {
 		long startTime = System.currentTimeMillis();
-		insertionCount++;
+		putCount++;
 		try {
 			db.set(key, toString(value));
 		} catch (IOException x) {
 			log.fatal("io problem", x);
 		}
-		putTime += (System.currentTimeMillis() - startTime);
-		timeConsumption += (System.currentTimeMillis() - startTime);
+		putTimeConsumption += System.currentTimeMillis() - startTime;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 	@Override
@@ -123,36 +180,14 @@ public class RedisStore extends BasicStore {
 		return db.keys("*");
 	}
 
-	// private long satCacheHit = 0;
-	// private long unsatCacheHit = 0;
-
-	@Override
-	public synchronized void flushAll() {
-		// do nothing
-	}
-
 	@Override
 	public void clear() {
 		long startTime = System.currentTimeMillis();
 		try {
-			// unsatCacheHit = 0;
-			// satCacheHit = 0;
 			db.flushAll();
 		} catch (Exception e) {
 		}
-		timeConsumption += (System.currentTimeMillis() - startTime);
-	}
-
-	public boolean isSet() {
-		if (set == null) {
-			try {
-				db.get("foo");
-				set = true;
-			} catch (Exception e) {
-				set = false;
-			}
-		}
-		return set;
+		storeTimeConsumption += System.currentTimeMillis() - startTime;
 	}
 
 }
