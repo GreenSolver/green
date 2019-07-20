@@ -20,6 +20,7 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.store.BasicStore;
+import za.ac.sun.cs.green.store.Store;
 import za.ac.sun.cs.green.util.Configuration;
 import za.ac.sun.cs.green.util.Reporter;
 

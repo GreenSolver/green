@@ -246,7 +246,7 @@ public class Doclet {
 	 * Remove the prefix of a qualified Java class if the prefix appears in the list
 	 * of excluded qualifiers.
 	 *
-	 * @param qualified
+	 * @param qualifier
 	 *                  Java class to process
 	 * @return qualified Java class with prefix removed if necessary
 	 */

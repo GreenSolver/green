@@ -59,7 +59,7 @@ public class MemStore extends BasicStore {
 	 * Milliseconds spent on flushing to secondary store.
 	 */
 	protected long flushTimeConsumption = 0;
-	
+
 	// ======================================================================
 	//
 	// FIELDS
@@ -86,9 +86,7 @@ public class MemStore extends BasicStore {
 	 * Constructor to create an in-memory store.
 	 *
 	 * @param solver
-	 *                   associated Green solver
-	 * @param properties
-	 *                   properties used to construct the store
+	 *               associated Green solver
 	 */
 	public MemStore(final Green solver) {
 		super(solver);
@@ -96,20 +94,19 @@ public class MemStore extends BasicStore {
 	}
 
 	/**
-	 * Constructor to create a named in-memory store.
+	 * Set the name of the store. This method is ALWAYS invoked an meant to set in
+	 * motion the potential creation of a connection to an external storage
+	 * database.
 	 *
-	 * @param solver
-	 *                   associated Green solver
-	 * @param name name of the store
-	 * @param properties
-	 *                   properties used to construct the store
+	 * @param name
+	 *             name of the store
 	 */
 	@Override
 	public void setName(final String name) {
 		secondaryStore = Configuration.loadStore(solver, "green.store." + name + ".secondary");
 		super.setName(name);
 	}
-	
+
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -168,7 +165,8 @@ public class MemStore extends BasicStore {
 	}
 
 	/**
-	 * Write all stored information to the secondary store, if any.  The in-memory store is NOT cleared.
+	 * Write all stored information to the secondary store, if any. The in-memory
+	 * store is NOT cleared.
 	 *
 	 * @see za.ac.sun.cs.green.store.BasicStore#flushAll()
 	 */
@@ -183,7 +181,8 @@ public class MemStore extends BasicStore {
 	}
 
 	/**
-	 * This operation clears the in-memory store but does not affect the secondary store, if any.
+	 * This operation clears the in-memory store but does not affect the secondary
+	 * store, if any.
 	 *
 	 * @see za.ac.sun.cs.green.store.BasicStore#clear()
 	 */

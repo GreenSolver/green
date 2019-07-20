@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.apache.logging.log4j.Logger;
 
-import reactor.util.annotation.Nullable;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.Service;
 import za.ac.sun.cs.green.Green;
@@ -76,8 +75,7 @@ public class SerialTaskManager implements TaskManager {
 	 *                       current set of instances to execute services on
 	 * @return final result
 	 */
-	private Object execute(@Nullable Service parent, @Nullable Instance parentInstance, Set<Service> services,
-			Set<Instance> instances) {
+	private Object execute(Service parent, Instance parentInstance, Set<Service> services, Set<Instance> instances) {
 		Object result = null;
 		for (Service service : services) {
 			for (Instance instance : instances) {
@@ -133,9 +131,9 @@ public class SerialTaskManager implements TaskManager {
 	 *                       parent service that spawned the instance
 	 * @param parentInstance
 	 *                       parent instance that spawned the instance
-	 * @param services
+	 * @param service
 	 *                       service to execute
-	 * @param instances
+	 * @param instance
 	 *                       instance to execute service on
 	 * @return final result
 	 */

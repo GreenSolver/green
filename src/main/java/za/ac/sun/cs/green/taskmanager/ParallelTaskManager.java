@@ -202,9 +202,9 @@ public class ParallelTaskManager implements TaskManager {
 		 *                       parent service that spawned the instance
 		 * @param parentInstance
 		 *                       parent instance that spawned the instance
-		 * @param services
+		 * @param service
 		 *                       service to execute
-		 * @param instances
+		 * @param instance
 		 *                       instance to execute service on
 		 */
 		Task(final Service parent, final Instance parentInstance, final Service service, final Instance instance) {
