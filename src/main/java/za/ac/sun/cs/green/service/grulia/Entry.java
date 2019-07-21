@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.grulia;
 
 /**
@@ -11,11 +19,6 @@ package za.ac.sun.cs.green.service.grulia;
  * the first expression that "generated" the entry. For example, the SatDelta
  * for a model entry, is the SatDelta value of the first expression for which
  * this model was generated.
- *
- * @author JH Taljaard (USnr 18509193)
- * @author Willem Visser (2018, 2019)
- * @author Jaco Geldenhuys (2017)
- * @date: 2018/06/20
  */
 public abstract class Entry implements Comparable<Entry> {
 
@@ -32,7 +35,8 @@ public abstract class Entry implements Comparable<Entry> {
 	/**
 	 * Construct an entry.
 	 *
-	 * @param satDelta SatDelta value for the new entry
+	 * @param satDelta
+	 *                 SatDelta value for the new entry
 	 */
 	public Entry(double satDelta) {
 		this.satDelta = satDelta;
@@ -47,8 +51,13 @@ public abstract class Entry implements Comparable<Entry> {
 		return satDelta;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Compare this entry to another. The comparison is based on the string
+	 * representations of the entries.
+	 *
+	 * @param entry
+	 *              entry to compare to
+	 * @return result of string comparison
 	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -58,15 +67,26 @@ public abstract class Entry implements Comparable<Entry> {
 	}
 
 	/**
-	 * Determine if the current entry is "valid" for the given entry.  This means that this entry could be used
-	 * as a model/core/solution for the given entry.  For example, in the case of models, this model could be
-	 * valid if it has enough variables.
+	 * Determine if the current entry is "valid" for the given entry. This means
+	 * that this entry could be used as a model/core/solution for the given entry.
+	 * For example, in the case of models, this model could be valid if it has
+	 * enough variables.
 	 *
-	 * @param entry target entry
+	 * @param entry
+	 *              target entry
 	 * @return {@code true} if this entry can be used, otherwise {@code false}
 	 */
 	public abstract boolean isValidFor(Entry entry);
 
+	/**
+	 * Create, if it does not exist, and return the string representation of the
+	 * entry. The creation is done only once and stored in
+	 * {@link #stringRepresentation}.
+	 *
+	 * @return string representation of entry
+	 *
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public final String toString() {
 		if (stringRepresentation == null) {
@@ -82,11 +102,8 @@ public abstract class Entry implements Comparable<Entry> {
 	/**
 	 * Return a string representation for this entry.
 	 *
-	 * @return a string representation for this entrty
+	 * @return a string representation for this entry
 	 */
 	public abstract String toString0();
-
-//	public int hashCode() {
-//	public boolean equals(Object obj) {
 
 }

@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.grulia;
 
 import java.util.Collections;
@@ -23,17 +31,11 @@ import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Based on Utopia (an SMT caching framework), which is defined in the paper:
- * "Heuristically Matching Formula Solution Spaces To Efficiently Reuse
- * Solutions" published at the International Conference on Software Engineering
- * (ICSE'17) by Andrea Aquino, Giovanni Denaro and Mauro Pezze'.
- *
- * Julia (Java version of Utopia Linear Integer Arithmetic) re-implemented to
- * improve GREEN. Julia is implemented as a service in GREEN -- Grulia.
- *
- * @author JH Taljaard (USnr 18509193)
- * @author Willem Visser (2018, 2019) (supervisor)
- * @author Jaco Geldenhuys (2017) (supervisor)
+ * Grulia service for models and cores.
+ * 
+ * Based on Utopia (an SMT caching framework) as described in Aquino, Denaro,
+ * Pezze: "Heuristically Matching Formula Solution Spaces To Efficiently Reuse
+ * Solutions", (ICSE 2017).
  */
 public class GruliaService extends ModelCoreService {
 
@@ -90,8 +92,8 @@ public class GruliaService extends ModelCoreService {
 	private long passedToSolverCount = 0;
 
 	/**
-	 * Number of times one of the reference
-	 * solutions satisfied the expression to solve.
+	 * Number of times one of the reference solutions satisfied the expression to
+	 * solve.
 	 */
 	private long satDeltaHitCount = 0;
 
@@ -117,8 +119,8 @@ public class GruliaService extends ModelCoreService {
 	private int repoCoreHitCount = 0;
 
 	/**
-	 * Number of times {@link #findSharedCore(Expression)} found no core
-	 * in the UNSAT repo to subsume an expression.
+	 * Number of times {@link #findSharedCore(Expression)} found no core in the
+	 * UNSAT repo to subsume an expression.
 	 */
 	private int unsatRepoMissCount = 0;
 
@@ -218,7 +220,8 @@ public class GruliaService extends ModelCoreService {
 	 * 
 	 * GruliaService recommends to run with Factorizer and Renamer.
 	 *
-	 * @param solver the {@link Green} solver this service will be added to
+	 * @param solver
+	 *               the {@link Green} solver this service will be added to
 	 */
 	public GruliaService(Green solver) {
 		super(solver);
@@ -235,9 +238,9 @@ public class GruliaService extends ModelCoreService {
 	}
 
 	/**
-	 * Overrides the method of the {@link ModelCoreService} superclass. This version makes
-	 * provision for the fact that Grulia may or may not compute an answer to the
-	 * process.
+	 * Overrides the method of the {@link ModelCoreService} superclass. This version
+	 * makes provision for the fact that Grulia may or may not compute an answer to
+	 * the process.
 	 * 
 	 * <ul>
 	 * <li>In the former case, the result is stored "inside" the instance, and is
@@ -248,7 +251,8 @@ public class GruliaService extends ModelCoreService {
 	 * set).</li>
 	 * </ul>
 	 * 
-	 * @param instance Green instance to solve
+	 * @param instance
+	 *                 Green instance to solve
 	 * @return {@code null} if Grulia finds an answer for the request or a singleton
 	 *         set with the same instance
 	 * @see za.ac.sun.cs.green.service.ModelCoreService#processRequest(za.ac.sun.cs.green.Instance)
@@ -297,10 +301,11 @@ public class GruliaService extends ModelCoreService {
 	}
 
 	/**
-	 * Overrides the method of the {@link ModelCoreService} superclass. This version does
-	 * not consult the store.
+	 * Overrides the method of the {@link ModelCoreService} superclass. This version
+	 * does not consult the store.
 	 *
-	 * @param instance Green instance to solve
+	 * @param instance
+	 *                 Green instance to solve
 	 * @return result of the computation as a {@link ModelCore}
 	 *
 	 * @see za.ac.sun.cs.green.service.ModelCoreService#solve0(za.ac.sun.cs.green.Instance)
@@ -316,7 +321,8 @@ public class GruliaService extends ModelCoreService {
 	/**
 	 * Executes the Utopia algorithm as described in the paper of Aquino.
 	 *
-	 * @param instance Green instance to solve
+	 * @param instance
+	 *                 Green instance to solve
 	 * @return the result of the computation as a {@link ModelCore}
 	 *
 	 * @see za.ac.sun.cs.green.service.ModelCoreService#modelCore(za.ac.sun.cs.green.Instance)
@@ -374,7 +380,8 @@ public class GruliaService extends ModelCoreService {
 	/**
 	 * Calculates the average SatDelta value of a given Expression.
 	 *
-	 * @param expr the given expression
+	 * @param expr
+	 *             the given expression
 	 * @return the average SatDelta value
 	 */
 	private double calculateSatDelta(Expression expr) {
@@ -410,8 +417,10 @@ public class GruliaService extends ModelCoreService {
 	 * <li>If none of the models satisfies the expression, return {@code null}.</li>
 	 * </ol>
 	 *
-	 * @param expr      expression to satisfy
-	 * @param setOfVars variables in expression, passed to repo
+	 * @param expr
+	 *                  expression to satisfy
+	 * @param setOfVars
+	 *                  variables in expression, passed to repo
 	 * @return {@code ModelCore} instance or {@code null}
 	 */
 	private ModelCore findSharedModel(Expression expr, SortedSet<IntVariable> setOfVars) {
@@ -465,7 +474,8 @@ public class GruliaService extends ModelCoreService {
 	 * <li>If none of the mores subsumes the expression, return {@code null}.</li>
 	 * </ol>
 	 *
-	 * @param expr      expression to subsume
+	 * @param expr
+	 *             expression to subsume
 	 * @return {@code ModelCore} instance or {@code null}
 	 */
 	private ModelCore findSharedCore(Expression expr) {
@@ -510,6 +520,15 @@ public class GruliaService extends ModelCoreService {
 		return result;
 	}
 
+	/**
+	 * If a solver was invoked as a subservice, extract and record the model or core for future use.
+	 *
+	 * @param instance problem solved
+	 * @param result result returned by the solver
+	 * @return same result as the solver
+	 *
+	 * @see za.ac.sun.cs.green.service.ModelCoreService#allChildrenDone(za.ac.sun.cs.green.Instance, java.lang.Object)
+	 */
 	@Override
 	public Object allChildrenDone(Instance instance, Object result) {
 		if (!(result instanceof ModelCore)) {
@@ -581,30 +600,35 @@ public class GruliaService extends ModelCoreService {
 	//
 	// ======================================================================
 
+	/**
+	 * Visitor to collect the set of integer variables used in an expession.
+	 */
 	private static class ExpressionVisitor extends Visitor {
 
-		private final SortedSet<IntVariable> variableSet;
+		/**
+		 * Set of variables.
+		 */
+		private final SortedSet<IntVariable> variableSet = new TreeSet<>();
 
-		private boolean linearInteger;
-
-		ExpressionVisitor() {
-			variableSet = new TreeSet<>();
-			linearInteger = true;
-		}
-
+		/**
+		 * Return the set of variables.
+		 *
+		 * @return set of variables in expression
+		 */
 		SortedSet<IntVariable> getVariableSet() {
 			return variableSet;
 		}
 
+		/**
+		 * Handle an integer variable by adding it to the set.
+		 *
+		 * @param variable integer variable to process
+		 *
+		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.IntVariable)
+		 */
 		@Override
-		public void postVisit(Variable variable) {
-			if (linearInteger) {
-				if (variable instanceof IntVariable) {
-					variableSet.add((IntVariable) variable);
-				} else {
-					linearInteger = false;
-				}
-			}
+		public void postVisit(IntVariable variable) {
+			variableSet.add(variable);
 		}
 	}
 
@@ -640,7 +664,8 @@ public class GruliaService extends ModelCoreService {
 		 * Clear the stack and set the reference value in preparation for a run of the
 		 * visitor.
 		 * 
-		 * @param referenceValue the new reference value
+		 * @param referenceValue
+		 *                       the new reference value
 		 */
 		void setReferenceValue(int referenceValue) {
 			stack.clear();
@@ -684,16 +709,11 @@ public class GruliaService extends ModelCoreService {
 		}
 
 		/**
-		 * Calculates the SatDelta value for a given operation and pushes the result
-		 * onto the stack.
+		 * Calculate the SatDelta value for a given operation and push the result onto
+		 * the stack.
 		 *
-		 * The distance of an expression from a set of reference models is called
-		 * "SatDelta" and is defined in the paper: "Heuristically Matching Formula
-		 * Solution Spaces To Efficiently Reuse Solutions" published at the
-		 * International Conference on Software Engineering (ICSE'17) by Andrea Aquino,
-		 * Giovanni Denaro and Mauro Pezze'.
-		 *
-		 * @param operation the current operation working with
+		 * @param operation
+		 *                  the current operation working with
 		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 		 */
 		@Override
@@ -787,12 +807,6 @@ public class GruliaService extends ModelCoreService {
 			return (top instanceof Boolean) && (Boolean) top;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Variable)
-		 */
 		@Override
 		public void postVisit(Variable variable) {
 			Constant value = modelMap.get(variable);
@@ -803,23 +817,11 @@ public class GruliaService extends ModelCoreService {
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-		 * IntConstant)
-		 */
 		@Override
 		public void postVisit(IntConstant constant) {
 			evalStack.push(constant.getValue());
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
-		 */
 		@Override
 		public void postVisit(Operation operation) {
 			Object left = null, right = null;

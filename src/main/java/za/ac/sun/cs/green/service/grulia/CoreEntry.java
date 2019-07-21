@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.grulia;
 
 import java.util.Set;
@@ -27,16 +35,22 @@ public class CoreEntry extends Entry {
 	/**
 	 * Construct a new core entry.
 	 *
-	 * @param satDelta SatDelta value for the new entry
-	 * @param core     core for the new entry
+	 * @param satDelta
+	 *                 SatDelta value for the new entry
+	 * @param core
+	 *                 core for the new entry
 	 */
 	public CoreEntry(double satDelta, Set<Expression> core) {
 		super(satDelta);
 		this.core = core;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Core entries are always valid.
+	 *
+	 * @param entry
+	 *              ignored reference entry
+	 * @return always {@code true}
 	 *
 	 * @see za.ac.sun.cs.green.service.grulia.Entry#isValidFor(za.ac.sun.cs.green.service.grulia.Entry)
 	 */
@@ -45,11 +59,6 @@ public class CoreEntry extends Entry {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString0()
-	 */
 	@Override
 	public String toString0() {
 		StringBuilder s = new StringBuilder();

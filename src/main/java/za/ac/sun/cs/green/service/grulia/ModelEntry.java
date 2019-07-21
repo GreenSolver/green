@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.grulia;
 
 import java.io.Serializable;
@@ -30,8 +38,10 @@ public class ModelEntry extends Entry implements Serializable {
 	/**
 	 * Construct a new model entry.
 	 *
-	 * @param satDelta SatDelta value for the new entry
-	 * @param model    model for the new entry
+	 * @param satDelta
+	 *                 SatDelta value for the new entry
+	 * @param model
+	 *                 model for the new entry
 	 */
 	public ModelEntry(double satDelta, Map<Variable, Constant> model) {
 		super(satDelta);
@@ -43,9 +53,12 @@ public class ModelEntry extends Entry implements Serializable {
 	 * Construct a new model entry. This version is used mostly for {@code null}
 	 * models that are used as anchor points when searching for nearby models.
 	 *
-	 * @param satDelta SatDelta value for the new entry
-	 * @param model    model for the new entry
-	 * @param size     size of the model
+	 * @param satDelta
+	 *                 SatDelta value for the new entry
+	 * @param model
+	 *                 model for the new entry
+	 * @param size
+	 *                 size of the model
 	 */
 	public ModelEntry(Double satDelta, Map<Variable, Constant> model, int size) {
 		super(satDelta);
@@ -71,8 +84,13 @@ public class ModelEntry extends Entry implements Serializable {
 		return modelSize;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Filter out models that are small than a given entry.
+	 *
+	 * @param entry
+	 *              entry to compare to
+	 * @return {@code true} if and only if this entry is larger (has more variables)
+	 *         than the given entry
 	 *
 	 * @see za.ac.sun.cs.green.service.grulia.Entry#isValidFor(za.ac.sun.cs.green.service.grulia.Entry)
 	 */
@@ -81,11 +99,6 @@ public class ModelEntry extends Entry implements Serializable {
 		return getModelSize() >= ((ModelEntry) entry).getModelSize();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#toString0()
-	 */
 	@Override
 	public String toString0() {
 		StringBuilder s = new StringBuilder();
