@@ -28,6 +28,11 @@ public abstract class Entry implements Comparable<Entry> {
 	private final double satDelta;
 
 	/**
+	 * The size of the model/core stored in this entry.
+	 */
+	private final int size;
+
+	/**
 	 * String representation for this entry.
 	 */
 	private String stringRepresentation = null;
@@ -38,8 +43,9 @@ public abstract class Entry implements Comparable<Entry> {
 	 * @param satDelta
 	 *                 SatDelta value for the new entry
 	 */
-	public Entry(double satDelta) {
+	public Entry(final double satDelta, final int size) {
 		this.satDelta = satDelta;
+		this.size = size;
 	}
 
 	/**
@@ -52,18 +58,35 @@ public abstract class Entry implements Comparable<Entry> {
 	}
 
 	/**
-	 * Compare this entry to another. The comparison is based on the string
+	 * Return the size for this entry.
+	 *
+	 * @return the entry's size
+	 */
+	public int getSize() {
+		return size;
+	}
+
+	/**
+	 * Compare this entry to another. The comparison is based firstly on the
+	 * satDelta value, then the size of model/core, and finally on the string
 	 * representations of the entries.
 	 *
 	 * @param entry
 	 *              entry to compare to
-	 * @return result of string comparison
+	 * @return result of comparison
 	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
 	public int compareTo(Entry entry) {
-		return toString().compareTo(entry.toString());
+		int result = Double.compare(getSatDelta(), entry.getSatDelta());
+		if (result == 0) {
+			result = Integer.compare(getSize(), entry.getSize());
+			if (result == 0) {
+				result = toString().compareTo(entry.toString());
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -92,6 +115,7 @@ public abstract class Entry implements Comparable<Entry> {
 		if (stringRepresentation == null) {
 			StringBuilder s = new StringBuilder();
 			s.append("(satDelta=").append(getSatDelta());
+			s.append(", size=").append(getSize());
 			s.append(", ").append(toString0());
 			s.append(')');
 			stringRepresentation = s.toString();

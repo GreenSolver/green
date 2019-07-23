@@ -41,7 +41,7 @@ public class CoreEntry extends Entry {
 	 *                 core for the new entry
 	 */
 	public CoreEntry(double satDelta, Set<Expression> core) {
-		super(satDelta);
+		super(satDelta, core.size());
 		this.core = core;
 	}
 

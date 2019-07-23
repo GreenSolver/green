@@ -31,11 +31,6 @@ public class ModelEntry extends Entry implements Serializable {
 	private final Map<Variable, Constant> model;
 
 	/**
-	 * The size of the model stored in this entry.
-	 */
-	private final int modelSize;
-
-	/**
 	 * Construct a new model entry.
 	 *
 	 * @param satDelta
@@ -44,9 +39,8 @@ public class ModelEntry extends Entry implements Serializable {
 	 *                 model for the new entry
 	 */
 	public ModelEntry(double satDelta, Map<Variable, Constant> model) {
-		super(satDelta);
+		super(satDelta, model.size());
 		this.model = model;
-		this.modelSize = model.size();
 	}
 
 	/**
@@ -61,9 +55,8 @@ public class ModelEntry extends Entry implements Serializable {
 	 *                 size of the model
 	 */
 	public ModelEntry(Double satDelta, Map<Variable, Constant> model, int size) {
-		super(satDelta);
+		super(satDelta, size);
 		this.model = model;
-		this.modelSize = size;
 	}
 
 	/**
@@ -73,15 +66,6 @@ public class ModelEntry extends Entry implements Serializable {
 	 */
 	public Map<Variable, Constant> getModel() {
 		return model;
-	}
-
-	/**
-	 * Return the model size for this entry.
-	 *
-	 * @return the entry's model size
-	 */
-	public int getModelSize() {
-		return modelSize;
 	}
 
 	/**
@@ -96,7 +80,7 @@ public class ModelEntry extends Entry implements Serializable {
 	 */
 	@Override
 	public boolean isValidFor(Entry entry) {
-		return getModelSize() >= ((ModelEntry) entry).getModelSize();
+		return getSize() >= ((ModelEntry) entry).getSize();
 	}
 
 	@Override
@@ -109,7 +93,6 @@ public class ModelEntry extends Entry implements Serializable {
 		} else {
 			s.append(new TreeMap<>(model));
 		}
-		s.append(", size=").append(getModelSize());
 		return s.toString();
 	}
 

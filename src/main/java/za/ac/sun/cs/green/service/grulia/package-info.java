@@ -8,7 +8,7 @@
  */
 
 /**
- * Service for models and cores based on the Utpoia system.
+ * Service for models and cores based on the Utopia system.
  */
 
 package za.ac.sun.cs.green.service.grulia;
