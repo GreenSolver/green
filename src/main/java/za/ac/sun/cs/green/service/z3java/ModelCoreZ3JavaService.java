@@ -12,6 +12,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Model;
+//import com.microsoft.z3.RatNum;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
@@ -151,6 +152,10 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
 					if (z3Val.isIntNum()) {
 						val = new IntConstant(Integer.parseInt(z3Val.toString()));
 					} else if (z3Val.isRatNum()) {
+//						RatNum rat = (RatNum) z3Val;
+//						val = new RealConstant(rat.getNumerator().getInt64() * 1.0 / rat.getDenominator().getInt64());
+//					} else if (z3Val.isReal()) {
+//						val = new RealConstant(Double.parseDouble(z3Val.toString()));
 						String z3ValString = z3Val.toString();
 						if (z3ValString.contains("/")) {
 							String[] rat = z3ValString.split("/");
