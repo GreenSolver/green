@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.smtlib;
 
 import za.ac.sun.cs.green.Green;
@@ -11,6 +19,12 @@ import za.ac.sun.cs.green.util.Reporter;
  */
 public abstract class SATSMTLIBService extends SATService {
 
+	// ======================================================================
+	//
+	// COUNTERS
+	//
+	// ======================================================================
+
 	/**
 	 * Number of conjuncts that appear in the translated expression.
 	 */
@@ -21,10 +35,22 @@ public abstract class SATSMTLIBService extends SATService {
 	 */
 	protected int varCount = 0;
 
+	// ======================================================================
+	//
+	// TIME CONSUMPTION
+	//
+	// ======================================================================
+
 	/**
 	 * Milliseconds spent on translating to SMTLIB.
 	 */
 	protected long translationTimeConsumption = 0;
+
+	// ======================================================================
+	//
+	// CONSTRUCTOR & METHODS
+	//
+	// ======================================================================
 
 	/**
 	 * Construct an instance of a SAT SMTLIB service.
@@ -36,12 +62,6 @@ public abstract class SATSMTLIBService extends SATService {
 		super(solver);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see za.ac.sun.cs.green.service.BasicService#report(za.ac.sun.cs.green.util.
-	 * Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -61,11 +81,6 @@ public abstract class SATSMTLIBService extends SATService {
 		return "QF_LIA";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.service.SATService#solve(za.ac.sun.cs.green.Instance)
-	 */
 	@Override
 	protected Boolean solve(Instance instance) {
 		try {

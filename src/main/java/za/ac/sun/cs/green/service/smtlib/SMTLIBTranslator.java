@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.smtlib;
 
 import java.util.HashMap;
@@ -23,7 +31,8 @@ import za.ac.sun.cs.green.util.Pair;
 public class SMTLIBTranslator extends Visitor {
 
 	/**
-	 * Stack of operands.
+	 * Stack of operands. Each entry consists of the SMTLIB translation for the
+	 * operand and its type as one of the GREEN expression classes.
 	 */
 	protected final Stack<Pair<String, Class<? extends Variable>>> stack = new Stack<>();
 
@@ -97,7 +106,8 @@ public class SMTLIBTranslator extends Visitor {
 	 * 
 	 * Note that positive parameters are returned as strings.
 	 * 
-	 * @param v integer literal
+	 * @param v
+	 *          integer literal
 	 * @return the SMTLIB equivalent
 	 */
 	protected String transformNegative(long v) {
@@ -120,7 +130,8 @@ public class SMTLIBTranslator extends Visitor {
 	 * 
 	 * Note that positive parameters are returned as strings.
 	 * 
-	 * @param v real literal
+	 * @param v
+	 *          real literal
 	 * @return the SMTLIB equivalent
 	 */
 	protected String transformNegative(double v) {
@@ -133,11 +144,14 @@ public class SMTLIBTranslator extends Visitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * IntConstant)
+	/**
+	 * Translate an integer constant to SMTLIB and place it on the stack along with
+	 * its type.
+	 *
+	 * @param constant
+	 *                 integer constant to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.IntConstant)
 	 */
 	@Override
 	public void postVisit(IntConstant constant) {
@@ -145,11 +159,14 @@ public class SMTLIBTranslator extends Visitor {
 		stack.push(new Pair<>(transformNegative(value), IntVariable.class));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * RealConstant)
+	/**
+	 * Translate a real constant to SMTLIB and place it on the stack along with its
+	 * type.
+	 *
+	 * @param constant
+	 *                 real constant to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.RealConstant)
 	 */
 	@Override
 	public void postVisit(RealConstant constant) {
@@ -157,11 +174,17 @@ public class SMTLIBTranslator extends Visitor {
 		stack.push(new Pair<>(transformNegative(value), RealVariable.class));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * IntVariable)
+	/**
+	 * Translate an integer variable to SMTLIB. This involves the variable
+	 * definition (added to the {@link #variableDefinitions} list), the lower and
+	 * upper bounds for the variable (added to the {@link #variableBounds} list),
+	 * and the mapping from GREEN variables to SMTLIB variable names (added to the
+	 * {@link #variableMap} map).
+	 *
+	 * @param variable
+	 *                 integer variable to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.IntVariable)
 	 */
 	@Override
 	public void postVisit(IntVariable variable) {
@@ -187,11 +210,17 @@ public class SMTLIBTranslator extends Visitor {
 		stack.push(new Pair<>(n, IntVariable.class));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * RealVariable)
+	/**
+	 * Translate a real variable to SMTLIB. This involves the variable definition
+	 * (added to the {@link #variableDefinitions} list), the lower and upper bounds
+	 * for the variable (added to the {@link #variableBounds} list), and the mapping
+	 * from GREEN variables to SMTLIB variable names (added to the
+	 * {@link #variableMap} map).
+	 *
+	 * @param variable
+	 *                 real variable to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.RealVariable)
 	 */
 	@Override
 	public void postVisit(RealVariable variable) {
@@ -220,8 +249,10 @@ public class SMTLIBTranslator extends Visitor {
 	 * Determine the supertype of two terms. This is the "least" type that both the
 	 * terms belong to.
 	 * 
-	 * @param left  first term
-	 * @param right second term
+	 * @param left
+	 *              first term
+	 * @param right
+	 *              second term
 	 * @return least type that contains both terms
 	 */
 	protected Class<? extends Variable> superType(Pair<String, Class<? extends Variable>> left,
@@ -239,8 +270,10 @@ public class SMTLIBTranslator extends Visitor {
 	 * Return the SMTLIB translation of a term such that it is compatible with the
 	 * type of a second operand.
 	 * 
-	 * @param term term to translate
-	 * @param type type required for other operand
+	 * @param term
+	 *             term to translate
+	 * @param type
+	 *             type required for other operand
 	 * @return SMTLIB translation of term
 	 */
 	protected String adjust(Pair<String, Class<? extends Variable>> term, Class<? extends Variable> type) {
@@ -258,9 +291,11 @@ public class SMTLIBTranslator extends Visitor {
 	/**
 	 * Map GREEN operators to their SMTLIB equivalent.
 	 * 
-	 * @param op GREEN operator
+	 * @param op
+	 *           GREEN operator
 	 * @return the SMTLIB operator
-	 * @throws TranslatorUnsupportedOperation if an operator cannot/should not be
+	 * @throws TranslatorUnsupportedOperation
+	 *                                        if an operator cannot/should not be
 	 *                                        translated
 	 */
 	protected String setOperator(Operator op) throws TranslatorUnsupportedOperation {
@@ -299,13 +334,17 @@ public class SMTLIBTranslator extends Visitor {
 	/**
 	 * Map GREEN operators to their resulting type.
 	 * 
-	 * @param op GREEN operator
-	 * @param supertype least common parent type
+	 * @param op
+	 *                  GREEN operator
+	 * @param supertype
+	 *                  least common parent type
 	 * @return resulting type
-	 * @throws TranslatorUnsupportedOperation if an operator cannot/should not be
+	 * @throws TranslatorUnsupportedOperation
+	 *                                        if an operator cannot/should not be
 	 *                                        translated
 	 */
-	protected Class<? extends Variable> setType(Operator op, Class<? extends Variable> supertype) throws TranslatorUnsupportedOperation {
+	protected Class<? extends Variable> setType(Operator op, Class<? extends Variable> supertype)
+			throws TranslatorUnsupportedOperation {
 		switch (op) {
 		case EQ:
 		case NE:
@@ -327,12 +366,19 @@ public class SMTLIBTranslator extends Visitor {
 			throw new TranslatorUnsupportedOperation("unsupported operation " + op);
 		}
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
+
+	/**
+	 * Handle an operation by removing the translated operands from the stack and
+	 * combining them with the appropriate operator string to create the
+	 * corresponding SMTLIB equivalent. This is placed back on the stack.
+	 *
+	 * @param operation
+	 *                  operation to process
+	 * @throws TranslatorUnsupportedOperation
+	 *                                        if an unsupported operator is
+	 *                                        encountered
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
 	 */
 	public void postVisit(Operation operation) throws TranslatorUnsupportedOperation {
 		Pair<String, Class<? extends Variable>> l = null;
@@ -362,11 +408,25 @@ public class SMTLIBTranslator extends Visitor {
 			b.append(adjust(l, v)).append(' ');
 			b.append(adjust(r, v)).append(')');
 		}
-		stack.push(new Pair<>(b.toString(), setType(op, v)));
-		postVisitExtra(operation, op, b);
+		Class<? extends Variable> type = setType(op, v);
+		stack.push(new Pair<>(b.toString(), type));
+		postVisitExtra(operation, b, type);
 	}
 
-	protected void postVisitExtra(Operation operation, Operator operator, StringBuilder clause) {
+	/**
+	 * Perform optional additional processing after the translation of an operation.
+	 * Subclasses are expected to override this method in some cases.
+	 *
+	 * @param operation
+	 *                  operation to process
+	 * @param clause
+	 *                  SMTLIB clause the operation was translated into and that was
+	 *                  just pushed onto the stack
+	 * @param type
+	 *                  GREEN class variable that indicates the type of the
+	 *                  operation
+	 */
+	protected void postVisitExtra(Operation operation, StringBuilder clause, Class<? extends Variable> type) {
 		// default is empty
 	}
 
