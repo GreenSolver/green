@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3;
 
 import java.io.BufferedReader;
@@ -24,7 +32,7 @@ import za.ac.sun.cs.green.service.smtlib.ModelCoreSMTLIBService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 command-line model service.
+ * Z3 command-line model/core service.
  */
 public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 
@@ -61,8 +69,10 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	/**
 	 * Construct an instance of the Z3 command-line service.
 	 * 
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the service
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
 	public ModelCoreZ3Service(Green solver, Properties properties) {
 		super(solver);
@@ -71,13 +81,6 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 		z3Command = p + ' ' + a;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService#report(za.ac.sun.cs.
-	 * green.util.Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -89,12 +92,21 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 		super.report(reporter);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.smtlib.ModelCoreSMTLIBService#resolve(java.lang.
-	 * String, java.util.Map, java.util.Map)
+	/**
+	 * Create a subprocess to run Z3, pass the query to the process, and collect and
+	 * parse the output.
+	 *
+	 * @param smtQuery
+	 *                          translated query as SMTLIB string
+	 * @param variables
+	 *                          mapping from GREEN variables to SMTLIB variable
+	 *                          names
+	 * @param coreClauseMapping
+	 *                          mapping from clause names to GREEN expressions
+	 * @return {@link ModelCore} or {@code null} if no answer can be determined
+	 *
+	 * @see za.ac.sun.cs.green.service.smtlib.ModelCoreSMTLIBService#resolve(java.lang.String,
+	 *      java.util.Map, java.util.Map)
 	 */
 	@Override
 	protected ModelCore resolve(String smtQuery, Map<Variable, String> variables,
@@ -160,9 +172,11 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	/**
 	 * Parse the output of Z3 and reconstruct a variable assignment.
 	 * 
-	 * @param output    Z3 output
-	 * @param variables mapping of variables to variables names
-	 * @return the variable value assignment
+	 * @param output
+	 *                  Z3 output
+	 * @param variables
+	 *                  mapping of variables to variables names
+	 * @return variable value assignment
 	 */
 	private Map<Variable, Constant> parseModel(String output, Map<Variable, String> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
@@ -212,9 +226,11 @@ public class ModelCoreZ3Service extends ModelCoreSMTLIBService {
 	/**
 	 * Parse the output of Z3 and reconstruct an unsatisfiable core.
 	 * 
-	 * @param output            Z3 output
-	 * @param coreClauseMapping mapping from clause names to Green expressions
-	 * @return the set of expressions that form an unsatisfiable core
+	 * @param output
+	 *                          Z3 output
+	 * @param coreClauseMapping
+	 *                          mapping from clause names to Green expressions
+	 * @return set of expressions that form an unsatisfiable core
 	 */
 	private Set<Expression> parseCore(String output, Map<String, Expression> coreClauseMapping) {
 		String[] clauseNames = output.replaceAll("^\\s*\\(\\s*([^\\s].*[^\\s]*)\\s*\\)\\s*$", "$1").split("\\s+");

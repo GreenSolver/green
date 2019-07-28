@@ -20,7 +20,7 @@ import za.ac.sun.cs.green.service.smtlib.SATSMTLIBService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 command-line SAT service.
+ * Z3 command-line SAT service for linear integer constraints.
  */
 public class SATZ3Service extends SATSMTLIBService {
 
@@ -53,8 +53,10 @@ public class SATZ3Service extends SATSMTLIBService {
 	/**
 	 * Construct an instance of the Z3 command-line service.
 	 * 
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the service
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
 	public SATZ3Service(Green solver, Properties properties) {
 		super(solver);
@@ -63,13 +65,6 @@ public class SATZ3Service extends SATSMTLIBService {
 		z3Command = p + ' ' + a;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.smtlib.SATSMTLIBService#report(za.ac.sun.cs.green.
-	 * util.Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -79,11 +74,15 @@ public class SATZ3Service extends SATSMTLIBService {
 		super.report(reporter);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.smtlib.SATSMTLIBService#resolve(java.lang.String)
+	/**
+	 * Create a subprocess to run Z3, pass the query to the process, and collect and
+	 * parse the output.
+	 *
+	 * @param smtQuery
+	 *                 translated query as SMTLIB string
+	 * @return boolean result, {@code true} if and only if the query is satisfiable
+	 *
+	 * @see za.ac.sun.cs.green.service.smtlib.SATSMTLIBService#resolve(java.lang.String)
 	 */
 	@Override
 	protected Boolean resolve(String smtQuery) {

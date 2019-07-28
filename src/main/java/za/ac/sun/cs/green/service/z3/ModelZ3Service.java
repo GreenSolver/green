@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3;
 
 import java.io.BufferedReader;
@@ -53,8 +61,10 @@ public class ModelZ3Service extends ModelSMTLIBService {
 	/**
 	 * Construct an instance of the Z3 command-line service.
 	 * 
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the service
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
 	public ModelZ3Service(Green solver, Properties properties) {
 		super(solver);
@@ -63,13 +73,6 @@ public class ModelZ3Service extends ModelSMTLIBService {
 		z3Command = p + ' ' + a;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService#report(za.ac.sun.cs.
-	 * green.util.Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -80,6 +83,20 @@ public class ModelZ3Service extends ModelSMTLIBService {
 		super.report(reporter);
 	}
 
+	/**
+	 * Create a subprocess to run Z3, pass the query to the process, and collect and
+	 * parse the output.
+	 *
+	 * @param smtQuery
+	 *                  translated query as SMTLIB string
+	 * @param variables
+	 *                  mapping from GREEN variables to SMTLIB variable names
+	 * @return {@link Model} that describes the satisfiable of the query and, if
+	 *         appropriate, a satisfying variable assignment
+	 *
+	 * @see za.ac.sun.cs.green.service.smtlib.ModelSMTLIBService#resolve(java.lang.String,
+	 *      java.util.Map)
+	 */
 	@Override
 	protected Model resolve(String smtQuery, Map<Variable, String> variables) {
 		log.trace("smtQuery: {}", smtQuery);
@@ -132,8 +149,10 @@ public class ModelZ3Service extends ModelSMTLIBService {
 	/**
 	 * Parse the output of Z3 and reconstruct a variable assignment.
 	 * 
-	 * @param output    Z3 output
-	 * @param variables mapping of variables to variables names
+	 * @param output
+	 *                  Z3 output
+	 * @param variables
+	 *                  mapping of variables to variables names
 	 * @return the variable value assignment
 	 */
 	private Map<Variable, Constant> parseModel(String output, Map<Variable, String> variables) {

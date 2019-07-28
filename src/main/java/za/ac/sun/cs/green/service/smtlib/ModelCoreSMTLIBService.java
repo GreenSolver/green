@@ -119,6 +119,7 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 	 * @param variables
 	 *                          mapping from variables to variable names
 	 * @param coreClauseMapping
+	 *                          mapping from clause names to GREEN expressions
 	 * @return a {@link ModelCore} or {@code null} if no answer can be determined
 	 */
 	protected abstract ModelCore resolve(String smtQuery, Map<Variable, String> variables,
