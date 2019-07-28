@@ -23,6 +23,7 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
+import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
 import za.ac.sun.cs.green.util.Pair;
 import za.ac.sun.cs.green.util.Reporter;
 
@@ -283,8 +284,9 @@ public abstract class ModelCoreSMTLIBService extends ModelCoreService {
 		 *                  unused partial clause being constructed for operation
 		 * @param type
 		 *                  unused type of the operation
+		 *
 		 * @see za.ac.sun.cs.green.service.smtlib.SMTLIBTranslator#postVisitExtra(za.ac.sun.cs.green.expr.Operation,
-		 *      java.lang.StringBuilder)
+		 *      java.lang.StringBuilder, java.lang.Class)
 		 */
 		@Override
 		protected void postVisitExtra(Operation operation, StringBuilder clause, Class<? extends Variable> type) {

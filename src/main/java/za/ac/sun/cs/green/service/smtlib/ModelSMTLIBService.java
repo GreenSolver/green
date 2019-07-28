@@ -15,6 +15,7 @@ import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelService;
+import za.ac.sun.cs.green.service.ModelService.Model;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
