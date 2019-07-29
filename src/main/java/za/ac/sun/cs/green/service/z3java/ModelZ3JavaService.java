@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3java;
 
 import java.util.HashMap;
@@ -21,7 +29,7 @@ import za.ac.sun.cs.green.service.ModelService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 Java library model service.
+ * Z3 Java library model service for linear integer constraints.
  */
 public class ModelZ3JavaService extends ModelService {
 
@@ -63,8 +71,10 @@ public class ModelZ3JavaService extends ModelService {
 	/**
 	 * Construct an instance of the Z3 Java library service.
 	 * 
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the service
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
 	public ModelZ3JavaService(Green solver, Properties properties) {
 		super(solver);
@@ -79,12 +89,6 @@ public class ModelZ3JavaService extends ModelService {
 		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.service.SATService#report(za.ac.sun.cs.green.util.
-	 * Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -95,6 +99,16 @@ public class ModelZ3JavaService extends ModelService {
 		super.report(reporter);
 	}
 
+	/**
+	 * Translate the GREEN problem using Z3 library calls (by invoking the
+	 * {@link Z3JavaTranslator}), solve the problem, and return the result.
+	 *
+	 * @param instance
+	 *                 problem to solve
+	 * @return a {@link Model} result or {@code null} if no answer is available
+	 *
+	 * @see za.ac.sun.cs.green.service.ModelService#model(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
 	protected ModelService.Model model(Instance instance) {
 		long startTime = System.currentTimeMillis();

@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3java;
 
 import java.util.HashMap;
@@ -47,7 +55,7 @@ public class Z3JavaTranslator extends Visitor {
 	protected final Context z3Context;
 
 	/**
-	 * Stack of operands.
+	 * Stack of operands. Each entry is a Z3 library object.
 	 */
 	protected final Stack<Expr> stack = new Stack<>();
 
@@ -79,7 +87,8 @@ public class Z3JavaTranslator extends Visitor {
 	/**
 	 * Create an instance of the translator.
 	 * 
-	 * @param context Z3 context
+	 * @param context
+	 *                Z3 context
 	 */
 	public Z3JavaTranslator(Logger log, Context context) {
 		this.log = log;
@@ -142,12 +151,6 @@ public class Z3JavaTranslator extends Visitor {
 		return coreClauseMapping;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * IntConstant)
-	 */
 	@Override
 	public void postVisit(IntConstant constant) {
 		try {
@@ -157,12 +160,6 @@ public class Z3JavaTranslator extends Visitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * RealConstant)
-	 */
 	@Override
 	public void postVisit(RealConstant constant) {
 		try {
@@ -172,11 +169,15 @@ public class Z3JavaTranslator extends Visitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * IntVariable)
+	/**
+	 * Create the Z3 library object that for a given integer variable. Also create
+	 * assertions that express the upper and lower bounds on values that the
+	 * variable can assume.
+	 *
+	 * @param variable
+	 *                 integer variable to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.IntVariable)
 	 */
 	@Override
 	public void postVisit(IntVariable variable) {
@@ -203,11 +204,15 @@ public class Z3JavaTranslator extends Visitor {
 		stack.push(var);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * RealVariable)
+	/**
+	 * Create the Z3 library object that for a given integer variable. Also create
+	 * assertions that express the upper and lower bounds on values that the
+	 * variable can assume.
+	 *
+	 * @param variable
+	 *                 integer variable to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.RealVariable)
 	 */
 	@Override
 	public void postVisit(RealVariable variable) {
@@ -228,12 +233,6 @@ public class Z3JavaTranslator extends Visitor {
 		stack.push(v);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
-	 */
 	@Override
 	public void postVisit(Operation operation) throws VisitorException {
 		Expr l = null;

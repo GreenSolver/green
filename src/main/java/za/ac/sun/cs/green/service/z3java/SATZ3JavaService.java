@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3java;
 
 import java.util.HashMap;
@@ -16,7 +24,7 @@ import za.ac.sun.cs.green.service.SATService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 Java library SAT service.
+ * Z3 Java library SAT service for linear integer constraints.
  */
 public class SATZ3JavaService extends SATService {
 
@@ -58,8 +66,10 @@ public class SATZ3JavaService extends SATService {
 	/**
 	 * Construct an instance of the Z3 Java library service.
 	 * 
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the service
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
 	public SATZ3JavaService(Green solver, Properties properties) {
 		super(solver);
@@ -74,12 +84,6 @@ public class SATZ3JavaService extends SATService {
 		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.service.SATService#report(za.ac.sun.cs.green.util.
-	 * Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -90,15 +94,21 @@ public class SATZ3JavaService extends SATService {
 		super.report(reporter);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
+	 * Translate the GREEN problem using Z3 library calls (by invoking the
+	 * {@link Z3JavaTranslator}), solve the problem, and return the result.
+	 *
+	 * @param instance
+	 *                 problem to solve
+	 * @return result of the computation: {@code true} mean SAT, {@code false} mean
+	 *         UNSAT, {@code null} means no answer is available
+	 *
 	 * @see za.ac.sun.cs.green.service.SATService#solve(za.ac.sun.cs.green.Instance)
 	 */
 	@Override
 	protected Boolean solve(Instance instance) {
 		long startTime = System.currentTimeMillis();
-		Boolean result = false;
+		Boolean result = null;
 
 		// translate instance to Z3
 		long startTime0 = System.currentTimeMillis();

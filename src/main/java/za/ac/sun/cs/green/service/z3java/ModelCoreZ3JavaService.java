@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3java;
 
 import java.util.HashMap;
@@ -29,7 +37,7 @@ import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 Java library model service.
+ * Z3 Java library model/core service for linear integer constraints.
  */
 public class ModelCoreZ3JavaService extends ModelCoreService {
 
@@ -68,9 +76,6 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
 	 */
 	protected long translationTimeConsumption = 0;
 
-	protected int conjunctCount = 0;
-	protected int variableCount = 0;
-
 	/**
 	 * Construct an instance of the Z3 Java library service.
 	 * 
@@ -92,12 +97,6 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
 		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.service.SATService#report(za.ac.sun.cs.green.util.
-	 * Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -105,11 +104,19 @@ public class ModelCoreZ3JavaService extends ModelCoreService {
 		reporter.report("  satTimeConsumption", satTimeConsumption);
 		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
 		reporter.report("  translationTimeConsumption", translationTimeConsumption);
-//		reporter.report("conjunctCount", conjunctCount);
-//		reporter.report("variableCount", variableCount);
 		super.report(reporter);
 	}
 
+	/**
+	 * Translate the GREEN problem using Z3 library calls (by invoking the
+	 * {@link Z3JavaTranslator}), solve the problem, and return the result.
+	 *
+	 * @param instance
+	 *                 problem to solve
+	 * @return a {@link ModelCore} result or {@code null} if no answer is available
+	 *
+	 * @see za.ac.sun.cs.green.service.ModelCoreService#modelCore(za.ac.sun.cs.green.Instance)
+	 */
 	@Override
 	protected ModelCore modelCore(Instance instance) {
 		long startTime = System.currentTimeMillis();
