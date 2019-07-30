@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3javabv;
 
 import java.util.HashMap;
@@ -26,11 +34,11 @@ import za.ac.sun.cs.green.expr.Variable;
 import za.ac.sun.cs.green.expr.VisitorException;
 import za.ac.sun.cs.green.service.ModelCoreService;
 import za.ac.sun.cs.green.service.ModelCoreService.ModelCore;
-import za.ac.sun.cs.green.service.z3java.Z3JavaTranslator;
 import za.ac.sun.cs.green.util.Reporter;
 
 /**
- * Z3 Java library model service using bitvectors.
+ * Z3 Java library model/core service using bitvectors for linear integer
+ * constraints.
  */
 public class ModelCoreZ3JavaBVService extends ModelCoreService {
 
@@ -74,14 +82,13 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 	 */
 	protected long translationTimeConsumption = 0;
 
-	protected int conjunctCount = 0;
-	protected int variableCount = 0;
-
 	/**
 	 * Construct an instance of the Z3 Java library service.
 	 * 
-	 * @param solver     associated Green solver
-	 * @param properties properties used to construct the service
+	 * @param solver
+	 *                   associated Green solver
+	 * @param properties
+	 *                   properties used to construct the service
 	 */
 	public ModelCoreZ3JavaBVService(Green solver, Properties properties) {
 		super(solver);
@@ -98,12 +105,6 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 		z3Solver = z3Context.mkSolver(Z3_LOGIC);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.service.SATService#report(za.ac.sun.cs.green.util.
-	 * Reporter)
-	 */
 	@Override
 	public void report(Reporter reporter) {
 		reporter.setContext(getClass().getSimpleName());
@@ -111,16 +112,17 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 		reporter.report("  satTimeConsumption", satTimeConsumption);
 		reporter.report("  unsatTimeConsumption", unsatTimeConsumption);
 		reporter.report("  translationTimeConsumption", translationTimeConsumption);
-//		reporter.report("conjunctCount", conjunctCount);
-//		reporter.report("variableCount", variableCount);
 		super.report(reporter);
 	}
 
 	/**
-	 * Calculate and return either a model, a core, or {@code null}.
+	 * Translate the GREEN problem using Z3 library calls (by invoking the
+	 * {@link Z3JavaBVTranslator}), solve the problem, and return the result.
 	 * 
-	 * @param instance the instance to solve
+	 * @param instance
+	 *                 the instance to solve
 	 * @return a{@link ModelCore} or {@code null}
+	 *
 	 * @see za.ac.sun.cs.green.service.ModelCoreService#modelCore(za.ac.sun.cs.green.Instance)
 	 */
 	@Override
@@ -129,7 +131,7 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 
 		// translate instance to Z3
 		long startTime0 = System.currentTimeMillis();
-		Z3JavaTranslator translator = new Z3JavaTranslator(log, z3Context);
+		Z3JavaBVTranslator translator = new Z3JavaBVTranslator(z3Context, BV_SIZE);
 		try {
 			instance.getExpression().accept(translator);
 		} catch (VisitorException x) {
@@ -140,7 +142,7 @@ public class ModelCoreZ3JavaBVService extends ModelCoreService {
 		translationTimeConsumption += System.currentTimeMillis() - startTime0;
 
 		// solve & extract model/core
-		Map<BoolExpr, Expression> coreClauseMappings = translator.getCoreClauseMappings();
+		Map<BoolExpr, Expression> coreClauseMappings = translator.getCoreClauseMapping();
 		try {
 			z3Solver.reset();
 			for (BoolExpr core : coreClauseMappings.keySet()) {

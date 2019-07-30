@@ -205,12 +205,12 @@ public class Z3JavaTranslator extends Visitor {
 	}
 
 	/**
-	 * Create the Z3 library object that for a given integer variable. Also create
+	 * Create the Z3 library object that for a given real variable. Also create
 	 * assertions that express the upper and lower bounds on values that the
 	 * variable can assume.
 	 *
 	 * @param variable
-	 *                 integer variable to process
+	 *                 real variable to process
 	 *
 	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.RealVariable)
 	 */

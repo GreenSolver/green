@@ -1,3 +1,11 @@
+/*
+ * This file is part of the GREEN library, https://greensolver.github.io/green/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.green.service.z3javabv;
 
 import java.util.HashMap;
@@ -79,7 +87,8 @@ public class Z3JavaBVTranslator extends Visitor {
 	/**
 	 * Create an instance of the translator.
 	 * 
-	 * @param context Z3 context
+	 * @param context
+	 *                Z3 context
 	 */
 	public Z3JavaBVTranslator(Context context, int bitvectorSize) {
 		this.z3Context = context;
@@ -136,17 +145,11 @@ public class Z3JavaBVTranslator extends Visitor {
 	 * 
 	 * @return mapping of Z3 expressions to Green expressions
 	 */
-	public Map<BoolExpr, Expression> getCoreClauseMappings() {
+	public Map<BoolExpr, Expression> getCoreClauseMapping() {
 		assertions.forEach((k, v) -> coreClauseMapping.put(z3Context.mkBoolConst(CLAUSE_PREFIX + counter++), k));
 		return coreClauseMapping;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * IntConstant)
-	 */
 	@Override
 	public void postVisit(IntConstant constant) {
 		try {
@@ -156,12 +159,6 @@ public class Z3JavaBVTranslator extends Visitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * RealConstant)
-	 */
 	@Override
 	public void postVisit(RealConstant constant) {
 		try {
@@ -171,11 +168,16 @@ public class Z3JavaBVTranslator extends Visitor {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * IntVariable)
+	/**
+	 * Create the Z3 library object that for a given integer variable. Also create
+	 * assertions that express the upper and lower bounds on values that the
+	 * variable can assume. The integer object is a bitvector with
+	 * {@link #bitVectorSize} bits.
+	 *
+	 * @param variable
+	 *                 integer variable to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.IntVariable)
 	 */
 	@Override
 	public void postVisit(IntVariable variable) {
@@ -202,11 +204,16 @@ public class Z3JavaBVTranslator extends Visitor {
 		stack.push(var);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.
-	 * RealVariable)
+	/**
+	 * Create the Z3 library object that for a given real variable. Also create
+	 * assertions that express the upper and lower bounds on values that the
+	 * variable can assume. The size of the real variable object depends on
+	 * {@link #bitVectorSize}: it will be either 16, 32, 64, or 128.
+	 *
+	 * @param variable
+	 *                 real variable to process
+	 *
+	 * @see za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.RealVariable)
 	 */
 	@Override
 	public void postVisit(RealVariable variable) {
@@ -249,12 +256,6 @@ public class Z3JavaBVTranslator extends Visitor {
 		stack.push(v);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * za.ac.sun.cs.green.expr.Visitor#postVisit(za.ac.sun.cs.green.expr.Operation)
-	 */
 	@Override
 	public void postVisit(Operation operation) throws VisitorException {
 		Expr l = null;
