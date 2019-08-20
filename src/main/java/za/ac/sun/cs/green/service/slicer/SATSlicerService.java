@@ -43,11 +43,12 @@ public class SATSlicerService extends BasicService {
 		int mv = slicer.getMinimalVariableCount();
 		reporter.report("invocations", ic);
 		reporter.report("totalConjuncts", tc);
-		reporter.report("minimalConjuncts", mc);
-		reporter.report("conjunctReduction", ((tc - mc) * 100.0D / tc));
+		reporter.report("  minimalConjuncts", mc);
+		reporter.report("  conjunctReduction", ((tc - mc) * 100.0D / tc));
 		reporter.report("totalVariables", tv);
-		reporter.report("minimalVariables", mv);
-		reporter.report("variableReduction", ((tv - mv) * 100.0D / tv));
+		reporter.report("  minimalVariables", mv);
+		reporter.report("  variableReduction", ((tv - mv) * 100.0D / tv));
+		super.report(reporter);
 	}
 
 }
