@@ -118,6 +118,8 @@
     <target name="package">
         <mkdir dir="target/"/>
         <jar destfile="target/${jar.file}">
+            <fileset dir="src"/>
+            <fileset dir="test"/>
         </jar>
     </target>
 
