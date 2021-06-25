@@ -39,7 +39,7 @@ jobs:
       if: ${{ always() }} 
       with:
         build_path: target # build artifact(s) directory
-        s3_bucket: codeguru-reviewer-my-bucket  # S3 Bucket with "codeguru-reviewer-*" prefix
+        s3_bucket: codeguru-reviewer-willem  # S3 Bucket with "codeguru-reviewer-*" prefix
     
     - name: Upload review result
       if: ${{ always() }}
