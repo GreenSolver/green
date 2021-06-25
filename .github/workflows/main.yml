@@ -26,6 +26,14 @@ jobs:
       with:
         fetch-depth: 0   # Required
    
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+    - name: Build with Ant
+      run: ant build package
+   
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       if: ${{ always() }} # This ensures that your workflow runs successfully
@@ -38,6 +46,7 @@ jobs:
       uses: aws-actions/codeguru-reviewer@v1.1
       if: ${{ always() }} 
       with:
+        build_path: target # build artifact(s) directory
         s3_bucket: codeguru-reviewer-willem  # S3 Bucket with "codeguru-reviewer-*" prefix
     
     - name: Upload review result
