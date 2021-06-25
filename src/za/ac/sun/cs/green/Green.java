@@ -120,7 +120,7 @@ public class Green {
 	 * new {@link SerialTaskManager} is created for a new Green solver instance.
 	 * 
 	 * @param taskManager
-	 *            the new task manager
+	 *           the new task manager
 	 */
 	public void setTaskManager(final TaskManager taskManager) {
 		this.taskManager = taskManager;
