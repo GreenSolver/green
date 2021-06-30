@@ -115,11 +115,10 @@
     TARGET: package
 -->
 
-    <target name="package">
+    <target name="package" depends="build">
         <mkdir dir="target/"/>
         <jar destfile="target/${jar.file}">
-            <fileset dir="src"/>
-            <fileset dir="test"/>
+            <fileset dir="bin"/>
         </jar>
     </target>
 
